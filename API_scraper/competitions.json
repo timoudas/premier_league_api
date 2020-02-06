@@ -1,0 +1,338 @@
+{
+    "Premier League": {
+        "info": {
+            "abbreviation": "EN_PR",
+            "id": 1.0
+        }
+    },
+    "UEFA Champions League": {
+        "info": {
+            "abbreviation": "EU_CL",
+            "id": 2.0
+        }
+    },
+    "UEFA Europa League": {
+        "info": {
+            "abbreviation": "EU_UC",
+            "id": 3.0
+        }
+    },
+    "FA Cup": {
+        "info": {
+            "abbreviation": "EN_FA",
+            "id": 4.0
+        }
+    },
+    "EFL Cup": {
+        "info": {
+            "abbreviation": "EN_LC",
+            "id": 5.0
+        }
+    },
+    "Professional Development League": {
+        "info": {
+            "abbreviation": "EN_PD",
+            "id": 6.0
+        }
+    },
+    "U18 Professional Development League": {
+        "info": {
+            "abbreviation": "AFAPL12",
+            "id": 7.0
+        }
+    },
+    "U18 Premier League": {
+        "info": {
+            "abbreviation": "AFAPL",
+            "id": 8.0
+        }
+    },
+    "Premier League Cup": {
+        "info": {
+            "abbreviation": "EN_PC",
+            "id": 9.0
+        }
+    },
+    "Premier League International Cup": {
+        "info": {
+            "abbreviation": "EN_PLIC",
+            "id": 10.0
+        }
+    },
+    "Premier League 2": {
+        "info": {
+            "abbreviation": "EN_RE",
+            "id": 11.0
+        }
+    },
+    "English Football League - Championship": {
+        "info": {
+            "abbreviation": "EN_D1",
+            "id": 12.0
+        }
+    },
+    "EFL Trophy": {
+        "info": {
+            "abbreviation": "EN_FL",
+            "id": 13.0
+        }
+    },
+    "Friendly": {
+        "info": {
+            "abbreviation": "FND",
+            "id": 71.0
+        }
+    },
+    "Premier League Asia Trophy": {
+        "info": {
+            "abbreviation": "IG_AT",
+            "id": 15.0
+        }
+    },
+    "Premier League 2 - Division 1": {
+        "info": {
+            "abbreviation": "PL_D1",
+            "id": 16.0
+        }
+    },
+    "Premier League 2 - Division 2": {
+        "info": {
+            "abbreviation": "PL_D2",
+            "id": 17.0
+        }
+    },
+    "U18 Premier League Cup": {
+        "info": {
+            "abbreviation": "PLC_U18",
+            "id": 18.0
+        }
+    },
+    "English U16 Premier League Cup": {
+        "info": {
+            "abbreviation": "PLC_U16",
+            "id": 19.0
+        }
+    },
+    "English Football League - League One": {
+        "info": {
+            "abbreviation": "EN_D2",
+            "id": 20.0
+        }
+    },
+    "La Liga": {
+        "info": {
+            "abbreviation": "ES_PL",
+            "id": 21.0
+        }
+    },
+    "Spanish Segunda Division": {
+        "info": {
+            "abbreviation": "ES_SD",
+            "id": 22.0
+        }
+    },
+    "Supercopa": {
+        "info": {
+            "abbreviation": "ES_SC",
+            "id": 23.0
+        }
+    },
+    "UEFA Super Cup": {
+        "info": {
+            "abbreviation": "EU_SC",
+            "id": 24.0
+        }
+    },
+    "Copa Del Rey": {
+        "info": {
+            "abbreviation": "ES_CR",
+            "id": 25.0
+        }
+    },
+    "FIFA Club World Cup": {
+        "info": {
+            "abbreviation": "IG_CL",
+            "id": 29.0
+        }
+    },
+    "International Champions Cup": {
+        "info": {
+            "abbreviation": "IG_CT",
+            "id": 30.0
+        }
+    },
+    "Audi Cup": {
+        "info": {
+            "abbreviation": "AU_DI",
+            "id": 31.0
+        }
+    },
+    "Trofeo Joan Gamper": {
+        "info": {
+            "abbreviation": "ES_JG",
+            "id": 32.0
+        }
+    },
+    "Supercopa de Catalunya": {
+        "info": {
+            "abbreviation": "ES_CT",
+            "id": 33.0
+        }
+    },
+    "UEFA Youth League": {
+        "info": {
+            "abbreviation": "EU_YL",
+            "id": 34.0
+        }
+    },
+    "English FA Youth Cup": {
+        "info": {
+            "abbreviation": "EN_YP",
+            "id": 35.0
+        }
+    },
+    "Belgium - Proximus League": {
+        "info": {
+            "abbreviation": "proximus",
+            "id": 36.0
+        }
+    },
+    "Friendlies": {
+        "info": {
+            "abbreviation": "FR",
+            "id": 37.0
+        }
+    },
+    "English Women's Super League": {
+        "info": {
+            "abbreviation": "WO_SL",
+            "id": 38.0
+        }
+    },
+    "Women's Super League Spring Series": {
+        "info": {
+            "abbreviation": "WO_SS",
+            "id": 41.0
+        }
+    },
+    "Scottish League Two": {
+        "info": {
+            "abbreviation": "LD_S3",
+            "id": 42.0
+        }
+    },
+    "English Football League - League Two": {
+        "info": {
+            "abbreviation": "EN_D3",
+            "id": 43.0
+        }
+    },
+    "Scottish Championship": {
+        "info": {
+            "abbreviation": "LD_S1",
+            "id": 44.0
+        }
+    },
+    "English Women's Championship": {
+        "info": {
+            "abbreviation": "WO_SL2",
+            "id": 45.0
+        }
+    },
+    "Scottish Premiership": {
+        "info": {
+            "abbreviation": "LD_SP",
+            "id": 46.0
+        }
+    },
+    "Scottish League One": {
+        "info": {
+            "abbreviation": "LD_S2",
+            "id": 48.0
+        }
+    },
+    "Scottish Championship Play-offs": {
+        "info": {
+            "abbreviation": "LD_P1",
+            "id": 74.0
+        }
+    },
+    "Scottish League One Play-offs": {
+        "info": {
+            "abbreviation": "LD_P2",
+            "id": 75.0
+        }
+    },
+    "Scottish League Two Play-offs": {
+        "info": {
+            "abbreviation": "LD_P3",
+            "id": 76.0
+        }
+    },
+    "Scottish Premiership Play-offs": {
+        "info": {
+            "abbreviation": "LD_PP",
+            "id": 77.0
+        }
+    },
+    "2019 Pre-Season (First Team)": {
+        "info": {
+            "abbreviation": "friendly",
+            "id": 296.0
+        }
+    },
+    "2019 Pre-Season (Under 23s)": {
+        "info": {
+            "abbreviation": "preseasonu23",
+            "id": 173.0
+        }
+    },
+    "Preseason": {
+        "info": {
+            "abbreviation": "preseason1920",
+            "id": 159.0
+        }
+    },
+    "Other Club Friendlies": {
+        "info": {
+            "abbreviation": "IG_OF",
+            "id": 210.0
+        }
+    },
+    "Women's FA Cup": {
+        "info": {
+            "abbreviation": "WO_FA",
+            "id": 345.0
+        }
+    },
+    "FA Women's Continental League Cup": {
+        "info": {
+            "abbreviation": "WO_WSLC",
+            "id": 346.0
+        }
+    },
+    "Women's Champions League": {
+        "info": {
+            "abbreviation": "WO_CL",
+            "id": 348.0
+        }
+    },
+    "Primera Divisi\u00f3n Femenina": {
+        "info": {
+            "abbreviation": "ES_PF",
+            "id": 349.0
+        }
+    },
+    "Leasing.com Trophy": {
+        "info": {
+            "abbreviation": "leasing",
+            "id": 365.0
+        }
+    },
+    "Spanish Supercopa Femenina": {
+        "info": {
+            "abbreviation": "ES_SF",
+            "id": 370.0
+        }
+    }
+}
