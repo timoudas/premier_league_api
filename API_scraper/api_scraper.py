@@ -81,8 +81,7 @@ class Premier_league:
         games_played = {} #Store info for each team
         url = self.base_url + '/fixtures' 
 
-        g = 0
-        h = 0
+   
         page = 0 #starting value of page
         while True:
             params = (
