@@ -101,7 +101,7 @@ for player in players:
         playersAndStats[players[player]]["stats"][stat["name"].replace("_"," ").capitalize()] = int(stat["value"])
 
 # to store data to a json file 
-f = open("data.json","w")
+f = open("../json/data.json","w")
 
 # pretty prints and writes the same to the json file 
 f.write(json.dumps(playersAndStats,indent=4, sort_keys=True))

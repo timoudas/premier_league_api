@@ -29,7 +29,7 @@ class Premier_league:
             competitions[league[comp["id"]]]["info"]["abbreviation"] = comp["abbreviation"]
             competitions[league[comp["id"]]]['info']['id'] = comp['id'] 
             
-        f = open("competitions.json","w")
+        f = open("../json/competitions.json","w")
 
         # pretty prints and writes the same to the json file 
         f.write(json.dumps(competitions,indent=4, sort_keys=False))
@@ -65,7 +65,7 @@ class Premier_league:
             if page == response["pageInfo"]["numPages"]:
                 break
             
-        f = open("clubs.json","w")
+        f = open("../json/clubs.json","w")
 
         # pretty prints and writes the same to the json file 
         f.write(json.dumps(clubs,indent=4, sort_keys=False))
@@ -152,13 +152,13 @@ class Premier_league:
         fixtures = dict(fixtures_unplayed)
         fixtures.update(fixtures_played)
 
-        with open("unplayed_fixtures.json","w") as f:
+        with open("../json/unplayed_fixtures.json","w") as f:
             f.write(json.dumps(fixtures_unplayed,indent=4, sort_keys=True))
 
-        with open("played_fixtures.json","w") as f:
+        with open("../json/played_fixtures.json","w") as f:
             f.write(json.dumps(fixtures_played,indent=4, sort_keys=True))
 
-        with open("fixtures.json","w") as f:
+        with open("../json/fixtures.json","w") as f:
             f.write(json.dumps(fixtures,indent=4, sort_keys=True))
 
         
