@@ -4,6 +4,8 @@ from pprint import pprint
 import os.path
 
 
+
+
 class PremierLeague:
 	
 	def __init__(self, base_url='https://footballapi.pulselive.com/football'):
@@ -13,14 +15,17 @@ class PremierLeague:
 						'Origin': 'https://www.premierleague.com',
 						'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'
 						}
-
 	
-	def save_json(self,file, filename):
-		file = os.path.join(self.dirname, "../json/" + str(file) + ".json" )
+	def save_json(self,file, filename, folder):
+		file = os.path.join(self.dirname, "../json/" + folder + "/" + str(file) + ".json" )
 		with open(file, "w") as f:
 			#pretty prints and writes the same to the json file 
 			f.write(json.dumps(filename, indent=4, sort_keys=False))
-		
+	
+	def load_json(self, folder, file_name):
+		return os.path.join(self.dirname, '..', 'json', folder, file_name + '.json')
+
+
 	def get_competion_id(self):
 
 		url = self.base_url + '/competitions' 
@@ -43,7 +48,7 @@ class PremierLeague:
 				  'id' : comp['id'],
 				 }
 		
-		self.save_json("competitions", competitions)
+		self.save_json("competitions", competitions, folder="competitions")
 
 	def get_clubs(self):
 		
@@ -63,15 +68,13 @@ class PremierLeague:
 
 			#loop to get all info for all competitions
 			for club in all_clubs: 
-				print(club['name'])
-				print(club['teams'][0]['id'])
 				clubs[club['name']] = club['teams'][0]['id']
 
 			page += 1
 			if page == response["pageInfo"]["numPages"]:
 				break
 			
-		self.save_json("clubs", clubs)
+		self.save_json("clubs", clubs, folder="clubs")
 
 	def get_fixtures(self,compSeasons):
 
@@ -160,9 +163,9 @@ class PremierLeague:
 		fixtures = dict(fixtures_unplayed)
 		fixtures.update(fixtures_played)
 
-		self.save_json("fixtures_unplayed", fixtures_unplayed)
-		self.save_json("fixtures_played", fixtures_played)
-		self.save_json("fixtures", fixtures)
+		self.save_json("fixtures_unplayed", fixtures_unplayed, folder="fixtures")
+		self.save_json("fixtures_played", fixtures_played, folder="fixtures")
+		self.save_json("fixtures", fixtures, folder="fixtures")
 
 	def get_standings(self, compSeasons):
 
@@ -198,7 +201,7 @@ class PremierLeague:
 			}
 
 
-		self.save_json("standings", standings)
+		self.save_json("standings", standings, folder="standings")
 
 	def get_team_standing(self, compSeasons, teamId):
 
@@ -211,7 +214,8 @@ class PremierLeague:
 
 
 		team_standing = response['entries'] #team standing through season
-		season_id = response['compSeason']['label'] #season label
+		season = response['compSeason']['label'] #season label
+		season_id = response['compSeason']['id'] #season label
 		team = response['team'] #team name
 		team_name = str(response['team']['name'])
 		
@@ -220,36 +224,49 @@ class PremierLeague:
 
 		#loop to get all info for all standings
 		for standing in team_standing:
-			standing_id = standing['played']
-			index = standing_id
+			if 'fixtures' in standing:
+				standing_id = standing['played']
+				index = standing_id
 
-			team_standings[index] = \
-			{
-			'season' : season_id,
-			'season_id' : standing['fixtures'][0]['gameweek']['compSeason']['id'],
-			'team_id' : team['club']['id'],
-			'team' : team['name'],
-			'position' : standing['position'],
-			'points' : standing['points'],
-			'played_games' : standing['played'],
-			'game_week_id' : standing['fixtures'][0]['gameweek']['id'],
-			'game_week': standing['fixtures'][0]['gameweek']['gameweek'],
-			'competition' : standing['fixtures'][0]['gameweek']['compSeason']['competition']['description'],
-			'game_id' : standing['fixtures'][0]['id'],
-			'home_team' : standing['fixtures'][0]['teams'][0]['team']['name'],
-			'home_team_id' : standing['fixtures'][0]['teams'][0]['team']['club']['id'],
-			'home_team_score': standing['fixtures'][0]['teams'][0]['score'],
-			'away_team' : standing['fixtures'][0]['teams'][1]['team']['name'],
-			'away_team_id' : standing['fixtures'][0]['teams'][1]['team']['club']['id'],
-			'away_team_score': standing['fixtures'][0]['teams'][1]['score'] 
-			}
+				team_standings[index] = \
+				{
+				'season' : season,
+				'season_id' : season_id,
+				'team_id' : team['club']['id'],
+				'team' : team['name'],
+				'position' : standing['position'],
+				'points' : standing['points'],
+				'played_games' : standing['played'],
+				 'game_week_id' : standing['fixtures'][0]['id'],
+				 'game_week': standing['fixtures'][0]['gameweek']['gameweek'],
+				 'competition' : standing['fixtures'][0]['gameweek']['compSeason']['competition']['description'],
+				 'game_id' : standing['fixtures'][0]['id'],
+				 'home_team' : standing['fixtures'][0]['teams'][0]['team']['name'],
+				 'home_team_id' : standing['fixtures'][0]['teams'][0]['team']['club']['id'],
+				 'home_team_score': standing['fixtures'][0]['teams'][0]['score'],
+				 'away_team' : standing['fixtures'][0]['teams'][1]['team']['name'],
+				 'away_team_id' : standing['fixtures'][0]['teams'][1]['team']['club']['id'],
+				 'away_team_score': standing['fixtures'][0]['teams'][1]['score'],
+				 }
 
+		self.save_json(team_name + "_standings_" + str(compSeasons), team_standings, folder="standings")
 
-		f = open(team_name + "_standings_" + str(compSeasons) + ".json", "w")
+		#f = open(team_name + "_standings_" + str(compSeasons) + ".json", "w")
 
 		# pretty prints and writes the same to the json file 
-		f.write(json.dumps(team_standings,indent=4, sort_keys=False))
-		f.close()
+		#f.write(json.dumps(team_standings,indent=4, sort_keys=False))
+		#f.clos
+
+	def premierleague_team_standings(self, compSeasons):
+		teams = []
+		path = self.load_json('standings','standings')
+		with open(path, 'r') as f:
+			clubs = json.load(f)			
+			for club in clubs.values():	
+				teams.append(club['team_id'])
+		for team in teams:
+			self.get_team_standing(compSeasons, team)
+
 
 
 
@@ -261,7 +278,11 @@ class PremierLeague:
 if __name__ == "__main__":
 	prem = PremierLeague()
 
+	prem.get_competion_id()
 	prem.get_clubs()
+	prem.get_fixtures(274)
+	prem.get_standings(274)
+	prem.premierleague_team_standings(274)
 
 
 
