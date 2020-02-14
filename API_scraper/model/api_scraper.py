@@ -7,62 +7,88 @@ from tqdm import tqdm
 
 
 class ApiScraper:
+"""Scraper for the API https://footballapi.pulselive.com/football"""
 
 	def __init__(self, base_url='https://footballapi.pulselive.com/football'):
-		"""Base url, working directory and headers to make request work"""
+		"""
+		Initializes the base_url for the API and the working directory
+		
+		"""
+		
 		self.base_url = base_url
-		self.dirname = os.path.dirname(__file__)
+		self.dirname = os.path.dirname(__file__) #Set working directory
+		#Required header to not get 403-Error from API
 		self.headers = {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
 						'Origin': 'https://www.premierleague.com',
 						'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'
 						}
 
 	def save_json(self, file, filename, folder):
-		"""save json files"""
-		file = os.path.join(self.dirname, "../json/" + folder + "/" + str(file) + ".json" )
+		"""save dictionarirys to .json files
+		
+		Args:
+			file (str): The name of the file that is to be saved in .json format
+			filename (dict): The dictionary that is to be writed to the .json file
+			folder (str): The folder name in the target directory
+		"""
+		
+		file = os.path.join(self.dirname, "../json/" + folder + "/" + str(file) + ".json" ) 
 		with open(file, "w") as f:
 			#pretty prints and writes the same to the json file 
 			f.write(json.dumps(filename, indent=4, sort_keys=False))
 
 	def load_json(self, folder, file_name):
-		"""load json files"""
+		"""load json files
+		
+		Args:
+			folder(str): The folder name that the requested file exist in
+			file_name(str): The file name of the requested file
+		"""
 		return os.path.join(self.dirname, '..', 'json', folder, file_name + '.json')
 
 
 	def get_competion_id(self):
-		"""get Ids for competitions on API"""
-		url = self.base_url + '/competitions' 
+		"""get Ids for competitions on API, returns a .json file saved in ../json/competitions/competitions.json
+		
+		json file contains IDs for each competition in the API.	
+		"""
+		url = self.base_url + '/competitions' #Set url for competitions
 
 		params = (('pageSize', '100'),)#adds ?pageSize=100 to url
 
-		response = requests.get(url, params = params, headers=self.headers).json() # request to obtain the id values and corresponding competition
+		# request to obtain the id values and corresponding competition
+		response = requests.get(url, params = params, headers=self.headers).json() 
 
 		all_comps = response["content"]
 
-		competitions = {}
+		competitions = {} #Dict that holds all data from API
 
-		for comp in all_comps:
+		for comp in all_comps: #Iterate over all items in the API
 
-			competition_id = comp['description']
-			index = competition_id
+			competition_id = comp['description'] #Get dict parent-keys
+			index = competition_id #Set parent-keys as index for the the dict
 			competitions[index] = \
 				 {
 				 'abbreviation': comp["abbreviation"],
 				  'id' : comp['id'],
 				 }
-
-		self.save_json("competitions", competitions, folder="competitions")
+			
+		#Save dict to json
+		self.save_json("competitions", competitions, folder="competitions") 
 
 	def get_compseason(self):
-		"""get season IDs for each competition on API"""
-		competitions_id = []
-		compseasons = {}
+		"""get Ids for all seasons for every competition on API, returns a .json file saved in ../json/competitions/comp_seasons.json
+		
+		json file contains IDs for each competition in the API.	
+		"""
+		competitions_id = [] #Holds all competition IDs
+		compseasons = {} #Dict to store att season IDs
 		label = {}
-		path = self.load_json('competitions','competitions')
+		path = self.load_json('competitions','competitions') #Set path for competions.json
 		with open(path, 'r') as f:
-			competitions = json.load(f)
+			competitions = json.load(f) 
 			for comp in competitions.values():
-				competitions_id.append(str(int(comp['id'])))
+				competitions_id.append(str(int(comp['id']))) #Append each competitionID competitions_id
 
 		try:
 			for comp_id in competitions_id:
@@ -85,18 +111,23 @@ class ApiScraper:
 
 
 	def get_clubs(self):
-
+		"""get Ids for all clubs on API, returns a .json file saved in ../json/clubs/clubs.json
+		
+		json file contains IDs for each club in the API.	
+		"""
 		clubs = {} #Store all clubs
-		url = self.base_url + '/clubs' 
+		url = self.base_url + '/clubs' #Set url 
 
 		page = 0 #starting value of page
 		while True:
 			params = (
 				('pageSize', '100'),
-				('page', str(page))#adds ?pageSize=100 to url
+				('page', str(page))
 					)
-			response = requests.get(url, params = params, headers=self.headers).json() # request to obtain the team info
-
+			
+			# request to obtain the club info
+			response = requests.get(url, params = params, headers=self.headers).json()
+			
 			all_clubs = response["content"]
 
 			#loop to get all info for all competitions
@@ -110,7 +141,10 @@ class ApiScraper:
 		self.save_json("clubs", clubs, folder="clubs")
 
 	def get_fixtures(self,compSeasons):
-
+		"""get Ids and other info for all fixture on API, returns a .json file saved in ../json/clubs/clubs.json
+		
+		json file contains IDs for each club in the API.	
+		"""
 		url = self.base_url + '/fixtures' 
 
 		fixtures_unplayed = {} #Store info for not played fixtures
@@ -124,17 +158,19 @@ class ApiScraper:
 				('page', str(page)),
 				('compSeasons', str(compSeasons)),
 					)
-			response = requests.get(url, params = params, headers=self.headers).json() # request to obtain the team info
+			
+			# request to obtain the team info
+			response = requests.get(url, params = params, headers=self.headers).json()
 
 			all_games = response["content"]
 
 			#loop to get info for each game 
-			for game in all_games: 
+			for game in all_games: #Iterates over all games
 
-				if game['status'] == 'U':
+				if game['status'] == 'U': #Checks if game is un-played
 
-					game_id = game['id']
-					index = game_id
+					game_id = game['id'] #Get's the gameIDs for each game
+					index = game_id #Set's gameIDs as index for dictionairy
 					fixtures_unplayed[index] = \
 						{
 						'match' : game_id,
@@ -156,10 +192,10 @@ class ApiScraper:
 
 			for game in all_games: 
 
-				if game['status'] == 'C':
+				if game['status'] == 'C': #Check's if game is played
 
-					game_id = game['id']
-					index = game_id
+					game_id = game['id'] #Get's the gameIDs for each game
+					index = game_id #Set's gameIDs as index for dictionairy
 					fixtures_played[index] = \
 					{
 					'match' : game['id'],
