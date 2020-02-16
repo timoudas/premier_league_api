@@ -1,2 +1,23 @@
-p: {
+* {
+  font-family: Helvetica, Arial, sans-serif;
+  font-color: black;
+}
+
+
+h1 {
+  color: SeaGreen;
+}
+
+body {
+    background-color: #D3D3D3;
+}
+
+p,
+li {
+  font-size: 18px;
+}
+
+
+a {
+  text-decoration: none;
 }
