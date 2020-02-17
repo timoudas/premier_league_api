@@ -27,7 +27,7 @@ class ApiScraper:
         """
         file = os.path.join(self.dirname, "../json/" + folder + "/" + str(file) + ".json" ) 
         with open(file, "w") as f:
-            #pretty prints and writes the same to the json file
+            pretty prints and writes the same to the json file
             f.write(json.dumps(filename, indent=4, sort_keys=False))
 
     def load_json(self, folder, file_name):
@@ -82,7 +82,7 @@ class ApiScraper:
         for comp_seasons in competions_info:
             index = competition_name #Set's gameIDs as index for dictionairy
             compseasons[index] = {comp_seasons['label']:{}}
-            compseasons[index]['label'] = \
+            compseasons[index] = \
             {
             'label' : comp_seasons['label'],
             'id':comp_seasons['id']
@@ -105,7 +105,6 @@ class ApiScraper:
 
             for comp_id, comp_name, comp_abbre in zip(competitions_id, competitions_name,competitions_abbre):
                 self.get_compseason(comp_id, comp_name, comp_abbre)
-
 
     def get_clubs(self):
         """get Ids for all clubs on API, returns a .json file saved in ../json/clubs/clubs.json
