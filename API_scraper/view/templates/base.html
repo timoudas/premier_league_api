@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    {% block body %}{% endblock %}
+  </body>
+  <footer class="footer">
+    <button><a href="" class="button">Andreas Github</a></button>
+    <button><a href="" class="button">Jesper Github</a></button>
+    <button><a href="/" class="button">Back</a></button>
+  </footer>
+</html>
