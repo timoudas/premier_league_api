@@ -1,0 +1,36 @@
+{
+    "345": [
+        {
+            "label": "Women's FA Cup Season 2019/2020",
+            "id": 335.0
+        },
+        {
+            "label": "Women's FA Cup Season 2018/2019",
+            "id": 311.0
+        },
+        {
+            "label": "Women's FA Cup Season 2017/2018",
+            "id": 305.0
+        },
+        {
+            "label": "Women's FA Cup Season 2016/2017",
+            "id": 310.0
+        },
+        {
+            "label": "Women's FA Cup Season 2015/2016",
+            "id": 308.0
+        },
+        {
+            "label": "Women's FA Cup Season 2014/2015",
+            "id": 302.0
+        },
+        {
+            "label": "Women's FA Cup Season 2013/2014",
+            "id": 301.0
+        },
+        {
+            "label": "Women's FA Cup Season 2012/2013",
+            "id": 304.0
+        }
+    ]
+}
