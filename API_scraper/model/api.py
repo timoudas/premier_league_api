@@ -90,8 +90,6 @@ class ApiScraper:
         comp_info = zip(competitions_id, competitions_name)
         return comp_info
 
-
-
     def get_all_compseasons(self):
         """Gets compseasons for all the competition on API and creates a .json file with 
         compseasons for each competion seperatly """
@@ -104,7 +102,7 @@ class ApiScraper:
             seasons = {}
             index = comp_id
             seasons[index] = all_compseasons
-            Dir.save_json(comp_name + 'seasons', seasons, '..', 'json', comp_name)
+            Dir.save_json(comp_name + '_seasons', seasons, '..', 'json', comp_name)
 
 
 
