@@ -90,9 +90,11 @@ class ApiScraper:
         comp_info = zip(competitions_id, competitions_name)
         return comp_info
 
+
     def get_all_compseasons(self):
         """Gets compseasons for all the competition on API and creates a .json file with 
         compseasons for each competion seperatly """
+        all_seasons = {}
         comp_info = self.competition_info()
         params = (('pageSize', '100'),)#adds ?pageSize=100 to url
         for comp_id, comp_name in comp_info:
@@ -102,9 +104,37 @@ class ApiScraper:
             seasons = {}
             index = comp_id
             seasons[index] = all_compseasons
+            all_seasons[index] = all_compseasons
             Dir.save_json(comp_name + '_seasons', seasons, '..', 'json', comp_name)
+        Dir.save_json('competition_seasons', all_seasons, '..', 'json')
+
+    def get_all_standings(self):
+        """Returns the table"""
+
+        url = self.base_url + '/compseasons/{}/standings'.format(compSeasons)
+        params = (('pageSize', '100'),)
+        response = requests.get(url, params = params, headers=self.headers).json() # request to obtain the team info
+        all_standings = response["tables"][0]['entries']
+        season_id = response['compSeason']['id']        
+        standings = {} #Store all standings
 
 
+        #loop to get all info for all standings
+        for standing in all_standings:
+            standing_id = standing['team']['name']
+            index = standing_id
+            standings[index] = \
+            {
+            'season_id' : season_id,
+            'team_id' : standing['team']['club']['id'],
+            'position' : standing['position'],
+            'overall' : standing['overall'],
+            'home' : standing['home'],
+            'away' : standing['away'],
+            }
+
+
+        self.save_json("standings", standings, folder="standings")
 
 
 
@@ -113,7 +143,6 @@ if __name__ == '__main__':
     prem = ApiScraper()
     #prem.get_teams()
     #prem.get_competion_id()
-    prem.create_leauge_folder()
     prem.get_all_compseasons()
     
 

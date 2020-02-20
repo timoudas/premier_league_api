@@ -1,4 +1,4 @@
-import os.path
+import os
 import json
 import requests
 
@@ -27,7 +27,7 @@ class ApiScraper:
         """
         file = os.path.join(self.dirname, "../json/" + folder + "/" + str(file) + ".json" ) 
         with open(file, "w") as f:
-            """ pretty prints and writes the same to the json file """
+            pretty prints and writes the same to the json file
             f.write(json.dumps(filename, indent=4, sort_keys=False))
 
     def load_json(self, folder, file_name):
