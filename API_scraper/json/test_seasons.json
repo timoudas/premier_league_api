@@ -1,0 +1,142 @@
+{
+    "2019/20": {
+        "label": "2019/20",
+        "id": 274,
+        "competition": 1
+    },
+    "2018/19": {
+        "label": "2018/19",
+        "id": 210,
+        "competition": 1
+    },
+    "2017/18": {
+        "label": "2017/18",
+        "id": 79,
+        "competition": 1
+    },
+    "2016/17": {
+        "label": "2016/17",
+        "id": 54,
+        "competition": 1
+    },
+    "2015/16": {
+        "label": "2015/16",
+        "id": 42,
+        "competition": 1
+    },
+    "2014/15": {
+        "label": "2014/15",
+        "id": 27,
+        "competition": 1
+    },
+    "2013/14": {
+        "label": "2013/14",
+        "id": 22,
+        "competition": 1
+    },
+    "2012/13": {
+        "label": "2012/13",
+        "id": 21,
+        "competition": 1
+    },
+    "2011/12": {
+        "label": "2011/12",
+        "id": 20,
+        "competition": 1
+    },
+    "2010/11": {
+        "label": "2010/11",
+        "id": 19,
+        "competition": 1
+    },
+    "2009/10": {
+        "label": "2009/10",
+        "id": 18,
+        "competition": 1
+    },
+    "2008/09": {
+        "label": "2008/09",
+        "id": 17,
+        "competition": 1
+    },
+    "2007/08": {
+        "label": "2007/08",
+        "id": 16,
+        "competition": 1
+    },
+    "2006/07": {
+        "label": "2006/07",
+        "id": 15,
+        "competition": 1
+    },
+    "2005/06": {
+        "label": "2005/06",
+        "id": 14,
+        "competition": 1
+    },
+    "2004/05": {
+        "label": "2004/05",
+        "id": 13,
+        "competition": 1
+    },
+    "2003/04": {
+        "label": "2003/04",
+        "id": 12,
+        "competition": 1
+    },
+    "2002/03": {
+        "label": "2002/03",
+        "id": 11,
+        "competition": 1
+    },
+    "2001/02": {
+        "label": "2001/02",
+        "id": 10,
+        "competition": 1
+    },
+    "2000/01": {
+        "label": "2000/01",
+        "id": 9,
+        "competition": 1
+    },
+    "1999/00": {
+        "label": "1999/00",
+        "id": 8,
+        "competition": 1
+    },
+    "1998/99": {
+        "label": "1998/99",
+        "id": 7,
+        "competition": 1
+    },
+    "1997/98": {
+        "label": "1997/98",
+        "id": 6,
+        "competition": 1
+    },
+    "1996/97": {
+        "label": "1996/97",
+        "id": 5,
+        "competition": 1
+    },
+    "1995/96": {
+        "label": "1995/96",
+        "id": 4,
+        "competition": 1
+    },
+    "1994/95": {
+        "label": "1994/95",
+        "id": 3,
+        "competition": 1
+    },
+    "1993/94": {
+        "label": "1993/94",
+        "id": 2,
+        "competition": 1
+    },
+    "1992/93": {
+        "label": "1992/93",
+        "id": 1,
+        "competition": 1
+    }
+}

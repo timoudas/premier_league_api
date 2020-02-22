@@ -5,6 +5,8 @@
 import requests
 from directory import Directory
 from pprint import pprint
+import collections.abc
+import collections
 
 Dir = Directory() 
 
@@ -28,7 +30,7 @@ class ApiScraper:
     def competition_info(self):
         competitions_id = self.get_competitions()
         """Returns id and name of competition in zipped list"""
-        competition_id = [str(int(comp)) for comp in competitions_id.keys()]
+        competition_id = [int(comp) for comp in competitions_id.keys()]
         competition_name = [comp for comp in competitions_id.values()]
         comp_info = zip(competition_id, competition_name)
         return comp_info
@@ -47,7 +49,7 @@ class ApiScraper:
         competitions = {} #Dict that holds all data from API
 
         for comp in all_comps: #Iterate over all items in the API
-            competition_id = str(int(comp['id'])) #Get dict parent-keys
+            competition_id = int(comp['id']) #Get dict parent-keys
             index = competition_id #Set parent-keys as index for the the dict
             competitions_id[index] = \
                  {
@@ -58,7 +60,6 @@ class ApiScraper:
 
 
     def get_compseason(self): 
-        competitions_id = self.get_competitions()
         competition_seasons = {}
         params = (('pageSize', '100'),)#adds ?pageSize=100 to url
         comp_info = self.competition_info()
@@ -70,8 +71,45 @@ class ApiScraper:
             competition_seasons[index] = {'seasons': {}}
             for comp in all_compseasons:
                 competition_seasons[index]['seasons'][comp['id']]={'label' : comp['label']}
-        competitions_id.update(competition_seasons)
-        return competitions_id
+        return competition_seasons
+
+    def get_teams(self):
+        teams = {}
+        merged_dict = self.merge_comp_compseason()
+        comp_info = self.competition_info()
+        
+
+
+
+
+
+
+        params = (('pageSize', '100'),
+                  ('comps', str(comp_id)),
+                  ('compSeason', str(comp_season_id)) )#adds ?pageSize=100 to url
+        url = self.base_url + '/teams'
+        
+
+
+    
+
+    def deep_update(self, source, overrides):
+        """
+        Update a nested dictionary or similar mapping.
+        Modify ``source`` in place.
+        """
+        for key, value in overrides.items():
+            if isinstance(value, collections.Mapping) and value:
+                returned = self.deep_update(source.get(key, {}), value)
+                source[key] = returned
+            else:
+                source[key] = overrides[key]
+        return source
+
+    def merge_comp_compseason(self):
+        competitions_id = self.get_competitions()
+        seasons_id = self.get_compseason()
+        return self.deep_update(competitions_id, seasons_id)
 
 
     def index_compseason(self):
@@ -83,7 +121,8 @@ class ApiScraper:
         self.get_competitions()
         self.competition_info()
         self.get_compseason()
-        Dir.save_json('test', self.get_compseason(), '..')
+        self.append_dict()
+        Dir.save_json('test', self.append_dict(), '..')
         #self.index_compseason()
 
 
