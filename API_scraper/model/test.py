@@ -10,7 +10,7 @@ layer4 = 'https://footballapi.pulselive.com/football/teams/1/compseasons/274/sta
 
 
 def load_raw_data(url):
-    """View the input data that I use to retrieve the different Ids"""
+    """Retreives Ids for different pages on the API"""
     headers = {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
                         'Origin': 'https://www.premierleague.com',
                         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'
@@ -23,6 +23,8 @@ def load_raw_data(url):
 
     if url.endswith('staff'):
         data = response['players']
+    elif "fixtures" in url:
+        data = response
     else:
         data = response['content']
         # note: bit of a hack, for some reason 'id' is a float, but everywhere it's referenced, it's an int
@@ -47,21 +49,44 @@ class TeamPlayers(dict):
             self[d['id']] = self._players[d['id']]
         return self._players
 
+class FixtureInfo(dict):
+    _fixtures = {}
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def load_info_for_fixture(self, fixture):
+        ds = load_raw_data(
+            f'https://footballapi.pulselive.com/football/fixtures/{fixture}')
+        self.clear()
+        for d in ds:
+            self._fixtures[d['id']] = d
+            self[d['id']] = self._fixtures[d['id']]
+        return self._fixtures
+
+        
+       
 class SeasonTeams(dict):
+    """Creates an object for a team given a season """
     _teams = {}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     class Team(dict):
+        """Creates an object for a team in a competion and specific season
+        
+        Args:
+            competition (str): Competition abbreviation
+        """
         def __init__(self, competition, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self['competition'] = competition
-            self.players = TeamPlayers()
+            self.players = TeamPlayers()#Returns Ids and info for every player on a team
 
         def load_players(self):
-            return self.players.load_players_for_team(self['id'], self['competition'])
+            """returns info for all the players given their id and a season _id"""
+            self.players.load_players_for_team(self['id'], self['competition'])
 
     def load_teams_for_season(self, season, comp):
         ds = load_raw_data(
@@ -73,6 +98,37 @@ class SeasonTeams(dict):
             self[d['shortName']] = self._teams[d['id']]
         return self._teams
 
+#NO IDE HOW THIS WORKS - REPLICATE SeasonTeams
+class SeasonFixtures(dict):
+    """Creates an object for all fixtures in a given a season """
+    _fixtures = {}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    class Fixture(dict):
+        """Creates an object for a fixture in a competion and specific season"""
+
+        def __init__(self, fixture, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self['fixture'] = fixture
+            self.fixture = FixtureInfo()#Returns Ids and info for every player on a team
+
+        def load_fixture(self):
+            """returns info for a fixture given it's Id"""
+            self.fixture.load_info_for_fixture(self['id'])
+
+    def load_fixture_for_season(self, season):
+        ds = load_raw_data(
+            f'https://footballapi.pulselive.com/football/fixtures?compSeason={season}')
+        self.clear()
+        for d in ds:
+            d['fixture'] = season
+            self._fixtures[d['id']] = self.Fixture(season, d)
+            self[d['shortName']] = self._fixtures[d['id']]
+        return self. _fixtures
+    
+
 class Season(dict):
     all_teams = SeasonTeams()
 
@@ -80,18 +136,29 @@ class Season(dict):
         super().__init__(*args, **kwargs)
         self['competition'] = competition
         self.teams = SeasonTeams()
+        self.fixtures = SeasonFixtures()
 
     def load_teams(self):
-        return self.teams.load_teams_for_season(self['id'], self['competition'])
+        self.teams.load_teams_for_season(self['id'], self['competition'])
+
+    def load_played_fixtures(self):
+        self.fixtures.load_fixture_for_season(self['id'])
+
+    def load_unplayed_fixtures(self):
+        pass
+
+    def load_all_fixtures(self):
+        pass
 
 
 class League(dict):
     """Gets Season_ids, returns a dict"""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.seasons = {}
+        self.seasons = {} #Initates dictionairy to hold seasonIds
 
     def load_seasons(self):
+        """Returns a dict with season label as key and season id as value"""
         ds = load_raw_data(f'https://footballapi.pulselive.com/football/competitions/{self["id"]}/compseasons')
         self.seasons = {d['label']: Season(self['id'], d) for d in ds}
         return self.seasons
@@ -100,20 +167,38 @@ class League(dict):
 class Football:
     """Gets Competition_abbreviation, returns a dict"""
     def __init__(self):
-        self.leagues = {}
+        self.leagues = {} #Initates dictionairy to hold leagueIds
 
     def load_leagues(self):
+        """Returns a dict with league abbreviation as key and league id as value"""
         ds = load_raw_data('https://footballapi.pulselive.com/football/competitions')
         self.leagues = {d['abbreviation']: League(d) for d in ds}
         return self.leagues
 
+
 Dir = Directory() 
 fb = Football()
+fb.load_leagues()
+fb.leagues['EN_PR'].load_seasons()
+fb.leagues['EN_PR'].seasons['2019/20'].load_played_fixtures()
 
-# Dir.mkdir('..', 'json')
-leagues = [league for league in fb.load_leagues().keys()]
-league_names = [league['description'] for league in fb.load_leagues().values()]
-print(leagues)
+
+#We want to query 
+#fb.leagues['EN_PR'].seasons['2019/20'].load_played_fixtures()
+#fb.leagues['EN_PR'].seasons['2019/20'].load_unplayed_fixtures()
+#fb.leagues['EN_PR'].seasons['2019/20'].load_all_fixtures()
+
+
+
+pprint(fb.leagues['EN_PR'].seasons)
+
+
+#pprint(fb.leagues['EN_PR'].seasons['2019/20'].load_teams())
+
+
+#leagues = [league for league in fb.load_leagues().keys()]
+#league_names = [league['description'] for league in fb.load_leagues().values()]
+#print(leagues)
 #for league in leagues:
     #print(leagues)
     #seasons = fb.leagues[league].load_seasons()
