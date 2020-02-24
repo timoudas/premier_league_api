@@ -11,27 +11,45 @@ layer4 = 'https://footballapi.pulselive.com/football/teams/1/compseasons/274/sta
 
 def load_raw_data(url):
     """Retreives Ids for different pages on the API"""
-    headers = {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                        'Origin': 'https://www.premierleague.com',
-                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'
-              }
-    params = (('pageSize', '100'),)
-    try:
-        response = requests.get(url, headers=headers, params=params).json()
-    except:
-        return {}
+    page = 0
+    game_num = 0
+    data_temp = []
+    while True:
+        headers = {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                            'Origin': 'https://www.premierleague.com',
+                            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'
+                  }
+        params = (('pageSize', '100'),
+                ('page', str(page)))
 
-    if url.endswith('staff'):
-        data = response['players']
-    elif "fixtures" in url:
-        data = response
-    else:
-        data = response['content']
-        # note: bit of a hack, for some reason 'id' is a float, but everywhere it's referenced, it's an int
-        for d in data:
-            d['id'] = int(d['id'])
+    # request to obtain the team info
+        try:
+            response = requests.get(url, params = params, headers=headers).json()  
+            if url.endswith('staff'):
+                data = response['players']
+                return data
+            elif 'fixtures' in url:
+                data = response["content"]
+                #loop to get info for each game 
+                data_temp.extend(data) 
+            else:
+                data = response['content']
+                # note: bit of a hack, for some reason 'id' is a float, but everywhere it's referenced, it's an int
+                for d in data:
+                    d['id'] = int(d['id']) 
+                return data       
+        except Exception as e:
+            print(e, "Something wrong")
+            return {}
 
-    return data
+        page += 1
+        if page == response["pageInfo"]["numPages"]:
+            break
+
+    for d in data_temp:
+        d['id'] = int(d['id'])
+    return data_temp
+
 
 
 class TeamPlayers(dict):
@@ -55,9 +73,9 @@ class FixtureInfo(dict):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def load_info_for_fixture(self, fixture):
+    def load_info_for_fixture(self, season):
         ds = load_raw_data(
-            f'https://footballapi.pulselive.com/football/fixtures/{fixture}')
+            f'https://footballapi.pulselive.com/football/fixtures?compSeasons={season}')
         self.clear()
         for d in ds:
             self._fixtures[d['id']] = d
@@ -109,24 +127,23 @@ class SeasonFixtures(dict):
     class Fixture(dict):
         """Creates an object for a fixture in a competion and specific season"""
 
-        def __init__(self, fixture, *args, **kwargs):
+        def __init__(self, competition, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            self['fixture'] = fixture
+            self['competition'] = competition
             self.fixture = FixtureInfo()#Returns Ids and info for every player on a team
-
         def load_fixture(self):
             """returns info for a fixture given it's Id"""
             self.fixture.load_info_for_fixture(self['id'])
 
     def load_fixture_for_season(self, season):
         ds = load_raw_data(
-            f'https://footballapi.pulselive.com/football/fixtures?compSeason={season}')
+            f'https://footballapi.pulselive.com/football/fixtures?compSeasons={season}')
         self.clear()
         for d in ds:
-            d['fixture'] = season
+            d['competition'] = season
             self._fixtures[d['id']] = self.Fixture(season, d)
-            self[d['shortName']] = self._fixtures[d['id']]
-        return self. _fixtures
+            self[d['fixtureType']] = self._fixtures[d['id']]
+        return self._fixtures
     
 
 class Season(dict):
@@ -139,10 +156,11 @@ class Season(dict):
         self.fixtures = SeasonFixtures()
 
     def load_teams(self):
-        self.teams.load_teams_for_season(self['id'], self['competition'])
+        return self.teams.load_teams_for_season(self['id'], self['competition'])
+
 
     def load_played_fixtures(self):
-        self.fixtures.load_fixture_for_season(self['id'])
+        return self.fixtures.load_fixture_for_season(self['id'])
 
     def load_unplayed_fixtures(self):
         pass
@@ -178,19 +196,31 @@ class Football:
 
 Dir = Directory() 
 fb = Football()
+fx = FixtureInfo()
+
+#ds = (load_raw_data('https://footballapi.pulselive.com/football/competitions'))
+#l = [d['abbreviation'] for d in ds]
+#print(l)
+
 fb.load_leagues()
 fb.leagues['EN_PR'].load_seasons()
+pprint(fb.leagues['EN_PR'].seasons['2019/20'].load_played_fixtures())
+#print(fb.leagues['EN_PR'].seasons['2019/20'].load_teams())
 fb.leagues['EN_PR'].seasons['2019/20'].load_played_fixtures()
+
+#pprint(len(FixtureInfo().load_info_for_fixture(274).keys()))
+#pprint(TeamPlayers().load_players_for_team(1, 274).keys())
+
 
 
 #We want to query 
-#fb.leagues['EN_PR'].seasons['2019/20'].load_played_fixtures()
+
 #fb.leagues['EN_PR'].seasons['2019/20'].load_unplayed_fixtures()
 #fb.leagues['EN_PR'].seasons['2019/20'].load_all_fixtures()
 
 
 
-pprint(fb.leagues['EN_PR'].seasons)
+# pprint(fb.leagues['EN_PR'].seasons)
 
 
 #pprint(fb.leagues['EN_PR'].seasons['2019/20'].load_teams())
