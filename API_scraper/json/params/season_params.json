@@ -1,0 +1,417 @@
+{
+    "EN_PR": [
+        "2019/20",
+        "2018/19",
+        "2017/18",
+        "2016/17",
+        "2015/16",
+        "2014/15",
+        "2013/14",
+        "2012/13",
+        "2011/12",
+        "2010/11",
+        "2009/10",
+        "2008/09",
+        "2007/08",
+        "2006/07",
+        "2005/06",
+        "2004/05",
+        "2003/04",
+        "2002/03",
+        "2001/02",
+        "2000/01",
+        "1999/00",
+        "1998/99",
+        "1997/98",
+        "1996/97",
+        "1995/96",
+        "1994/95",
+        "1993/94",
+        "1992/93"
+    ],
+    "EU_CL": [
+        "Champions League Season 2019/2020",
+        "2018/19",
+        "2017/18",
+        "2016/17",
+        "2015/16",
+        "2014/15",
+        "2013/14",
+        "2012/13",
+        "2011/12",
+        "2010/11",
+        "Champions League Season 2009/2010",
+        "Champions League Season 2008/2009",
+        "Champions League Season 2006/2007"
+    ],
+    "EU_UC": [
+        "UEFA Europa League Season 2019/2020",
+        "2018/19",
+        "2017/18",
+        "2016/17",
+        "2015/16",
+        "2014/15",
+        "2013/14",
+        "2012/13",
+        "UEFA Europa League Season 2011/2012",
+        "UEFA Europa League Season 2010/2011",
+        "UEFA Europa League Season 2008/2009",
+        "2006/07",
+        "2009/10",
+        "UEFA Europa League Season 1995/1996",
+        "UEFA Europa League Season 1985/1986",
+        "UEFA Europa League Season 1982/1983",
+        "UEFA Europa League Season 1980/1981",
+        "UEFA Europa League Season 1976/1977",
+        "UEFA Europa League Season 1975/1976",
+        "UEFA Europa League Season 1972/1973",
+        "UEFA Europa League Season 1984/1985"
+    ],
+    "EN_FA": [
+        "English FA Cup Season 2019/2020",
+        "2018/19",
+        "2017/18",
+        "2016/17",
+        "2015/16",
+        "2014/15",
+        "2013/14",
+        "2012/13",
+        "2011/12",
+        "2010/11",
+        "2009/10",
+        "2008/09",
+        "2007/08",
+        "2006/07",
+        "2005/06",
+        "2004/05"
+    ],
+    "EN_LC": [
+        "2019/20",
+        "2018/19",
+        "2017/18",
+        "2016/17",
+        "2015/16",
+        "2014/15",
+        "2013/14",
+        "2012/13",
+        "2011/12",
+        "2010/11",
+        "2009/10",
+        "2008/09"
+    ],
+    "EN_PD": [
+        "English Professional Development League Season 2019/2020",
+        "2018/19",
+        "2017/18",
+        "2016/17",
+        "2015/16",
+        "2014/15"
+    ],
+    "AFAPL12": [
+        "2019/20",
+        "2018/19",
+        "2017/18",
+        "2016/17",
+        "2015/16",
+        "2014/15"
+    ],
+    "AFAPL": [
+        "2019/20",
+        "2018/19",
+        "2017/18",
+        "2016/17",
+        "2015/16",
+        "2014/15",
+        "2013/14",
+        "2012/13",
+        "2011/12"
+    ],
+    "EN_PC": [
+        "English Premier League Cup Season 2019/2020",
+        "2018/19",
+        "2017/18",
+        "2016/17",
+        "2015/16",
+        "2014/15"
+    ],
+    "EN_PLIC": [
+        "Premier League International Cup Season 2019/2020",
+        "2018/19",
+        "2017/18",
+        "2016/17",
+        "2015/16",
+        "2014/15"
+    ],
+    "EN_RE": [
+        "2016/17",
+        "2015/16",
+        "2014/15",
+        "2013/14",
+        "2012/13"
+    ],
+    "EN_D1": [
+        "2019/20",
+        "2018/19",
+        "2017/18",
+        "2016/17",
+        "2014/15",
+        "2013/14",
+        "2012/13",
+        "2011/12",
+        "2010/11",
+        "2009/10",
+        "1996/97"
+    ],
+    "EN_FL": [
+        "English Football League Trophy Season 2019/2020",
+        "2018/19",
+        "2017/18",
+        "2016/17"
+    ],
+    "IG_CF": [
+        "Friendly Season 2019/2020",
+        "Friendly Season 2020/2021",
+        "Friendly Season 2018/2019",
+        "2017/18",
+        "2016/17",
+        "Friendly Season 2015/2016",
+        "Friendly Season 2014/2015",
+        "Friendly Season 2013/2014",
+        "Friendly Season 2012/2013",
+        "Friendly Season 2011/2012",
+        "Friendly Season 2010/2011"
+    ],
+    "IG_AT": [
+        "Premier League Asia Trophy Season 2019/2020",
+        "2017/18"
+    ],
+    "PL_D1": [
+        "2019/20",
+        "2018/19",
+        "2017/18",
+        "2016/17"
+    ],
+    "PL_D2": [
+        "2019/20",
+        "2018/19",
+        "2017/18",
+        "2016/17"
+    ],
+    "PLC_U18": [
+        "English U18 Premier League Cup Season 2019/2020",
+        "2018/19",
+        "2017/18"
+    ],
+    "PLC_U16": [
+        "English U16 Premier League Cup Season 2019/2020",
+        "English U16 Premier League Cup Season 2018/2019",
+        "English U16 Premier League Cup Season 2017/2018"
+    ],
+    "EN_D2": [
+        "English Football League - League One Season 2019/2020",
+        "English Football League - League One Season 2018/2019",
+        "English Football League - League One Season 2013/2014",
+        "English Football League - League One Season 2008/2009"
+    ],
+    "ES_PL": [
+        "Spanish La Liga Season 2019/2020",
+        "Spanish La Liga Season 2018/2019",
+        "Spanish La Liga Season 2017/2018",
+        "Spanish La Liga Season 2016/2017",
+        "Spanish La Liga Season 2015/2016",
+        "Spanish La Liga Season 2014/2015",
+        "Spanish La Liga Season 2013/2014",
+        "Spanish La Liga Season 2012/2013",
+        "Spanish La Liga Season 2011/2012",
+        "Spanish La Liga Season 2010/2011",
+        "Spanish La Liga Season 2006/2007",
+        "Spanish La Liga Season 2003/2004",
+        "Spanish La Liga Season 2007/2008"
+    ],
+    "ES_SD": [
+        "Spanish Segunda Division Season 2017/2018",
+        "Spanish Segunda Division Season 2016/2017",
+        "Spanish Segunda Division Season 2015/2016",
+        "Spanish Segunda Division Season 2014/2015",
+        "Spanish Segunda Division Season 2013/2014",
+        "Spanish Segunda Division Season 2012/2013",
+        "Spanish Segunda Division Season 2011/2012",
+        "Spanish Segunda Division Season 2010/2011"
+    ],
+    "ES_SC": [
+        "Spanish Supercopa Season 2019/2020",
+        "Spanish Supercopa Season 2018/2019",
+        "Spanish Supercopa Season 2017/2018",
+        "Spanish Supercopa Season 2016/2017",
+        "Spanish Supercopa Season 2015/2016",
+        "Spanish Supercopa Season 2014/2015",
+        "Spanish Supercopa Season 2013/2014",
+        "Spanish Supercopa Season 2012/2013",
+        "Spanish Supercopa Season 2011/2012",
+        "Spanish Supercopa Season 2010/2011"
+    ],
+    "EU_SC": [
+        "UEFA Super Cup Season 2019/2020",
+        "UEFA Super Cup Season 2018/2019",
+        "UEFA Super Cup Season 2017/2018",
+        "UEFA Super Cup Season 2016/2017",
+        "UEFA Super Cup Season 2015/2016",
+        "UEFA Super Cup Season 2014/2015",
+        "UEFA Super Cup Season 2013/2014",
+        "UEFA Super Cup Season 2012/2013",
+        "UEFA Super Cup Season 2011/2012",
+        "UEFA Super Cup Season 2010/2011"
+    ],
+    "ES_CR": [
+        "Spanish Copa Del Rey Season 2019/2020",
+        "Spanish Copa Del Rey Season 2018/2019",
+        "Spanish Copa Del Rey Season 2017/2018",
+        "Spanish Copa Del Rey Season 2016/2017",
+        "Spanish Copa Del Rey Season 2015/2016",
+        "Spanish Copa Del Rey Season 2014/2015",
+        "Spanish Copa Del Rey Season 2013/2014",
+        "Spanish Copa Del Rey Season 2012/2013",
+        "Spanish Copa Del Rey Season 2011/2012",
+        "Spanish Copa Del Rey Season 2010/2011"
+    ],
+    "IG_CL": [
+        "FIFA Club World Cup Season 2019/2020",
+        "FIFA Club World Cup Season 2018/2019",
+        "FIFA Club World Cup Season 2017/2018",
+        "FIFA Club World Cup Season 2016/2017",
+        "FIFA Club World Cup Season 2015/2016",
+        "FIFA Club World Cup Season 2014/2015",
+        "FIFA Club World Cup Season 2013/2014",
+        "FIFA Club World Cup Season 2012/2013",
+        "FIFA Club World Cup Season 2011/2012",
+        "FIFA Club World Cup Season 2010/2011"
+    ],
+    "IG_CT": [
+        "International Champions Cup Season 2019/2020",
+        "International Champions Cup Season 2018/2019",
+        "International Champions Cup Season 2017/2018",
+        "International Champions Cup Season 2016/2017",
+        "International Champions Cup Season 2015/2016",
+        "International Champions Cup Season 2014/2015",
+        "International Champions Cup Season 2013/2014"
+    ],
+    "AU_DI": [
+        "Audi Cup Season 2015/2016",
+        "Audi Cup Season 2013/2014"
+    ],
+    "ES_JG": [
+        "Trofeo Joan Gamper Season 2019/2020",
+        "Trofeo Joan Gamper Season 2018/2019",
+        "Trofeo Joan Gamper Season 2017/2018",
+        "Trofeo Joan Gamper Season 2016/2017"
+    ],
+    "ES_CT": [
+        "Supercopa de Catalunya Season 2018/2019",
+        "Supercopa de Catalunya Season 2017/2018",
+        "Supercopa de Catalunya Season 2016/2017"
+    ],
+    "EU_YL": [
+        "UEFA Youth League Season 2019/2020",
+        "UEFA Youth League Season 2018/2019",
+        "UEFA Youth League Season 2017/2018",
+        "UEFA Youth League Season 2016/2017",
+        "UEFA Youth League Season 2015/2016",
+        "UEFA Youth League Season 2014/2015",
+        "UEFA Youth League Season 2013/2014"
+    ],
+    "EN_YP": [
+        "English FA Youth Cup Season 2019/2020",
+        "English FA Youth Cup Season 2018/2019",
+        "English FA Youth Cup Season 2017/2018",
+        "English FA Youth Cup Season 2016/2017",
+        "English FA Youth Cup Season 2015/2016"
+    ],
+    "proximus": [],
+    "FR": [],
+    "WO_SL": [
+        "English Women's Super League Season 2019/2020",
+        "2018/2019",
+        "2017/2018",
+        "2016/2017",
+        "2015/2016",
+        "2014/2015",
+        "2013/2014"
+    ],
+    "WO_SS": [
+        "Women's Super League Spring Series Season 2016/2017"
+    ],
+    "LD_S3": [
+        "Scottish League Two Season 2019/2020",
+        "Scottish League Two Season 2018/2019"
+    ],
+    "EN_D3": [
+        "English Football League - League Two Season 2019/2020",
+        "English Football League - League Two Season 2018/2019"
+    ],
+    "LD_S1": [
+        "Scottish Championship Season 2019/2020",
+        "Scottish Championship Season 2018/2019"
+    ],
+    "WO_SL2": [
+        "English Women's Championship Season 2019/2020",
+        "English Women's Championship Season 2018/2019"
+    ],
+    "LD_SP": [
+        "Scottish Premiership Season 2019/2020",
+        "Scottish Premiership Season 2018/2019"
+    ],
+    "LD_S2": [
+        "Scottish League One Season 2019/2020",
+        "Scottish League One Season 2018/2019"
+    ],
+    "FND": [],
+    "LD_P1": [
+        "Scottish Championship Play-offs Season 2018/2019"
+    ],
+    "LD_P2": [
+        "Scottish League One Play-offs Season 2018/2019"
+    ],
+    "LD_P3": [
+        "Scottish League Two Play-offs Season 2018/2019"
+    ],
+    "LD_PP": [
+        "Scottish Premiership Play-offs Season 2018/2019"
+    ],
+    "preseason": [],
+    "preseason23s": [],
+    "preseason1920": [],
+    "preseasonu23": [],
+    "IG_OF": [
+        "Other Club Friendlies Season 2019/2020"
+    ],
+    "friendly": [],
+    "WO_FA": [
+        "Women's FA Cup Season 2019/2020",
+        "Women's FA Cup Season 2018/2019",
+        "Women's FA Cup Season 2017/2018",
+        "Women's FA Cup Season 2016/2017",
+        "Women's FA Cup Season 2015/2016",
+        "Women's FA Cup Season 2014/2015",
+        "Women's FA Cup Season 2013/2014",
+        "Women's FA Cup Season 2012/2013"
+    ],
+    "WO_WSLC": [
+        "FA WSL Cup Season 2019/2020",
+        "FA WSL Cup Season 2018/2019",
+        "FA WSL Cup Season 2017/2018",
+        "FA WSL Cup Season 2016/2017"
+    ],
+    "WO_CL": [
+        "Women's Champions League Season 2019/2020"
+    ],
+    "ES_PF": [
+        "Primera Divisi\u00f3n Femenina Season 2019/2020"
+    ],
+    "leasing": [],
+    "ES_SF": [
+        "Spanish Supercopa Femenina Season 2019/2020"
+    ],
+    "EC_SC": [
+        "Supercopa de Ecuador Season 2019/2020"
+    ]
+}
