@@ -1,389 +1,322 @@
-import os
 import json
 import requests
+from pprint import pprint
+from directory import Directory
+import re
+
+#layer1 = 'https://footballapi.pulselive.com/football/competitions' #League Ids
+#layer2 = 'https://footballapi.pulselive.com/football/competitions/1/compseasons'#Season Ids for League_id: 1
+#layer3 = 'https://footballapi.pulselive.com/football/teams?comps=1&pageSize=100&compSeasons=274'#Teams_Ids for League_id: 1, Season_id:274
+#layer4 = 'https://footballapi.pulselive.com/football/teams/1/compseasons/274/staff' #Players_Ids for team_id: 1, Season_id:274
+
+"""***HOW TO USE***
+
+    1. Create an instance of Football, this initiates the leagues dict which holds
+    all the leagueIDs. 
+
+    fb = Football()
+
+    2. To get the all the seasons for all leagues, first run the the method
+    fb.load_leagues()
+    this fills the leagues dict with nessesery info to make further querys.
+    To get season values the league abbreviation has to be passed like below:
+
+    fb.leagues['EN_PR'].load_seasons()
+    
+    This selects the key 'EN_PR' which is the parent key in leagues and loads
+    the season for that league by running the method load.seasons() which is in
+    class Leagues(). This returns a dict seasons holding the following:
+
+    1992/93': {'competition': 1, 'id': 1, 'label': '1992/93'}
+
+    Where the '1992/93' is the key containing that seasons information.
+
+
+    ***WHAT IS NEEDED FOR ARBITRAIRY QUERYS***
+     
+    League abbreviation
+    Season label
+    Team name
+
+    """
+
+
+def load_raw_data(url):
+    """Retreives Ids for different pages on the API"""
+    page = 0
+    data_temp = []
+    while True:
+        headers = {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                            'Origin': 'https://www.premierleague.com',
+                            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'
+                  }
+        params = (('pageSize', '100'),
+                ('page', str(page)))
+
+    # request to obtain the team info
+        try:
+            response = requests.get(url, params = params, headers=headers).json()  
+            if url.endswith('staff'):
+                data = response['players']
+                return data
+            elif 'fixtures' in url:
+                data = response["content"]
+                #loop to get info for each game 
+                data_temp.extend(data) 
+            else:
+                data = response['content']
+                # note: bit of a hack, for some reason 'id' is a float, but everywhere it's referenced, it's an int
+                for d in data:
+                    d['id'] = int(d['id']) 
+                return data       
+        except Exception as e:
+            print(e, 'Something went wrong with the request')
+            return {}
+
+        page += 1
+        if page == response["pageInfo"]["numPages"]:
+            break
+
+    for d in data_temp:
+        d['id'] = int(d['id'])
+    return data_temp
 
 
 
-class ApiScraper:
+class TeamPlayers(dict):
+    _players = {}
 
-    def __init__(self, base_url='https://footballapi.pulselive.com/football'):
-        """
-        Initializes the base_url for the API and the working directory
-        """
-        self.base_url = base_url
-        self.dirname = os.path.dirname(__file__) #Set working directory
-        #Required header to not get 403-Error from API
-        self.headers = {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                        'Origin': 'https://www.premierleague.com',
-                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'
-                        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-    def save_json(self, file, filename, folder):
-        """save dictionarirys to .json files        
+    def load_players_for_team(self, team, comp):
+        ds = load_raw_data(
+            f'https://footballapi.pulselive.com/football/teams/{team}/compseasons/{comp}/staff')
+        self.clear()
+        for d in ds:
+            self._players[d['id']] = d
+            self[d['id']] = self._players[d['id']]
+        return self._players
+
+class FixtureInfo(dict):
+    _fixtures = {}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def load_info_for_fixture(self, season):
+        ds = load_raw_data(
+            f'https://footballapi.pulselive.com/football/fixtures?compSeasons={season}')
+        self.clear()
+        for d in ds:
+            self._fixtures[d['id']] = d
+            self[d['id']] = self._fixtures[d['id']]
+        return self._fixtures
+
+        
+       
+class SeasonTeams(dict):
+    """Creates an object for a team given a season """
+    _teams = {}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    class Team(dict):
+        """Creates an object for a team in a competion and specific season
+        
         Args:
-            file (str): The name of the file that is to be saved in .json format
-            filename (dict): The dictionary that is to be wrote to the .json file
-            folder (str): The folder name in the target directory
+            competition (str): Competition abbreviation
         """
-        file = os.path.join(self.dirname, "../json/" + folder + "/" + str(file) + ".json" ) 
-        with open(file, "w") as f:
-            pretty prints and writes the same to the json file
-            f.write(json.dumps(filename, indent=4, sort_keys=False))
+        def __init__(self, competition, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self['competition'] = competition
+            self.players = TeamPlayers()#Returns Ids and info for every player on a team
 
-    def load_json(self, folder, file_name):
-        """load json files
-        Args:
-            folder(str): The folder name that the requested file exist in
-            file_name(str): The file name of the requested file
-        """
-        return os.path.join(self.dirname, '..', 'json', folder, file_name + '.json')
+        def load_players(self):
+            """returns info for all the players given their id and a season _id"""
+            return self.players.load_players_for_team(self['id'], self['competition'])
 
-    def get_competion_id(self):
-        """get Ids for competitions on API, returns a .json file saved in 
-        ../json/competitions/competitions.json    
-        json file contains IDs for each competition in the API.
-        """
-        url = self.base_url + '/competitions' #Set url for competitions
-        params = (('pageSize', '100'),)#adds ?pageSize=100 to url
-        # request to obtain the id values and corresponding competition
-        response = requests.get(url, params=params, headers=self.headers).json()
-        all_comps = response["content"]
-        competitions = {} #Dict that holds all data from API
+    def load_teams_for_season(self, season, comp):
+        ds = load_raw_data(
+            f'https://footballapi.pulselive.com/football/teams?comps={comp}&pageSize=100&compSeasons={season}')
+        self.clear()
+        for d in ds:
+            d['competition'] = comp
+            self._teams[d['id']] = self.Team(comp, d)
+            self[d['shortName']] = self._teams[d['id']]
+        return self._teams
 
-        for comp in all_comps: #Iterate over all items in the API
-            competition_id = comp['description'] #Get dict parent-keys
-            index = competition_id #Set parent-keys as index for the the dict
-            competitions[index] = \
-                 {
-                 'abbreviation': comp["abbreviation"],
-                  'id' : comp['id'],
-                 }
-            
-        #Save dict to json
-        self.save_json("competitions", competitions, folder="competitions")
+#NO IDE HOW THIS WORKS - REPLICATE SeasonTeams
+class SeasonFixtures(dict):
+    """Creates an object for all fixtures in a given a season """
+    _fixtures = {}
 
-    def get_compseason(self, comp_id, competition_name, competition_abbr):
-        """get Ids for all seasons for a competition on API, returns a .json file saved in
-        ../json/competitions/comp_seasons_id_abbreviation.json
-        json file contains IDs for a competition in the API.
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-        Args:
-            id (str): The competions id
-            competition_name (str): The name of the competion
-            competions_abbr (str): The abbreviation of the competions
-        """
-        compseasons = {} #Dict to store att season IDs
+    class Fixture(dict):
+        """Creates an object for a fixture in a competion and specific season"""
 
-        url = self.base_url + '/competitions/{}/compseasons'.format(comp_id)
-        print(url)
-        params = (('pageSize', '100'),)#adds ?pageSize=100 to url
-        response = requests.get(url, params = params, headers=self.headers).json()
-        competions_info = response['content']
-        for comp_seasons in competions_info:
-            index = competition_name #Set's gameIDs as index for dictionairy
-            compseasons[index] = {comp_seasons['label']:{}}
-            compseasons[index] = \
-            {
-            'label' : comp_seasons['label'],
-            'id':comp_seasons['id']
-            }
+        def __init__(self, competition, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self['competition'] = competition
+            self.fixture = FixtureInfo()#Returns Ids and info for every player on a team
+        def load_fixture(self):
+            """returns info for a fixture given it's Id"""
+            self.fixture.load_info_for_fixture(self['id'])
 
-        self.save_json("comp_seasons_" + str(comp_id) + "_" + str(competition_abbr), compseasons, folder="seasons")
+    def load_fixture_for_season(self, season):
+        ds = load_raw_data(
+            f'https://footballapi.pulselive.com/football/fixtures?compSeasons={season}')
+        self.clear()
+        for d in ds:
+            d['competition'] = season
+            self._fixtures[d['id']] = self.Fixture(season, d)
+            self[d['fixtureType']] = self._fixtures[d['id']]
+        return self._fixtures
+    
 
-    def get_all_compseasons(self):
-        """Gets compseasons for all the competition on API and creates a .json file with 
-        compseasons for each competion seperatly """
-        path = self.load_json('competitions','competitions') #Set path for competions.json
-        with open(path, 'r') as comps:
-            competitions = json.load(comps)
-            #Holds all competition IDs
-            competitions_id = [str(int(comp['id'])) for comp in competitions.values()]
-            #Holds all competition names
-            competitions_name = [str(comp) for comp in competitions.keys()]
-            #Holds all competion abbreviations
-            competitions_abbre = [str(comp['abbreviation']) for comp in competitions.values()]
+class Season(dict):
+    all_teams = SeasonTeams()
 
-            for comp_id, comp_name, comp_abbre in zip(competitions_id, competitions_name,competitions_abbre):
-                self.get_compseason(comp_id, comp_name, comp_abbre)
+    def __init__(self, competition, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self['competition'] = competition
+        self.teams = SeasonTeams()
+        self.fixtures = SeasonFixtures()
 
-    def get_clubs(self):
-        """get Ids for all clubs on API, returns a .json file saved in ../json/clubs/clubs.json
-        
-        json file contains IDs for each club in the API.    
-        """
-        clubs = {} #Store all clubs
-        url = self.base_url + '/clubs' #Set url 
-        page = 0 #starting value of page
-        while True:
-            params = (
-                ('pageSize', '100'),
-                ('page', str(page))
-                    )
-            
-            # request to obtain the club info
-            response = requests.get(url, params = params, headers=self.headers).json()          
-            all_clubs = response["content"]
-            #loop to get all info for all competitions
-            for club in all_clubs: 
-                clubs[club['name']] = club['teams'][0]['id']
-
-            page += 1
-            if page == response["pageInfo"]["numPages"]:
-                break
-
-        self.save_json("clubs", clubs, folder="clubs")
-
-    def get_fixtures(self,compSeasons):
-        """get Ids and other info for all fixture on API, returns a .json file saved in ../json/clubs/clubs.json
-        
-        json file contains IDs for each club in the API.    
-        """
-        url = self.base_url + '/fixtures' 
-        fixtures_unplayed = {} #Store info for not played fixtures
-        fixtures_played = {} #Store all clubs
-
-        page = 0 #starting value of page
-        while True:
-            params = (
-                ('pageSize', '100'), #adds ?pageSize=100 to url
-                ('page', str(page)),
-                ('compSeasons', str(compSeasons)),
-                    )
-            
-            # request to obtain the team info
-            response = requests.get(url, params = params, headers=self.headers).json()
-            all_games = response["content"]
-            #loop to get info for each game 
-
-            for game in all_games: #Iterates over all games
-
-                if game['status'] == 'U': #Checks if game is un-played
-                    game_id = game['id'] #Get's the gameIDs for each game
-                    index = game_id #Set's gameIDs as index for dictionairy
-                    fixtures_unplayed[index] = \
-                        {
-                        'match' : game_id,
-                        'kickoff' : game['fixtureType'],
-                        'preli_date' : game['provisionalKickoff']['label'],
-                        'scientific_date' : game['provisionalKickoff']['millis'],
-                        'home_team' : game['teams'][0]['team']['name'],
-                        'home_team_id' : game['teams'][0]['team']['club']['id'],
-                        'home_team_abbr' : game['teams'][0]['team']['club']['abbr'],
-                        'away_team' : game['teams'][1]['team']['name'],
-                        'away_team_id' : game['teams'][1]['team']['club']['id'],
-                        'away_team_abbr' : game['teams'][1]['team']['club']['abbr'],
-                        'grounds' : game['ground']['name'],
-                        'grounds_id' : game['ground']['id'],
-                        'gameweek' : game['gameweek']['gameweek'],
-                        'status' : game['status'],
-                        }
+    def load_teams(self):
+        return self.teams.load_teams_for_season(self['id'], self['competition'])
 
 
-            for game in all_games: 
+    def load_played_fixtures(self):
+        return self.fixtures.load_fixture_for_season(self['id'])
 
-                if game['status'] == 'C': #Check's if game is played
-                    game_id = game['id'] #Get's the gameIDs for each game
-                    index = game_id #Set's gameIDs as index for dictionairy
-                    fixtures_played[index] = \
-                    {
-                    'match' : game['id'],
-                    'kickoff' : game['fixtureType'],
-                    'preli_date' : game['provisionalKickoff']['label'],
-                    'scientific_date' : game['provisionalKickoff']['millis'],
-                    'home_team' : game['teams'][0]['team']['name'],
-                    'home_team_id' : game['teams'][0]['team']['club']['id'],
-                    'home_team_abbr' : game['teams'][0]['team']['club']['abbr'],
-                    'home_team_score' : game['teams'][0]['score'],
-                    'away_team' : game['teams'][1]['team']['name'],
-                    'away_team_id' : game['teams'][1]['team']['club']['id'],
-                    'away_team_abbr' : game['teams'][1]['team']['club']['abbr'],
-                    'away_team_score' : game['teams'][1]['score'],
-                    'grounds' : game['ground']['name'],
-                    'grounds_id' : game['ground']['id'],
-                    'gameweek' : game['gameweek']['gameweek'],
-                    'outcome' : game['outcome'],
-                    'extraTime'  : game['extraTime'],
-                    'shootout' : game['shootout'],
-                    'played_time' : game['clock']['secs'],
-                    'played_time_label' : game['clock']['label'],
-                    'status' : game['status'],
-                    'goals' : game['goals'],
-                    }
+    def load_unplayed_fixtures(self):
+        pass
 
-            page +=1
-            if page == response["pageInfo"]["numPages"]:
-                break
-
-        fixtures = dict(fixtures_unplayed)
-        fixtures.update(fixtures_played)
-
-        self.save_json("fixtures_unplayed", fixtures_unplayed, folder="fixtures")
-        self.save_json("fixtures_played", fixtures_played, folder="fixtures")
-        self.save_json("fixtures", fixtures, folder="fixtures")
-
-    def get_standings(self, compSeasons):
-        """Returns the table"""
-
-        url = self.base_url + '/compseasons/{}/standings'.format(compSeasons)
-        params = (('pageSize', '100'),)
-        response = requests.get(url, params = params, headers=self.headers).json() # request to obtain the team info
-        all_standings = response["tables"][0]['entries']
-        season_id = response['compSeason']['id']        
-        standings = {} #Store all standings
+    def load_all_fixtures(self):
+        pass
 
 
-        #loop to get all info for all standings
-        for standing in all_standings:
-            standing_id = standing['team']['name']
-            index = standing_id
-            standings[index] = \
-            {
-            'season_id' : season_id,
-            'team_id' : standing['team']['club']['id'],
-            'position' : standing['position'],
-            'overall' : standing['overall'],
-            'home' : standing['home'],
-            'away' : standing['away'],
-            }
+class League(dict):
+    """Gets Season_ids, returns a dict"""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.seasons = {} #Initates dictionairy to hold seasonIds
+
+    def season_label(self, label):
+        try:
+            return re.search( r'(\d{4}/\d{4})', label).group()  
+        except: 
+            label = re.search( r'(\d{4}/\d{2})', label).group()
+            return re.sub(r'(\d{4}/)', r'\g<1>20', label)
 
 
-        self.save_json("standings", standings, folder="standings")
-
-    def get_team_standing(self, compSeasons, teamId):
-        """returns a teams standings"""
-
-        url = self.base_url + '/compseasons/{}/standings/team/{}'.format(compSeasons,teamId)        
-        params = (
-            ('pageSize', '100'),
-                )
-        # request to obtain the team info
-        response = requests.get(url, params = params, headers=self.headers).json()
-        team_standing = response['entries'] #team standing through season
-        season = response['compSeason']['label'] #season label
-        season_id = response['compSeason']['id'] #season label
-        team = response['team'] #team name
-        team_name = str(response['team']['name'])       
-        team_standings = {} #Store all standings
-
-        #loop to get all info for all standings
-        for standing in team_standing:
-            if 'fixtures' in standing:
-                standing_id = standing['played']
-                index = standing_id
-
-                team_standings[index] = \
-                {
-                'season' : season,
-                'season_id' : season_id,
-                'team_id' : team['club']['id'],
-                'team' : team['name'],
-                'position' : standing['position'],
-                'points' : standing['points'],
-                'played_games' : standing['played'],
-                 'game_week_id' : standing['fixtures'][0]['id'],
-                 'game_week': standing['fixtures'][0]['gameweek']['gameweek'],
-                 'competition' : standing['fixtures'][0]['gameweek']['compSeason']['competition']['description'],
-                 'game_id' : standing['fixtures'][0]['id'],
-                 'home_team' : standing['fixtures'][0]['teams'][0]['team']['name'],
-                 'home_team_id' : standing['fixtures'][0]['teams'][0]['team']['club']['id'],
-                 'home_team_score': standing['fixtures'][0]['teams'][0]['score'],
-                 'away_team' : standing['fixtures'][0]['teams'][1]['team']['name'],
-                 'away_team_id' : standing['fixtures'][0]['teams'][1]['team']['club']['id'],
-                 'away_team_score': standing['fixtures'][0]['teams'][1]['score'],
-                 }
-
-        self.save_json(team_name + "_standings_" + str(compSeasons), team_standings, folder="standings")
-
-    def premierleague_team_standings(self, compSeasons):
-        """Get standings for each team, for each week"""
-        teams=[]
-        path=self.load_json('standings', 'standings')
-        with open(path, 'r') as f:
-            clubs=json.load(f)
-            for club in clubs.values():
-                teams.append(club['team_id'])
-        for team in teams:
-            self.get_team_standing(compSeasons, team)
-
-    def get_all_player(self):
-        """Get all players from API"""
-
-        url = self.base_url + '/players'
-        players = {} #Store all standings
-            
-        page = 0 #starting value of page
-        while True:
-            params = (('pageSize', '100'),)
-            response = requests.get(url, params = params, headers=self.headers).json() # request to obtain the team info
-            all_players = response["content"]
-
-            #loop to get all info for all standings
-            for player in all_players:
-                try: 
-                    if 'playerId' in player:
-                        player_id = player['playerId']
-                        index = player_id
-
-                        players[index] = \
-                        {'position' : player['info']['position'],
-                        'positionInfo' : player['info']['positionInfo'],
-                        'nationalTeam' : player['nationalTeam']['country'],
-                        'birth' : player['birth']['date']['millis'],
-                        'age' : player['age']
-                        }
-
-                    if 'shirtNum' in player:
-                        players[index] = {'shirtNum' : player['info']['shirtNum']}
-
-                    if 'currentTeam' in player:
-                        players[index] = \
-                        {
-                        'currentTeam' : player['currentTeam']['name'],
-                        'currentTeam_id' : player['currentTeam']['club']['id'],
-                            }
-                except Exception as e:
-                    print(e)
-            page +=1
-            if page == response["pageInfo"]["numPages"]:
-                break
+    def load_seasons(self):
+        """Returns a dict with season label as key and season id as value"""
+        ds = load_raw_data(f'https://footballapi.pulselive.com/football/competitions/{self["id"]}/compseasons')
+        self.seasons = {self.season_label(d['label']): Season(self['id'], d) for d in ds}
+        return self.seasons
 
 
-        self.save_json("players", players, folder="players")
+class Football:
+    """Gets Competition_abbreviation, returns a dict"""
+    def __init__(self):
+        self.leagues = {} #Initates dictionairy to hold leagueIds
 
-    def get_premierleague_players(self, compSeasons):
-        """Get all premier_league players"""
-        teams = []
-        path = self.load_json('standings', 'standings')
-        with open(path, 'r') as standings_clubs:
-            clubs = json.load(standings_clubs)
-            for club in clubs.values(): 
-                teams.append(club['team_id'])
-        url = self.base_url + compseasons
-
-        
-
-         
+    def load_leagues(self):
+        """Returns a dict with league abbreviation as key and league id as value"""
+        ds = load_raw_data('https://footballap.pulselive.com/football/competitions')
+        self.leagues = {d['abbreviation']: League(d) for d in ds}
+        return self.leagues
 
 
-if __name__ == "__main__":
-    PREM = ApiScraper()
+if __name__ == '__main__':
 
-    PREM.get_all_compseasons()
+    Dir = Directory() 
+    fb = Football()
+    lg = League()
+    fx = FixtureInfo()
+    fb.load_leagues()
+    #fb.leagues['EU_CL'].load_seasons()
+    #.seasons['2019/2020'].load_played_fixtures())
+    #pprint(fb.leagues['EU_CL'].seasons['2019/2020'].teams['Chelsea'].load_players())
 
 
-
-
-
-
-        
 
 
     
-    
-            
-    
+
+    #ds = (load_raw_data('https://footballapi.pulselive.com/football/competitions'))
+    #l = [d['abbreviation'] for d in ds]
+    #league = fb.load_leagues()
+    #pprint(fb.leagues['EU_CL'].load_seasons())
 
 
 
 
 
+
+
+    #fb.leagues['EN_PR'].load_seasons()
+
+    #
+    #print(fb.leagues['EN_PR'].seasons['2019/20'].load_teams())
+    #fb.leagues['EN_PR'].seasons['2019/20'].load_played_fixtures()
+
+    #pprint(len(FixtureInfo().load_info_for_fixture(274).keys()))
+    #pprint(TeamPlayers().load_players_for_team(1, 274).keys())
+
+
+
+    #We want to query 
+
+    #fb.leagues['EN_PR'].seasons['2019/20'].load_unplayed_fixtures()
+    #fb.leagues['EN_PR'].seasons['2019/20'].load_all_fixtures()
+
+
+
+    # pprint(fb.leagues['EN_PR'].seasons)
+
+
+    #pprint(fb.leagues['EN_PR'].seasons['2019/20'].load_teams())
+
+
+    #leagues = [league for league in fb.load_leagues().keys()]
+    #league_names = [league['description'] for league in fb.load_leagues().values()]
+    #print(leagues)
+    #for league in leagues:
+        #print(leagues)
+        #seasons = fb.leagues[league].load_seasons()
+        #seasons_label = [season['id'] for season in seasons.values()]
+        #for season in seasons_label:
+            #teams = fb.leagues[leagues].seasons[season].load_teams()
+
+
+
+    # Dir.save_json('test_teams', fb.leagues['EN_PR'].seasons['2019/20'].load_teams(), '..', 'json')
+    # Dir.save_json('test_players', fb.leagues['EN_PR'].seasons['2019/20'].teams['Chelsea'].load_players(), '..', 'json')
+
+
+
+
+    #fb.leagues['EN_PR'].seasons['2019/20'].load_teams()
+
+    # load the players for a specific team
+    #fb.leagues['EN_PR'].seasons['2019/20'].teams['Chelsea'].load_players()
+
+    # or perhaps for all
+    #for team in fb.leagues['EN_PR'].seasons['2019/20'].teams.values():
+        #team.load_players()
+
+    #pprint(fb.leagues)
+    #pprint(fb.leagues['EN_PR'].seasons)
+    #pprint(fb.leagues['EN_PR'].seasons['2019/20'].teams)
+    #pprint(fb.leagues['EN_PR'].seasons['2019/20'].teams['Chelsea'].players)
+
+    #pprint('goalies:',
+          #[player['name']['display']
+           #for team in fb.leagues['EN_PR'].seasons['2019/20'].teams.values()
+           #for player in team.players.values() if 'position' in player['info'] and player['info']['position'] == 'G'])
