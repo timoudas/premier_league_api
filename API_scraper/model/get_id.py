@@ -1,13 +1,16 @@
 from api_scraper import *
 from directory import Directory
 import re
+from functools import lru_cache
+import cProfile
+
 
 
 class Params():
 
 	def __init__(self):
 		self.fb = Football()
-		self.fb_league = Football().load_leagues()
+		self.fb_league = self.fb.load_leagues()
 		self.dir = Directory()
 
 	def season_label(self, label):
@@ -26,12 +29,12 @@ class Params():
 		self.dir.mkdir('..', 'json', 'params')
 		self.dir.save_json('league_params', league_info, '..', 'json', 'params')
 
+
 	def league_season(self):
 		league_abbreviation = [league['abbreviation'] for league in self.fb_league.values()]
-		self.fb.load_leagues()
 		season_info = {}
 		for abbreviation in league_abbreviation:
-			league_info = self.fb.leagues[abbreviation].load_seasons()
+			league_info = self.fb_league[abbreviation].load_seasons()
 			season_info[abbreviation] = []
 			for i in league_info.values():
 				season_info[abbreviation] += [self.season_label(i['label'])]
@@ -48,6 +51,6 @@ class Params():
 
 if __name__ == '__main__':
 	p = Params()
-	p.season()
+	p.league_season()
 
 

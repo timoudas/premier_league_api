@@ -1,13 +1,16 @@
 import json
 import requests
+requests.packages.urllib3.contrib.pyopenssl.extract_from_urllib3
 from pprint import pprint
 from directory import Directory
 import re
+import cProfile
 
-#layer1 = 'https://footballapi.pulselive.com/football/competitions' #League Ids
-#layer2 = 'https://footballapi.pulselive.com/football/competitions/1/compseasons'#Season Ids for League_id: 1
-#layer3 = 'https://footballapi.pulselive.com/football/teams?comps=1&pageSize=100&compSeasons=274'#Teams_Ids for League_id: 1, Season_id:274
-#layer4 = 'https://footballapi.pulselive.com/football/teams/1/compseasons/274/staff' #Players_Ids for team_id: 1, Season_id:274
+#TODO
+"""
+*Program is not scaling well
+
+"""
 
 """***HOW TO USE***
 
@@ -228,7 +231,7 @@ class Football:
 
     def load_leagues(self):
         """Returns a dict with league abbreviation as key and league id as value"""
-        ds = load_raw_data('https://footballap.pulselive.com/football/competitions')
+        ds = load_raw_data('https://footballapi.pulselive.com/football/competitions')
         self.leagues = {d['abbreviation']: League(d) for d in ds}
         return self.leagues
 
@@ -239,10 +242,11 @@ if __name__ == '__main__':
     fb = Football()
     lg = League()
     fx = FixtureInfo()
-    fb.load_leagues()
-    #fb.leagues['EU_CL'].load_seasons()
+    cProfile.run("fb.load_leagues()", filename='first_iteration.cprof' )
+  
+    fb.leagues['EU_CL'].load_seasons()
     #.seasons['2019/2020'].load_played_fixtures())
-    #pprint(fb.leagues['EU_CL'].seasons['2019/2020'].teams['Chelsea'].load_players())
+    pprint(fb.leagues['EU_CL'].seasons['2019/2020'].load_teams())
 
 
 
