@@ -10,13 +10,17 @@ with open("test_leauges.json") as leagues:
 with open("test_teams.json") as teams:
     json_teams = json.load(teams)
 
-cluster = MongoClient('mongodb+srv://admin:kommer10@db-k0ycg.mongodb.net/test?retryWrites=true&w=majority')
-db = cluster['db']
-collectionLeague = db['leagues']
+cluster = MongoClient('mongodb+srv://admin:kommer10@db-k0ycg.mongodb.net/test?retryWrites=true&w=majority') # Connection to our database
+db = cluster['db'] # name of cluster
+
+# Variables to query our different collections.
+collectionLeague = db['leagues'] 
 collectionTeam = db['teams']
 
 
-
+"""
+This function pushes all the data from test_leagues.json to MongoDB
+"""
 def pushLeagues():
     print('Pushing leagues to database...')
     for league in json_leagues:
@@ -42,6 +46,9 @@ def pushLeagues():
 
     print('Finished!')
 
+"""
+This function pushes all the data from test_teams.json to MongoDB
+"""
 def pushTeams():
     print('Pushing teams to database...')
     for team in json_teams:
@@ -59,9 +66,9 @@ def pushTeams():
         }
        
         existingPost = collectionLeague.find_one(post)
-        if existingPost == None: # If the league doesnt exist in the database then push it
+        if existingPost == None: # If the team doesnt exist in the database then push it
             collectionTeam.insert_one(post)
-        else: # If the league already exists in the databse then update it with new values from the json file.
+        else: # If the team already exists in the databse then update it with new values from the json file.
            
             updatedPost = {
             '$set': {'id': json_teams[team]["club"]["id"]},
@@ -79,7 +86,8 @@ def pushTeams():
     print('Finished!')
 
 
-
-#pushLeagues()
+# Everytime we connect to the database we will also push our json data.
+# This means we can add, remove or update data in the jsons files and it will automatically be sent to the database.
+pushLeagues()
 pushTeams()
 
