@@ -58,10 +58,12 @@ class Params():
 				for team, val in league_team.items():
 					if team not in teams:
 						teams.update({team:val})
+						#Add championship key to new teams
 						teams[team].update({'championships':{league:[]}})
+					#If league exist in championship and in team keys
 					elif league in teams[team]['championships'] and league in val:
 						teams[team]['championships'][league].append(str(season_label))	
-					elif league in
+					elif league in val and league not in teams[team]['championships']:
 						teams[team]['championships'].update({league: []})
 						
 			pprint(teams)

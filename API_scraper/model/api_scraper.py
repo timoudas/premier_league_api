@@ -242,8 +242,8 @@ if __name__ == '__main__':
     fb = Football()
     lg = League()
     fx = FixtureInfo()
-    cProfile.run("fb.load_leagues()", filename='first_iteration.cprof' )
-  
+    
+    fb.load_leagues()
     fb.leagues['EU_CL'].load_seasons()
     #.seasons['2019/2020'].load_played_fixtures())
     pprint(fb.leagues['EU_CL'].seasons['2019/2020'].load_teams())
