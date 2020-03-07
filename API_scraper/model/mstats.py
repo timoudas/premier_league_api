@@ -15,6 +15,11 @@ from directory import Directory
             // Lists all the statistics for a given player
             // Params : compSeasonIds, sort, fixtures, comps, sys
             'player' : '/stats/player/{id}',"""
+
+#Example query
+#pl = PremierLeague()
+#pl.season['2019/2020'].load_fixtures()
+
 def load_raw_data(url):
     """Retreives Ids for different pages on the API"""
     page = 0
@@ -71,70 +76,38 @@ def load_match_data(url):
         print(e, 'Something went wrong with the request')
         return {}
 
+def import_id(file_id):
+    return dir.load_json(file_id ,'..', 'json', 'params')
 
 
-class PremierLeague():
+class FixtureSeasons():
     fb = Football()
     dir = Directory()
-    def __init__(self, league='EN_PR', season='2019/2020'):
-        self.pool = multiprocessing.cpu_count()
+    def __init__(self, league='EN_PR'):
         self.league = league
-        self.season = season
-        self.fixture_id = [fix['id'] for fix in self.load_season_fixture().values()]
-    
+        self.api = self.fb.load_leagues()
+        self.seasons = {}
+        self.pool = multiprocessing.cpu_count()
+        
+
+    def get_season(self):
+        league_seasons = self.api[self.league].load_seasons()
+        self.seasons = {label: label_id['id'] for label, label_id in league_seasons.items()}
 
 
-    def load_season_fixture(self):
-        print(f'Initializing \t {self.league} \t {self.season}')
-        self.fb.load_leagues()
-        self.fb.leagues[self.league].load_seasons()
-        print('Initialization completed')
-        return self.fb.leagues[self.league].seasons[self.season].load_played_fixtures()
+class FixtureStats(dict):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.stats = {} 
 
-    def fixture_stats_singel(self, fixture):
-        ds = load_match_data(f'https://footballapi.pulselive.com/football/stats/match/{fixture}')
-        return ds
-
-    def fixture_stats(self):
-        stats = {}
-        print("Getting fixture stats..")
-        with Pool(self.pool) as p:
-            fixture_stats = list(tqdm(p.imap(self.fixture_stats_singel, self.fixture_id, chunksize=1), total=len(self.fixture_id)))
-        print('Getting data from workers..')
-        fix = fixture_stats
-        i = 0
-        for fixture in fix:
-            game_id = fixture['entity']['id'] #Get's the gameIDs for each game
-            index = game_id #Set's gameIDs as index for dictionairy
-            stats[index] = {'info': fixture['entity']}
-            if 'data' in fixture:
-                stats[index].update({'stats':fixture['data']})
-        #pprint(stats)       
-        # for fixture in fix:
-        #     stats.update({fixture['entity']['id']: fixture['entity']})
-        #     pprint(fixture['entity'])
-        #     if 'data' in fixture:
-        #          stats.update({fixture['entity']['id']: fixture['data']})
-        #     else:
-        #         i+=1
-
-        print('Completed')
-        print(f'{i} games retreived had no stats')
-        year = re.search( r'(\d{4})', self.season).group()  
-        filename = self.league + '_' + year + '_' + 'fixturestats'
-        self.dir.save_json(filename, stats, '..', 'json', 'params')
-        path = '/'.join(('..', 'json', 'params'))
-        print(f'Saved as {filename}.json in {path}')
+    def load_fixtures(self, fixture):
+        ds = load_match_data(f'https://footballapi.pulselive.com/football/stats/match/{self["id"]}')
+        #self.seasons = {self.season_label(d['label']): Season(self['id'], d) for d in ds}
+        return self.seasons
 
 
 start = time.time()
-d = PremierLeague('EU_CL', '2019/2020')
-d.fixture_stats()
-end = time.time()
-print(end - start)
-
-
-
-
-
+d = FixtureSeasons()
+d.get_season()
+print(d.seasons)
 
