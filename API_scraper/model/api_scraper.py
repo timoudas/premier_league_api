@@ -1,10 +1,7 @@
-import json
 import requests
-requests.packages.urllib3.contrib.pyopenssl.extract_from_urllib3
 from pprint import pprint
-from directory import Directory
 import re
-import cProfile
+
 
 #TODO
 """
@@ -15,7 +12,7 @@ import cProfile
 """***HOW TO USE***
 
     1. Create an instance of Football, this initiates the leagues dict which holds
-    all the leagueIDs. 
+    all the leagueIDs.
 
     fb = Football()
 
@@ -25,7 +22,7 @@ import cProfile
     To get season values the league abbreviation has to be passed like below:
 
     fb.leagues['EN_PR'].load_seasons()
-    
+
     This selects the key 'EN_PR' which is the parent key in leagues and loads
     the season for that league by running the method load.seasons() which is in
     class Leagues(). This returns a dict seasons holding the following:
@@ -36,7 +33,7 @@ import cProfile
 
 
     ***WHAT IS NEEDED FOR ARBITRAIRY QUERYS***
-     
+
     League abbreviation
     Season label
     Team name
@@ -58,20 +55,20 @@ def load_raw_data(url):
 
     # request to obtain the team info
         try:
-            response = requests.get(url, headers=headers, params=params).json()  
+            response = requests.get(url, headers=headers, params=params).json()
             if url.endswith('staff'):
                 data = response['players']
                 return data
             elif 'fixtures' in url:
                 data = response["content"]
-                #loop to get info for each game 
-                data_temp.extend(data) 
+                #loop to get info for each game
+                data_temp.extend(data)
             else:
                 data = response['content']
                 # note: bit of a hack, for some reason 'id' is a float, but everywhere it's referenced, it's an int
                 for d in data:
-                    d['id'] = int(d['id']) 
-                return data       
+                    d['id'] = int(d['id'])
+                return data
         except Exception as e:
             print(e, 'Something went wrong with the request')
             return {}
@@ -116,8 +113,6 @@ class FixtureInfo(dict):
             self[d['id']] = self._fixtures[d['id']]
         return self._fixtures
 
-        
-       
 class SeasonTeams(dict):
     """Creates an object for a team given a season """
     _teams = {}
@@ -127,7 +122,7 @@ class SeasonTeams(dict):
 
     class Team(dict):
         """Creates an object for a team in a competion and specific season
-        
+
         Args:
             competition (str): Competition abbreviation
         """
@@ -142,7 +137,7 @@ class SeasonTeams(dict):
             return self.players.load_players_for_team(self['id'], self['competition'])
 
     def load_teams_for_season(self, season, comp):
- 
+
         ds = load_raw_data(
             f'https://footballapi.pulselive.com/football/teams?comps={comp}&compSeasons={season}')
         self.clear()
@@ -180,7 +175,6 @@ class SeasonFixtures(dict):
             self._fixtures[d['id']] = self.Fixture(season, d)
             self[d['fixtureType']] = self._fixtures[d['id']]
         return self._fixtures
-    
 
 class Season(dict):
     all_teams = SeasonTeams()
