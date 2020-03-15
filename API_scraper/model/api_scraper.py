@@ -120,6 +120,7 @@ class SeasonTeams(dict):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+
     class Team(dict):
         """Creates an object for a team in a competion and specific season
 
@@ -141,6 +142,7 @@ class SeasonTeams(dict):
         ds = load_raw_data(
             f'https://footballapi.pulselive.com/football/teams?comps={comp}&compSeasons={season}')
         self.clear()
+        self._teams.clear()
         for d in ds:
             d['competition'] = comp
             self._teams[d['id']] = self.Team(season, d)
@@ -173,11 +175,12 @@ class SeasonFixtures(dict):
         for d in ds:
             d['competition'] = season
             self._fixtures[d['id']] = self.Fixture(season, d)
-            self[d['fixtureType']] = self._fixtures[d['id']]
+            self[d['status']] = self._fixtures[d['id']]
         return self._fixtures
 
 class Season(dict):
     all_teams = SeasonTeams()
+
 
     def __init__(self, competition,  *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -240,8 +243,13 @@ if __name__ == '__main__':
     # fx = FixtureInfo()
     fb.load_leagues()
     ds = fb.leagues['EN_PR'].load_seasons()
-    fb.leagues['EN_PR'].seasons['2019/2020'].load_teams()
-    pprint(fb.leagues['EN_PR'].seasons['2019/2020'].teams['Liverpool'].load_players())
+    print(len(fb.leagues['EN_PR'].seasons['2019/2020'].load_teams()))
+    print(len(fb.leagues['EN_PR'].seasons['2018/2019'].load_teams()))
+    print(len(fb.leagues['EN_PR'].seasons['2017/2018'].load_teams()))
+    print(len(fb.leagues['EN_PR'].seasons['2016/2017'].load_teams()))
+    pprint(fb.leagues['EN_PR'].seasons['2015/2016'].load_teams())
+    #pprint(fb.leagues['EN_PR'].seasons['2018/2019'].load_teams())
+    #pprint(fb.leagues['EN_PR'].seasons['2018/2019'].teams['Aston Villa'].load_players())
 
     #id = [i['id'] for i in fb.leagues['EN_PR'].seasons['2019/2020'].keys()]
 

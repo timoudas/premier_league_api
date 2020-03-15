@@ -68,6 +68,18 @@ class Directory:
 		with open(file, 'r') as temp_file:
 			return json.load(temp_file)
 
+	def write_json(self, filename, *path):
+		"""writes to json file
+		Args:
+			filename(str): The file name of the requested file
+			*path(str): The path of the file
+		"""
+
+		file = os.path.join(self.working_dir, *path, filename)
+		with open(file, 'w') as temp_file:
+			return json.load(temp_file)
+
+
 if __name__ == '__main__':
 	d = Directory()
 	d.mkdir('..', 'json')

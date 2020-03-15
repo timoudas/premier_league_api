@@ -2,6 +2,8 @@ import re
 from tqdm import tqdm
 from api_scraper import Football
 from directory import Directory
+from pprint import pprint
+import time
 
 
 
@@ -63,15 +65,20 @@ class Params():
         #Gets the league abbreviations from fb_league
         league_abbreviation = [league['abbreviation'] for league in self.fb_league.values()]
         season_info = {} #Placeholder-dict for league-season
+        season_info_id = {}
         #Iterates over all league_abbreviations
         for abbreviation in tqdm(league_abbreviation):
             #loads all seasons for each abbreviation
             league_info = self.fb_league[abbreviation].load_seasons()
             season_info[abbreviation] = []#Initiates empty list as value
+            season_info_id[abbreviation] = []#Initiates empty list as value
             for i in league_info.values():
-                season_info[abbreviation] += [{self.season_label(i['label']): i['id']}]
+                if self.season_label(i['label']).startswith('2'):
+                    season_info[abbreviation] += [self.season_label(i['label'])]
+                    season_info_id[abbreviation] += [{'label':self.season_label(i['label']) , 'id': i['id']}]
         #Saves season_info as season_params.json in params folder
         self.dir.save_json('season_params', season_info, '..', 'json', 'params')
+        self.dir.save_json('season_params_id', season_info_id, '..', 'json', 'params')
 
     def get_team_param(self):
         """Generates a .json with a all team info, where the teamID acts as key.
@@ -112,17 +119,76 @@ class Params():
                         teams[team]['championships'][league].append(str(season_label))
             self.dir.save_json('teams_params', teams, '..', 'json', 'params')
 
+    def get_team_param(self):
+        """Generates a .json with a all team info, where the teamID acts as key.
+        season_params must have been generated as it looks for it to load seasonIDs.
+        Adds all the seasons the team has played in in a list with league
+        abbreviation as key.
+        """
+        #Gets the league abbreviations from fb_league
+        teams = {}
+        #loads league and their seasons from season_params.json
+        league_season_info = self.dir.load_json('season_params.json', '..', 'json', 'params')
+        #Iterates over league-season in league_season_info
+        for league, season in tqdm(league_season_info.items()):
+            seasons = self.fb.leagues[str(league)].load_seasons()
+            #Iterates over season_label and ID in seasons
+            for season_label, season_id in seasons.items():
+                #Gets teams for a specific season
+                league_teams = self.fb.leagues[str(league)].seasons[str(season_label)].load_teams()
+                #Separates the team_id from it's values
+                for team, val in league_teams.items():
+                    #Adds the team_id and it's values if not in teams
+                    if team not in teams:
+                        teams.update({team:val})
+                        #Add championship key to new teams
+                        teams[team].update({'championships':[]})
+                        teams[team]['championships'].append({'league':league, 'seasons':[]})
+                        for items in teams[team]['championships']:
+                            season_key = items.get('seasons')
+                            #season_key.append({'id': season_id['id'], 'label': season_label})
+
+                    # for items in teams[team]['championships']:
+                    #     season_key = items.get('seasons')
+                        
+
+                    for items in teams[team]['championships']:
+                            season_key = items.get('seasons')
+                            season_key.append({'id': season_id['id'], 'label': season_label}) 
+            pprint(teams)
+
+                    #If season_id matches the season_id in team values
+                    #and the league exist as key in championships it appends the seasonID
+                    #print(season_id['id'] == val['competition'])
+                    # elif team in teams and season_id['id'] == val['competition']:
+                    #     for items in teams[team]['championships']:
+                    #         leag = items.get('league')
+                    #         seas = items.get('seasons')
+                    #         for s in seas:
+                    #             if leag == league and season_id['id'] != s['id']:
+                                    
+                    #             else:
+                    #                 print('no')
+
+
+                        # if league in leag and season_id['id'] == val['competition']:
+                        #     season_key.append({'id': season_id['id'], 'label': season_label})
+                        # else:
+                            # teams[team]['championships'].append({'league':league, 'seasons':[]})
+            #pprint(teams)
+
+
 def main():
     """Runs the script to 
     get the .json param files"""
     d = Params()
-    print('Retrieving leagues..')
-    d.league_param()
-    print('Retrieving league-seasons..')
-    d.league_season_param()
-    print('Retrieving teams..')
+    # print('Retrieving leagues..')
+    # d.league_param()
+    #print('Retrieving league-seasons..')
+    #d.league_season_param()
+    # print('Retrieving teams..')
     d.get_team_param()
-    print('Finished')
+    # print('Finished')
 
 if __name__ == '__main__':
     main()
