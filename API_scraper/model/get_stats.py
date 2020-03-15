@@ -98,31 +98,17 @@ class SeasonStats:
         self.dir.mkdir('..', 'json', 'params', 'stats')
 
 
+
     def load_season_fixture(self):
         """Loads the fixtures for a league-season,
         calls api_scraper.py methods
         """
+        self.fb.load_leagues()
+        self.fb.leagues[self.league].load_seasons()
         print(f'Initializing \t {self.league} \t {self.season} fixtures')
-        self.fb.load_leagues()
-        self.fb.leagues[self.league].load_seasons()
         print('Initialization completed')
+        self.fb.leagues[self.league].seasons[self.season].load_played_fixtures()
         return self.fb.leagues[self.league].seasons[self.season].load_played_fixtures()
-
-    def load_season_players(self):
-        """Loads the players for a league-season,
-        calls api_scraper.py methods
-        """
-        print(f'Initializing \t {self.league} \t {self.season} players')
-        player_id = []
-        self.fb.load_leagues()
-        self.fb.leagues[self.league].load_seasons()
-        teams = self.fb.leagues[self.league].seasons[self.season].load_teams()
-        for team in tqdm(teams.values()):
-            players = self.fb.leagues[self.league].seasons[self.season].teams[team['shortName']].load_players()
-        for player in players.keys():
-            player_id.append(player)
-        print('Initialization completed')
-        return player_id
 
     def load_season_teams(self):
         """Loads the teams for a league-season,
@@ -135,6 +121,28 @@ class SeasonStats:
         print('Initialization completed')
         return self.fb.leagues[self.league].seasons[self.season].load_teams()
 
+    def load_season_players(self):
+        """Loads the players for a league-season,
+        calls api_scraper.py methods
+        """
+        print(f'Initializing \t {self.league} \t {self.season} players')
+        player_id = []
+        self.fb.load_leagues()
+        self.fb.leagues[self.league].load_seasons()
+        teams = self.fb.leagues[self.league].seasons[self.season].load_teams()
+        for team in tqdm(teams.values()):
+            try:
+                players = self.fb.leagues[self.league].seasons[self.season].teams[team['shortName']].load_players()
+            except:
+                print(f"Found no players for {self.league} {self.season} {team}")
+        if players:
+            for player in players.keys():
+                player_id.append(player)
+        else:
+            ('No players found..')
+        print('Initialization completed')
+        return player_id
+
     def fixture_stats_singel(self, fixture):
         """Gets stats for a fixture"""
         ds = load_match_data(f'https://footballapi.pulselive.com/football/stats/match/{fixture}')
@@ -146,6 +154,8 @@ class SeasonStats:
 
         """
         stats = {}
+        self.fb.load_leagues()
+        self.fb.leagues[self.league].load_seasons()
         print("Getting fixture stats..")
         with Pool(self.pool) as p:
             fixture_stats = list(tqdm(p.imap(self.fixture_stats_singel, self.fixture_ids, chunksize=1), total=len(self.fixture_ids)))
@@ -177,6 +187,8 @@ class SeasonStats:
 
     def player_stats(self):
         stats = {}
+        self.fb.load_leagues()
+        self.fb.leagues[self.league].load_seasons()
         print("Getting player stats..")
         with Pool(self.pool) as p:
             player_stats = list(tqdm(p.imap(self.player_stats_singel, self.player_ids, chunksize=1), total=len(self.player_ids)))
@@ -203,6 +215,8 @@ class SeasonStats:
 
     def team_standings_singel(self, team_id):
         #NEED TO HAVE SEASON ID
+        self.fb.load_leagues()
+        self.fb.leagues[self.league].load_seasons()
         season_id = self.fb.leagues[self.league].seasons[self.season]['id']
         ds = load_match_data(
             f'https://footballapi.pulselive.com/football/compseasons/{season_id}/standings/team/{team_id}')
@@ -241,13 +255,15 @@ class SeasonStats:
 class Stats:
     dir = Directory()
     def __init__(self):
+
         data = self.dir.load_json('season_params.json', '..', 'json', 'params')
+        fb.load_leagues()
         holder = {str(league)+'_'+ str(season_label):
                     SeasonStats(league=league, season=season_label) 
                         for league, seasons in data.items() for season_label in seasons}
         with open('league_seasons', 'wb') as f:
             pickle.dump(holder, f)
-        return holder
+
 
 #stat = Stats()
 
@@ -256,12 +272,12 @@ class Stats:
 if __name__ == '__main__': 
 
 
-    stats = Stats()
-    # season_params = {'EN_PR':['2019/2020', '2018/2019']}
-    # gen = ((str(league)+'_'+ str(season_label), SeasonStats(league=league, season=season_label)) for league, seasons in season_params.items() for season_label in seasons)
-    # d = dict(gen)
-    # with open('test_pickle', 'wb') as f:
-    #     pickle.dump(d, f)
+    #stats = Stats()
+    season_params = {'EN_PR':['2019/2020', '2018/2019']}
+    gen = ((str(league)+'_'+ str(season_label), SeasonStats(league=league, season=season_label)) for league, seasons in season_params.items() for season_label in seasons)
+    d = dict(gen)
+    with open('test_pickle', 'wb') as f:
+        pickle.dump(d, f)
     # start = time.time()
     # season_19_20 = SeasonStats('EN_PR', '2018/2019')
     # season_19_20.team_standings()

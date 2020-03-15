@@ -74,7 +74,7 @@ def load_raw_data(url):
             return {}
 
         page += 1
-        if page == response["pageInfo"]["numPages"]:
+        if page >= response["pageInfo"]["numPages"]:
             break
 
     for d in data_temp:
@@ -90,12 +90,13 @@ class TeamPlayers(dict):
         super().__init__(*args, **kwargs)
 
     def load_players_for_team(self, team, season):
+        #self.clear()
         ds = load_raw_data(
             f'https://footballapi.pulselive.com/football/teams/{team}/compseasons/{season}/staff')
-        self.clear()
         for d in ds:
-            self._players[d['id']] = d
-            self[d['id']] = self._players[d['id']]
+            if d:
+                self._players[d['id']] = d
+                self[d['id']] = self._players[d['id']]
         return self._players
 
 class FixtureInfo(dict):
@@ -242,12 +243,13 @@ if __name__ == '__main__':
     # lg = League()
     # fx = FixtureInfo()
     fb.load_leagues()
-    ds = fb.leagues['EN_PR'].load_seasons()
-    print(len(fb.leagues['EN_PR'].seasons['2019/2020'].load_teams()))
-    print(len(fb.leagues['EN_PR'].seasons['2018/2019'].load_teams()))
-    print(len(fb.leagues['EN_PR'].seasons['2017/2018'].load_teams()))
-    print(len(fb.leagues['EN_PR'].seasons['2016/2017'].load_teams()))
-    pprint(fb.leagues['EN_PR'].seasons['2015/2016'].load_teams())
+    # ds = fb.leagues['EN_PR'].load_seasons()
+    # fb.leagues['EN_PR'].seasons['2016/2017'].load_teams()
+    # pprint(fb.leagues['EN_PR'].seasons['2016/2017'].teams['Arsenal'].load_players())
+    ds = fb.leagues['EU_CL'].load_seasons()
+    fb.leagues['EU_CL'].seasons['2016/2017'].load_teams()
+    pprint(fb.leagues['EU_CL'].seasons['2016/2017'].teams['Atlético'].load_players())
+
     #pprint(fb.leagues['EN_PR'].seasons['2018/2019'].load_teams())
     #pprint(fb.leagues['EN_PR'].seasons['2018/2019'].teams['Aston Villa'].load_players())
 

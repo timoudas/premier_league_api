@@ -30,6 +30,7 @@ class ValidateParams():
     def __init__(self, league_file='league_params.json', team_seasons_file='teams_params.json' ):
         self.leagues = self.import_id(league_file)
         self.team_seasons = self.import_id(team_seasons_file)
+        self.league_file = league_file
 
     def import_id(self, file):
         """Imports a json file in read mode
@@ -80,7 +81,7 @@ class ValidateParams():
             if failed in league:
                 del league[failed]
                 deleted.append(failed)
-        print("Below leagues have been removed from", self.file)       
+        print("Below leagues have been removed from", self.league_file)       
         print("\n".join(deleted))
         self.dir.save_json('season_params', league, '..', 'json', 'params')
 
@@ -90,7 +91,7 @@ class ValidateParams():
         #loads league and their seasons from season_params.json
         league_season_info = self.dir.load_json('season_params.json', '..', 'json', 'params')
         #Iterates over league-season in league_season_info
-        for league, season in tqdm(league_season_info.items()):
+        for league, season in league_season_info.items():
             seasons = self.fb.leagues[str(league)].load_seasons()
             #Iterates over season_label and ID in seasons
             for season_label, season_id in seasons.items():
@@ -100,7 +101,6 @@ class ValidateParams():
                 for team in league_teams.keys():
                     status = self.make_request(
                         f'https://footballapi.pulselive.com/football/teams/{team}/compseasons/{s_id}/staff')
-                    print(status)
                 if status != 200 and league not in failed:
                    failed.update({s_id:league})
         print(failed)
@@ -113,9 +113,26 @@ class ValidateParams():
         return self.remove_failed_leagues(self.check_current_season())
 
 if __name__ == '__main__':
+    # def make_request(url):
+    #     """Makes a GET request
+
+    #         Args:
+    #             url (str): url to webbsite
+    #     """
+    #     headers = {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    #                         'Origin': 'https://www.premierleague.com',
+    #                         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'
+    #               }
+    #     params = (('pageSize', '100'),)           
+    #     response = requests.get(url, params = params, headers=headers)
+    #     return response.status_code
+
+    # status = make_request(
+    #     'https://footballapi.pulselive.com/football/teams/131/compseasons/1/staff?page=0&pageSize=100')
+    # print(status)
     d = ValidateParams()
     # d.remove_failed_leagues(d.check_current_season())
-    d.check_stats_urls()
+    d.main()
 
 
 
