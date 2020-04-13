@@ -43,6 +43,11 @@ class Directory:
 		except OSError as e:
 			print(folder,'coult not be created', e)
 
+	def check_if_file_exist(self, *path):
+		if os.path.exists(os.path.join(self.working_dir, *path)):
+			return True
+		else:
+			return False
 
 	def save_json(self, filename, content, *path):
 			"""save dictionarirys to .json files        
@@ -82,4 +87,4 @@ class Directory:
 
 if __name__ == '__main__':
 	d = Directory()
-	d.mkdir('..', 'json')
+	print(d.check_if_file_exist('..', 'json', 'test_leauges.json'))
