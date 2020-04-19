@@ -15,6 +15,7 @@ If fixture stats exist it requests att teams in
 
 """
 from directory import Directory
+from directory import StorageConfig
 from api_scraper import Football
 import requests
 from tqdm import tqdm
@@ -38,7 +39,7 @@ class ValidateParams():
             Args:
                 file(str): Name of file
         """
-        return self.dir.load_json(file ,'..', 'json', 'params')
+        return self.dir.load_json(file , StorageConfig.PARAMS_DIR)
 
     def make_request(self, url):
         """Makes a GET request
@@ -83,13 +84,13 @@ class ValidateParams():
                 deleted.append(failed)
         print("Below leagues have been removed from", self.league_file)       
         print("\n".join(deleted))
-        self.dir.save_json('season_params', league, '..', 'json', 'params')
+        self.dir.save_json('season_params', league, StorageConfig.PARAMS_DIR)
 
     def check_stats_urls(self):
         failed = {}
         self.fb.load_leagues()
         #loads league and their seasons from season_params.json
-        league_season_info = self.dir.load_json('season_params.json', '..', 'json', 'params')
+        league_season_info = self.dir.load_json('season_params.json', StorageConfig.PARAMS_DIR)
         #Iterates over league-season in league_season_info
         for league, season in league_season_info.items():
             seasons = self.fb.leagues[str(league)].load_seasons()
@@ -131,7 +132,7 @@ if __name__ == '__main__':
     #     'https://footballapi.pulselive.com/football/teams/131/compseasons/1/staff?page=0&pageSize=100')
     # print(status)
     d = ValidateParams()
-    # d.remove_failed_leagues(d.check_current_season())
+    d.remove_failed_leagues(d.check_current_season())
     d.main()
 
 

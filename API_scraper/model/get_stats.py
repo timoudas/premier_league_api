@@ -7,6 +7,7 @@ import time
 import json
 import sys
 from directory import Directory
+from directory import Storageconfig
 import requests
 import re
 import pickle
@@ -182,7 +183,7 @@ class SeasonStats:
         print('Completed')
         if i >0:
             print(f'{i} games retreived had no stats')
-        self.save_completed('fixturestats', stats_list, '..', 'json', 'params', 'stats')
+        self.save_completed('fixturestats', stats_list, Storageconfig.STATS_DIR)
 
     def player_stats_singel(self, player):
         season_id = self.fb.leagues[self.league].seasons[self.season]['id']
@@ -214,7 +215,7 @@ class SeasonStats:
         print('Completed')
         if i > 0:
             print(f'{i} players retreived had no stats')
-        self.save_completed('playerstats', stats_list, '..', 'json', 'params', 'stats')
+        self.save_completed('playerstats', stats_list, Storageconfig.STATS_DIR)
 
     def team_standings_singel(self, team_id):
         #NEED TO HAVE SEASON ID
@@ -248,7 +249,7 @@ class SeasonStats:
         print('Completed')
         if i > 0:
             print(f'{i} teams retreived had no standings')
-        self.save_completed('teamstandings', stats_list, '..', 'json', 'params', 'stats')
+        self.save_completed('teamstandings', stats_list, Storageconfig.STATS_DIR)
 
 class Stats:
     dir = Directory()
@@ -269,9 +270,7 @@ class Stats:
 if __name__ == '__main__': 
 
 
-    stats = SeasonStats()
-
-    stats.save_completed('hello', stats_list, '..', 'json', 'params')
+    #stats = SeasonStats()
     # season_params = {'EN_PR':['2019/2020', '2018/2019']}
     # gen = ((str(league)+'_'+ str(season_label), SeasonStats(league=league, season=season_label)) for league, seasons in season_params.items() for season_label in seasons)
     # d = dict(gen)

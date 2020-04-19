@@ -77,8 +77,8 @@ class Params():
                     season_info[abbreviation] += [self.season_label(i['label'])]
                     season_info_id[abbreviation] += [{'label':self.season_label(i['label']) , 'id': i['id']}]
         #Saves season_info as season_params.json in params folder
-        self.dir.save_json('season_params', season_info, '..', 'json', 'params')
-        self.dir.save_json('season_params_id', season_info_id, '..', 'json', 'params')
+        self.dir.save_json('season_params', season_info, StorageConfig.PARAMS_DIR)
+        self.dir.save_json('season_params_id', season_info_id, StorageConfig.PARAMS_DIR)
 
     def get_team_param(self):
         """Generates a .json with a all team info, where the teamID acts as key.
@@ -90,7 +90,7 @@ class Params():
         #Gets the league abbreviations from fb_league
         teams = {}
         #loads league and their seasons from season_params.json
-        league_season_info = self.dir.load_json('season_params.json', '..', 'json', 'params')
+        league_season_info = self.dir.load_json('season_params.json', StorageConfig.PARAMS_DIR)
         #Iterates over league-season in league_season_info
         for league, season in tqdm(league_season_info.items()):
             seasons = self.fb.leagues[str(league)].load_seasons()
@@ -117,19 +117,19 @@ class Params():
                     elif season_id['id'] == val['competition'] and league not in teams[team]['championships']:
                         teams[team]['championships'][league] = []
                         teams[team]['championships'][league].append(str(season_label))
-            self.dir.save_json('teams_params', teams, '..', 'json', 'params')
+            self.dir.save_json('teams_params', teams, StorageConfig.PARAMS_DIR)
 
 def main():
     """Runs the script to 
     get the .json param files"""
     d = Params()
-    # print('Retrieving leagues..')
+    print('Retrieving leagues..')
     d.league_param()
-    #print('Retrieving league-seasons..')
-    #d.league_season_param()
-    # print('Retrieving teams..')
-    #d.get_team_param()
-    # print('Finished')
+    print('Retrieving league-seasons..')
+    d.league_season_param()
+    print('Retrieving teams..')
+    d.get_team_param()
+    print('Finished')
 
 if __name__ == '__main__':
     main()
