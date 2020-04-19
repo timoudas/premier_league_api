@@ -25,7 +25,7 @@ import datetime
 from dateutil.parser import parse as parsedate
 r = requests.head(url, headers=headers)
 url_time = r.headers.get('if-none-match', '')
-print(url_time)
+
 #url_date = parsedate(url_time)
 # file_time = datetime.datetime.fromtimestamp(os.path.getmtime(test_pickle))
 # if url_date > file_time :

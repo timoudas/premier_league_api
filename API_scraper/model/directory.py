@@ -20,6 +20,7 @@
 
 import os
 import json
+from pathlib import Path
 
 class Directory:
 
@@ -85,6 +86,16 @@ class Directory:
 			return json.load(temp_file)
 
 
+class StorageConfig:
+
+  STORAGE_BASE_DIR = Path("../json")
+  PARAMS_DIR = STORAGE_BASE_DIR / "params"
+  STATS_DIR = PARAMS_DIR / "stats"
+
 if __name__ == '__main__':
-	d = Directory()
-	print(d.check_if_file_exist('..', 'json', 'test_leauges.json'))
+	test = {'key': 'value'}
+	Directory().save_json('test', test ,StorageConfig.STATS_DIR)
+	#d = Directory()
+	#print(d.check_path('..', 'json', 'test_leauges.json'))
+
+

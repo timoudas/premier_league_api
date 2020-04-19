@@ -100,6 +100,13 @@ class SeasonStats:
         self.dir.mkdir('..', 'json', 'params', 'stats')
         self.year = re.search( r'(\d{4})', self.season).group()
 
+    def save_completed(self, filename, stats_list, *path):
+        year = re.search( r'(\d{4})', self.season).group()  
+        filename = self.league + '_' + year + '_' + filename
+        self.dir.save_json(filename, stats_list, *path)
+        path = '/'.join(path)
+        print(f'Saved as {filename}.json in {path}')
+
     def load_season_fixture(self):
         """Loads the fixtures for a league-season,
         calls api_scraper.py methods
@@ -154,7 +161,7 @@ class SeasonStats:
         saves output in a json file.
 
         """
-        stats = {}
+        stats_list = []
         self.fb.load_leagues()
         self.fb.leagues[self.league].load_seasons()
         print("Getting fixture stats..")
@@ -163,22 +170,19 @@ class SeasonStats:
         print('Getting data from workers..')
         i = 0
         for fixture in fixture_stats:
+            stats = {}
             if 'data' in fixture:
-                game_id = fixture['entity']['id'] #Get's the gameIDs for each game
-                index = game_id #Set's gameIDs as index for dictionairy
-                stats[index] = {'info': fixture['entity']} 
-                stats[index].update({'stats':fixture['data']})
+                stats['info'] = fixture['entity']
+                stats['stats'] = fixture['data']
             else:
                 i += 1
+            if stats:
+                stats_list.append(stats)
 
         print('Completed')
         if i >0:
             print(f'{i} games retreived had no stats')
-        year = re.search( r'(\d{4})', self.season).group()  
-        filename = self.league + '_' + year + '_' + 'fixturestats'
-        self.dir.save_json(filename, stats, '..', 'json', 'params', 'stats')
-        path = '/'.join(('..', 'json', 'params'))
-        print(f'Saved as {filename}.json in {path}')
+        self.save_completed('fixturestats', stats_list, '..', 'json', 'params', 'stats')
 
     def player_stats_singel(self, player):
         season_id = self.fb.leagues[self.league].seasons[self.season]['id']
@@ -207,26 +211,10 @@ class SeasonStats:
                 i += 1
             stats_list.append(stats)
 
-            #################
-            # game_id = int(player['entity']['id']) #Get's the gameIDs for each game
-            # index = game_id #Set's gameIDs as index for dictionairy
-            # stats[index] = {'info': player['entity']}
-            # stats[index] = player['entity']
-            # if 'stats' in player:
-            #     stats[index].update({'stats':player['stats']})
-            # else:
-            #     i += 1
-            #################
-
         print('Completed')
         if i > 0:
             print(f'{i} players retreived had no stats')
-        year = re.search( r'(\d{4})', self.season).group()  
-        filename = self.league + '_' + year + '_' + 'playerstats'
-        # self.dir.save_json(filename, stats, '..', 'json', 'params', 'stats')
-        self.dir.save_json(filename, stats_list, '..', 'json', 'params', 'stats')
-        path = '/'.join(('..', 'json', 'params'))
-        print(f'Saved as {filename}.json in {path}')
+        self.save_completed('playerstats', stats_list, '..', 'json', 'params', 'stats')
 
     def team_standings_singel(self, team_id):
         #NEED TO HAVE SEASON ID
@@ -238,7 +226,7 @@ class SeasonStats:
         return ds
 
     def team_standings(self):
-        stats = {}
+        stats_list = []
         print("Getting team standings..")
         with Pool(self.pool) as p:
             team_standings = list(tqdm(p.imap(self.team_standings_singel, self.team_ids), total=len(self.team_ids)))
@@ -246,26 +234,21 @@ class SeasonStats:
         i = 0
         team_standing = team_standings
         for team in team_standing:
-            team_id = int(team['team']['club']['id']) #Get's the gameIDs for each game
-            index = team_id #Set's gameIDs as index for dictionairy
+            stats = {"season": {}, "team": {}, "standing": {}}
             if 'compSeason' in team:
-                stats[index] = {'season': team['compSeason']}
+                stats['season'] = team['compSeason']
             if 'team' in team:
-                stats[index].update({'team': team['team']})
+                stats['team'] = team['team']
             if 'entries' in team:
-                stats[index].update({'standing': team['entries']})
+                stats['standing'] = team['entries']
             else:
                 i += 1
+            stats_list.append(stats)
 
         print('Completed')
         if i > 0:
             print(f'{i} teams retreived had no standings')
-        year = re.search( r'(\d{4})', self.season).group()  
-        filename = self.league + '_' + year + '_' + 'teamstandings'
-        self.dir.save_json(filename, stats, '..', 'json', 'params', 'stats')
-        path = '/'.join(('..', 'json', 'params'))
-        print(f'Saved as {filename}.json in {path}')
-
+        self.save_completed('teamstandings', stats_list, '..', 'json', 'params', 'stats')
 
 class Stats:
     dir = Directory()
@@ -286,7 +269,9 @@ class Stats:
 if __name__ == '__main__': 
 
 
-    stats = Stats()
+    stats = SeasonStats()
+
+    stats.save_completed('hello', stats_list, '..', 'json', 'params')
     # season_params = {'EN_PR':['2019/2020', '2018/2019']}
     # gen = ((str(league)+'_'+ str(season_label), SeasonStats(league=league, season=season_label)) for league, seasons in season_params.items() for season_label in seasons)
     # d = dict(gen)
