@@ -4,6 +4,7 @@ Updates .json files with new data from the api if the json exists
 Looks if fixtureID exists in .json, if it doesn't exist it gets append
 """
 from directory import Directory 
+from directory import Storageconfig 
 import pandas as pd
 from pprint import pprint
 from functools import reduce 
@@ -27,7 +28,7 @@ def load_player_stats(year):
     """
     try: 
         file = f'EN_PR_{year}_playerstats.json'
-        stats_file = dirs.load_json(file, '..', 'json', 'params', 'stats')
+        stats_file = dirs.load_json(file, Storageconfig.STATS_DIR)
         stats_file.append({'season': year})
         return stats_file
     except FileNotFoundError as e:
