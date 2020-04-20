@@ -1,0 +1,4 @@
+#GITIGNORE
+
+**/json
+/model/__pycache__/
