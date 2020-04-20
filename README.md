@@ -5,7 +5,8 @@ This will become a webb-app for getting odds on primarly PL but also other leagu
 To save time a pickled file containg all nesserary id's to fetch playerstats, fixturestats and team standings are stored in a dict where the league and season is the key.
 
 ```python
-dict['EN_PR_2019/2020']```
+dict['EN_PR_2019/2020']
+```
 
 ## Setup
 
@@ -23,6 +24,7 @@ with open('league_season_init, 'rb') as f:
     leagues = pickle.load(f)
     leagues['EN_PR_2019/2020'].team_standings()
     leagues['EN_PR_2019/2020'].fixture_stats()
-    leagues['EN_PR_2019/2020'].player_stats()```
+    leagues['EN_PR_2019/2020'].player_stats()
+```
 
 Files will be saved in ../json/params/stats folder that is created if it doesn't exist.
