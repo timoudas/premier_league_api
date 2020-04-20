@@ -7,13 +7,15 @@ To save time a pickled file containg all nesserary id's to fetch playerstats, fi
 ```python
 dict['EN_PR_2019/2020']```
 
-##Setup
+## Setup
 
 The 
 
-```setup.py``` loads the pickled file league_seasons_init which contains all the id's.This will developed into a CLI where the user can see which leagues exist and how to query them to get stats.
+```setup.py```
 
-###Example
+ loads the pickled file league_seasons_init which contains all the id's.This will developed into a CLI where the user can see which leagues exist and how to query them to get stats.
+
+### Example
 ```python
 
 import pickle
