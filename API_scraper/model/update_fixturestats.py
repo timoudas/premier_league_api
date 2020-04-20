@@ -1,3 +1,4 @@
+#!/usr/bin/python
 """
 Updates .json files with new data from the api if the json exists
 

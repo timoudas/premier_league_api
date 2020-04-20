@@ -7,7 +7,7 @@ import time
 import json
 import sys
 from directory import Directory
-from directory import Storageconfig
+from directory import StorageConfig
 import requests
 import re
 import pickle
@@ -101,11 +101,10 @@ class SeasonStats:
         self.dir.mkdir('..', 'json', 'params', 'stats')
         self.year = re.search( r'(\d{4})', self.season).group()
 
-    def save_completed(self, filename, stats_list, *path):
+    def save_completed(self, filename, stats_list, path):
         year = re.search( r'(\d{4})', self.season).group()  
         filename = self.league + '_' + year + '_' + filename
-        self.dir.save_json(filename, stats_list, *path)
-        path = '/'.join(path)
+        self.dir.save_json(filename, stats_list, StorageConfig.STATS_DIR)
         print(f'Saved as {filename}.json in {path}')
 
     def load_season_fixture(self):
@@ -183,7 +182,7 @@ class SeasonStats:
         print('Completed')
         if i >0:
             print(f'{i} games retreived had no stats')
-        self.save_completed('fixturestats', stats_list, Storageconfig.STATS_DIR)
+        self.save_completed('fixturestats', stats_list, StorageConfig.STATS_DIR)
 
     def player_stats_singel(self, player):
         season_id = self.fb.leagues[self.league].seasons[self.season]['id']
@@ -215,7 +214,7 @@ class SeasonStats:
         print('Completed')
         if i > 0:
             print(f'{i} players retreived had no stats')
-        self.save_completed('playerstats', stats_list, Storageconfig.STATS_DIR)
+        self.save_completed('playerstats', stats_list, StorageConfig.STATS_DIR)
 
     def team_standings_singel(self, team_id):
         #NEED TO HAVE SEASON ID
@@ -249,7 +248,7 @@ class SeasonStats:
         print('Completed')
         if i > 0:
             print(f'{i} teams retreived had no standings')
-        self.save_completed('teamstandings', stats_list, Storageconfig.STATS_DIR)
+        self.save_completed('teamstandings', stats_list, StorageConfig.STATS_DIR)
 
 class Stats:
     dir = Directory()
@@ -268,7 +267,7 @@ class Stats:
 
 
 if __name__ == '__main__': 
-
+    pass
 
     #stats = SeasonStats()
     # season_params = {'EN_PR':['2019/2020', '2018/2019']}
