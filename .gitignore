@@ -1,4 +1,8 @@
 #GITIGNORE
 
-**/json
+**/json/*
 /model/__pycache__/
+*.ipynb
+/model/Extra
+*.sqlite
+*.csv
