@@ -1,10 +1,13 @@
 #!/usr/bin/python
 
-from directory import Directory
-from directory import StorageConfig 
 import pandas as pd
-from pprint import pprint
 from functools import reduce 
+from pprint import pprint
+from directory import Directory
+from directory import StorageConfig
+from get_stats import SeasonStats
+
+
 
 dirs = Directory()
 

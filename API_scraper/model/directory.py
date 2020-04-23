@@ -1,7 +1,8 @@
+#!/usr/bin/python
 #Class to create/save/load the json folders and files in relative paths
 #dir
 
-#Function to create subfolder depending on depth in json direktory
+#Function to create subfolder depending on depth in json directory
 #Example
 # json  
 #   |--premier_league

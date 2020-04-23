@@ -130,8 +130,7 @@ class SeasonTeams(dict):
         """
         def __init__(self, competition, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            self['competition'] = competition ##THIS IS THE PROBLEM##############################################
-            #self['season'] = season #######################TRYING TO SOLVE
+            self['competition'] = competition 
             self.players = TeamPlayers()#Returns Ids and info for every player on a team
 
         def load_players(self):

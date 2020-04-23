@@ -12,6 +12,7 @@ import requests
 import re
 import pickle
 import os
+import argparse
 
 
 
@@ -260,6 +261,11 @@ class Stats:
                         for league, seasons in data.items() for season_label in seasons}
         with open('league_seasons_init', 'wb') as f:
             pickle.dump(holder, f)
+
+
+
+
+
 
 
 #stat = Stats()
