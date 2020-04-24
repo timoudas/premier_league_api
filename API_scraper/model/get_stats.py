@@ -103,7 +103,7 @@ class SeasonStats:
         self.year = re.search( r'(\d{4})', self.season).group()
 
     def save_completed(self, filename, stats_list, path):
-        year = re.search( r'(\d{4})', self.season).group()  
+        year = self.year 
         filename = self.league + '_' + year + '_' + filename
         self.dir.save_json(filename, stats_list, StorageConfig.STATS_DIR)
         print(f'Saved as {filename}.json in {path}')
