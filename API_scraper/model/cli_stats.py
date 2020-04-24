@@ -1,114 +1,149 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+"""
+Interactive command line interface to view avalible leagues and their seasons.
+And download stats for a league
+Usage:
+    CLIStats$ (-i | --interactive)
+    CLIStats$ view [LEAGUE]
+    CLIStats$ (-p | -t| -f) <LEAGUE> <SEASON>
 
+Options:
+    -i, --interactive    Interactive Mode
+    -p,  --player         Playerstats
+    -t,  --team           Team standings
+    -f,  --fixture        Fixturestats
+"""
 import sys
 import os
 import pickle
-import argparse
+import cmd 
 import click
+from docopt import docopt, DocoptExit
 from directory import Directory
 from directory import StorageConfig
 from get_stats import SeasonStats
 
 
-
 dir = Directory()
 
-class CLIStats:
+def docopt_cmd(func):
+    """
+    This decorator is used to simplify the try/except block and pass the result
+    of the docopt parsing to the called action.
+    """
+    def fn(self, arg):
+        try:
+            opt = docopt(fn.__doc__, arg)
+
+        except DocoptExit as e:
+            # The DocoptExit is thrown when the args do not match.
+            # We print a message to the user and the usage block.
+
+            print('Invalid Command!')
+            print(e)
+            return
+
+        except SystemExit:
+            # The SystemExit exception prints the usage for --help
+            # We do not need to do the print here.
+
+            return
+
+        return func(self, opt)
+
+    fn.__name__ = func.__name__
+    fn.__doc__ = func.__doc__
+    fn.__dict__.update(func.__dict__)
+    return fn
+
+
+class StatShell(cmd.Cmd):
 
     def __init__(self):
-        self.header = self.header()
-        self.description = self.description()
-        self.commands = self.commands()
+        super(StatShell, self).__init__()
         self.leagues = dir.load_json('season_params.json', StorageConfig.PARAMS_DIR)
         with open('league_seasons_init', 'rb') as f:
-            self.pickle = pickle.load(f)
+            self.pickle = pickle.load(f)        
 
-    @staticmethod
-    def header():
-        os.system('clear')
-        print('\t','*'*60)
-        print("\t\t***  Welcome - Football Stats generator  ***")
-        print('\t','*'*60)
 
-    @staticmethod
-    def description():
-        print('Interface to download: \t playerstats \t fixturestats \t team standing \n')
-        print('Type "exit" to terminate shell')
+    os.system('clear')
+    intro = '\n'.join([
+        "\t" + "*"*60,
+        "\t\t***  Welcome - Football Stats generator  ***",
+        "\t" + "*"*60,
+        "",
+        "\tType help or ? to list commands,",
+        "\t\tor help command to get help about a command."
+    ])
+    prompt = '(CLIStats$) '
 
-    @staticmethod
-    def commands():
-        commands = {'View Leagues': '-v',
-                    'View League Seasons': '-v LEAGUE',
-                    'Download stats': '-d LEAGUE SEASON TYPE',
-                    'Help' : '-h',}
-        for key, value in commands.items():
-            print("{: <25} {}".format(key, value))
-        print('\n')
-
-    def view_leagues(self):
-        for league in self.leagues.keys():
-            print("{: <10}".format(league), end="")
-        print('\n')
-
-    def view_seasons(self, league):
-        if league in self.leagues:
-            seasons = self.leagues[league]
-            print(league,'seasons:')
-            for season in seasons:
-                print("{: <20}".format(season), end="")
-            print('\n')
-        else:
-            print(league, 'is not avalible')
-            print('\n')
-
-    def download_stats(self, league, season, stat_type):
-        league = league.upper()
-        season_end = str(int(season)+1)
-        season = str(season + '/' + season_end)
-        stats = {'-p': 'player_stats',
-                '-t': 'team_standings',
-                '-f': 'fixture_stats'}
-        if not stats.get(stat_type):
-            print('Select a valid stats type: \t -p [Player] \t -f [Fixture] \t -t [Team]')
-        else:
-            if stats.get(stat_type) == 'player_stats':
-                self.pickle[league + '_' + season].player_stats()
-            elif stats.get(stat_type) == 'fixture_stats':
-                self.pickle[league + '_' + season].fixture_stats()
+    @docopt_cmd
+    def do_view(self, arg):
+        """Usage: CLIStats$ [LEAGUE] """
+        if arg['LEAGUE']:
+            league = arg['LEAGUE'].upper()
+            if league in self.leagues:
+                seasons = self.leagues[league]
+                print(league,'seasons:')
+                for season in seasons:
+                    print("{: <20}".format(season), end="")
+                print('\n')
             else:
-                self.pickle[league + '_' + season].team_standings()
+                print(league, 'is not avalible')
+                print('\n')
+        else:
+            for league in self.leagues.keys():
+                print("{: <10}".format(league), end="")
+            print('\n')
 
+    def downloads_choices(self, type_stats, league, season):
+        choices = {'-p': self.pickle[league + '_' + season].player_stats,
+                   '-t': self.pickle[league + '_' + season].team_standings,
+                   '-f': self.pickle[league + '_' + season].fixture_stats}
+        return choices.get(type_stats)()
+
+
+    @docopt_cmd
+    def do_download(self, arg):
+        """Usage: CLIStats$ -p -t -f <LEAGUE> <SEASON>
+
+Options:
+    -p,  --player         Playerstats
+    -t,  --team           Team standings
+    -f,  --fixture        Fixturestats
+        """
+        league = arg['<LEAGUE>'].upper()
+        season_end = str(int(arg['<SEASON>'])+1)
+        season = str(arg['<SEASON>'] + '/' + season_end)
+        for key, value in arg.items():
+            if value == True:
+                self.downloads_choices(key, league, season)
+
+
+    def do_clear(self, arg):
+        """Clear the screen and return turtle to center:  RESET"""
+        os.system('clear')
+        print(self.intro)
+
+    def do_exit(self, arg):
+        """Exit the interpreter."""
+        print("exiting ...")
+        return True
 
 
 def main():
-    interface = CLIStats()
-    cmd = {'-v': interface.view_leagues,
-           'exit': sys.exit,
-           'View Stats Type': '-s',
-           '-h' : 'interface.help', }
-    while True:
-        usr_command = input('CLIStats$ ')
-        if usr_command in cmd.keys():
-            cmd.get(usr_command)()
-        elif len(usr_command.split(' ')) == 2:
-            league = usr_command.split(' ')[-1]
-            interface.view_seasons(league)
-        elif len(usr_command.split(' ')) == 4:
-            league = usr_command.split(' ')[1]
-            season = usr_command.split(' ')[2]
-            stat_type = usr_command.split(' ')[3]
-            interface.download_stats(league, season, stat_type)
-        else:
-            print('Command not valid')
-        #     print(usr_command)
-        #     cmd[usr_command]
+    opt = docopt(__doc__, sys.argv[1:])
 
-
-
-
+    if opt['--interactive']:
+        StatShell().cmdloop()
 
 if __name__ == '__main__':
     main()
+
+
+
+
+
 
 
 
