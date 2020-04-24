@@ -10,7 +10,7 @@ dict['EN_PR_2019/2020']
 
 ## CLI
 
-The ````cli_stats.py``` is an interactive command line interface to fetch data from the API. To be able to utilize the ICLI season_params.json and the league_season_init is required. 
+The ```cli_stats.py``` is an interactive command line interface to fetch data from the API. To be able to utilize the ICLI season_params.json and the league_season_init is required. 
 
 
 ## Setup
