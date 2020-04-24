@@ -8,6 +8,11 @@ To save time a pickled file containg all nesserary id's to fetch playerstats, fi
 dict['EN_PR_2019/2020']
 ```
 
+## CLI
+
+The ````cli_stats.py``` is an interactive command line interface to fetch data from the API. To be able to utilize the ICLI season_params.json and the league_season_init is required. 
+
+
 ## Setup
 
 The 
@@ -28,3 +33,7 @@ with open('league_season_init, 'rb') as f:
 ```
 
 Files will be saved in ../json/params/stats folder that is created if it doesn't exist.
+
+## Data cleaning
+
+To clean the different .json files in json/params/stats to the  

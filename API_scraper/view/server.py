@@ -1,6 +1,9 @@
 from flask import Flask, render_template, url_for, request, redirect
 from datetime import datetime
-from json import test_leagues as leagues
+from model.directory import StorageConfig
+from model.directory import Directory
+
+
 """
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
@@ -30,6 +33,8 @@ def viewLeague():
 @app.route('/games/viewGames')
 def viewGames():
     print("Here we load all games from db")
+
+    response = json.dumps(league_params, sort_keys = True, indent = 4, separators = (',', ': '))
     return render_template('games/viewGames.html')
 
 """ BETS """
