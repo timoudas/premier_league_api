@@ -16,11 +16,11 @@ from pprint import pprint
 # validation = ValidateParams()
 # stats = Stats().stats
 # fb = Football()
-with open('league_seasons_init', 'rb') as f:
+with open('test_pickle', 'rb') as f:
     test = pickle.load(f)
     # test['EN_PR_2017/2018'].fixture_stats()
     # test['EN_PR_2018/2019'].fixture_stats()
     #test['EN_PR_2019/2020'].fixture_stats()
     # test['EN_PR_2017/2018'].team_standings()
     # test['EN_PR_2018/2019'].team_standings()
-    test['EN_PR_2019/2020'].team_standings()
+    test['EN_PR_2019/2020'].team_squad()

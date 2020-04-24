@@ -5,13 +5,14 @@ And download stats for a league
 Usage:
     CLIStats$ (-i | --interactive)
     CLIStats$ view [LEAGUE]
-    CLIStats$ (-p | -t| -f) <LEAGUE> <SEASON>
+    CLIStats$ [options] <LEAGUE> <SEASON>
 
 Options:
     -i, --interactive    Interactive Mode
     -p,  --player         Playerstats
     -t,  --team           Team standings
     -f,  --fixture        Fixturestats
+    -s,  --squad          Squad
 """
 import sys
 import os
@@ -99,18 +100,20 @@ class StatShell(cmd.Cmd):
     def downloads_choices(self, type_stats, league, season):
         choices = {'-p': self.pickle[league + '_' + season].player_stats,
                    '-t': self.pickle[league + '_' + season].team_standings,
-                   '-f': self.pickle[league + '_' + season].fixture_stats}
+                   '-f': self.pickle[league + '_' + season].fixture_stats,
+                   '-s': self.pickle[league + '_' + season].team_squad}
         return choices.get(type_stats)()
 
 
     @docopt_cmd
     def do_download(self, arg):
-        """Usage: CLIStats$ -p -t -f <LEAGUE> <SEASON>
+        """Usage: CLIStats$ [options] <LEAGUE> <SEASON>
 
 Options:
     -p,  --player         Playerstats
     -t,  --team           Team standings
     -f,  --fixture        Fixturestats
+    -s,  --squad          Squad
         """
         league = arg['<LEAGUE>'].upper()
         season_end = str(int(arg['<SEASON>'])+1)

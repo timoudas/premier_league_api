@@ -272,6 +272,45 @@ class SeasonStats:
             print(f'{i} teams retreived had no standings')
         self.save_completed('teamstandings', stats_list, StorageConfig.STATS_DIR)
 
+    def team_squad_singel(self, team_id):
+        """Gets stats for a player"""
+        self.fb.load_leagues()
+        self.fb.leagues[self.league].load_seasons()
+        season_id = self.fb.leagues[self.league].seasons[self.season]['id']
+        ds = load_match_data(
+            f'https://footballapi.pulselive.com/football/teams/{team_id}/compseasons/{season_id}/staff')
+        return ds
+
+    def team_squad(self):
+        """Gets standings for all teams in a league-season using multithreading
+        saves output in a json file.
+         """
+        stats_list = []
+        print("Getting team standings..")
+        with Pool(self.pool) as p:
+            team_squads = list(tqdm(p.imap(self.team_squad_singel, self.team_ids), total=len(self.team_ids)))
+        print('Getting data from workers..')
+        i = 0
+        team_squad = team_squads
+        for team in team_squad:
+            stats = {"season": {}, "team": {}, "officials": {}}
+            if 'compSeason' in team:
+                stats['season'] = team['compSeason']
+            if 'team' in team:
+                stats['team'] = team['team']
+            if 'players' in team:
+                stats['players'] = team['players']
+            if 'officials' in team:
+                stats['officials'] = team['officials']
+            else:
+                i += 1
+            stats_list.append(stats)
+
+        print('Completed')
+        if i > 0:
+            print(f'{i} teams retreived had no standings')
+        self.save_completed('teamsquads', stats_list, StorageConfig.STATS_DIR)
+
 class Stats:
     dir = Directory()
     def __init__(self):
@@ -301,17 +340,18 @@ class Stats:
 
 
 if __name__ == '__main__': 
-    pass
+    
 
-    #stats = SeasonStats()
+    stats = SeasonStats('EN_PR', '2019/2020')
+    stats.team_squad()
     # season_params = {'EN_PR':['2019/2020', '2018/2019']}
     # gen = ((str(league)+'_'+ str(season_label), SeasonStats(league=league, season=season_label)) for league, seasons in season_params.items() for season_label in seasons)
     # d = dict(gen)
     # with open('test_pickle', 'wb') as f:
     #     pickle.dump(d, f)
     # start = time.time()
-    # season_19_20 = SeasonStats('EN_PR', '2018/2019')
-    # season_19_20.team_standings()
+    #season_19_20 = SeasonStats('EN_PR', '2018/2019')
+    #season_19_20.team_squad()
     # season_19_20.player_stats()
     # season_19_20.fixture_stats()
     # # end = time.time()
