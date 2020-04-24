@@ -90,9 +90,16 @@ class SeasonStats:
     dir = Directory()
 
     def __init__(self, league, season):
-        
-
-        ### Included from '__init__'s of previous subclasses ###
+        """Initiates the class by counting the cores for later multiprocessing.
+        Fixture, team and player IDs are loaded into lists from method within the class.
+        That is so that they don't have to be created everytime that they are needed, and 
+        save time. A directory stats/ is created in ..json/params/ folder to store all the
+        downloaded stats. 
+            
+            Args:
+                league(str): A league in the form of it's abbreviation. Ex. 'EN_PR'
+                season(str): A season that exists for that specific league EX. '2019/2020'
+        """
         self.pool = multiprocessing.cpu_count()
         self.league = league
         self.season = season
@@ -103,6 +110,14 @@ class SeasonStats:
         self.year = re.search( r'(\d{4})', self.season).group()
 
     def save_completed(self, filename, stats_list, path):
+        """Saves dict to json file.
+
+        Args:
+            filename(str): The name of the file
+            stats_list(list of dicts): The content that is to be saved
+            path(str): The path to were the content is to be saved
+
+        """
         year = self.year 
         filename = self.league + '_' + year + '_' + filename
         self.dir.save_json(filename, stats_list, StorageConfig.STATS_DIR)
@@ -186,14 +201,17 @@ class SeasonStats:
         self.save_completed('fixturestats', stats_list, StorageConfig.STATS_DIR)
 
     def player_stats_singel(self, player):
+        """Gets stats for a player"""
         season_id = self.fb.leagues[self.league].seasons[self.season]['id']
         ds = load_match_data(
             f'https://footballapi.pulselive.com/football/stats/player/{player}?compSeasons={season_id}')
         return ds
 
     def player_stats(self):
+        """Gets stats for all players in a league-season using multithreading
+        saves output in a json file.
+         """
         stats_list = []
-        # stats = {}
         self.fb.load_leagues()
         self.fb.leagues[self.league].load_seasons()
         print("Getting player stats..")
@@ -218,7 +236,7 @@ class SeasonStats:
         self.save_completed('playerstats', stats_list, StorageConfig.STATS_DIR)
 
     def team_standings_singel(self, team_id):
-        #NEED TO HAVE SEASON ID
+        """Gets standing for a team"""
         self.fb.load_leagues()
         self.fb.leagues[self.league].load_seasons()
         season_id = self.fb.leagues[self.league].seasons[self.season]['id']
@@ -227,6 +245,9 @@ class SeasonStats:
         return ds
 
     def team_standings(self):
+        """Gets standings for all teams in a league-season using multithreading
+        saves output in a json file.
+         """
         stats_list = []
         print("Getting team standings..")
         with Pool(self.pool) as p:
@@ -254,6 +275,13 @@ class SeasonStats:
 class Stats:
     dir = Directory()
     def __init__(self):
+        """Creates a pickle object where the __init__() attributes from
+        SeasonStats is saved. This is to enable the download of stats
+        without having to initiate SeasonStats everytime to download
+        stats. Drawback is that the pickled object can get outdated as
+        players switch teams or teams move up and down the leagues at
+        the ens of the season.
+        """
 
         data = self.dir.load_json('season_params.json', '..', 'json', 'params')
         holder = {str(league)+'_'+ str(season_label):
