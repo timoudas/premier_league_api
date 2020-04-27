@@ -223,10 +223,10 @@ class SeasonStats:
         for player in all_players:
             stats = {"info": {}}
             stats["info"] = player['entity']
-            if 'stats' in player:
+            if player['stats']:
                 stats['stats'] = player['stats']
                 stats['stats'].append({'id':player['entity']['id']})
-            elif not player['stats']:
+            else:
                 i += 1
             stats_list.append(stats)
 

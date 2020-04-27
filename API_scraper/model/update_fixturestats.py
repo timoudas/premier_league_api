@@ -42,9 +42,9 @@ def read_fixtureinfo(data):
             if 'info' in d:
                 stats = d['info']
                 stats_temp = \
-                    {'gameweek_id' : stats.get('gameweek.id'),
+                    {'gameweek_id' : deep_get(stats, 'gameweek.id'),
                     'season_label' : deep_get(stats, 'gameweek.compSeason.label'),
-                    'id' : stats.get('id'),
+                    'id' : stats['id'],
 
                     'competition' : deep_get(stats, 'gameweek.compSeason.competition.description'),
                     'competition_abbr' : deep_get(stats, 'gameweek.compSeason.competition.abbreviation'),
@@ -87,6 +87,7 @@ def read_fixturestats(data):
     try:
         stats_all = []
         for d in data:
+            stats_temp = {}
             stats_home = {}
             stats_away = {}
             if 'stats' in d:
@@ -94,27 +95,23 @@ def read_fixturestats(data):
                 info = d['info']
 
                 home_id_key = str(info['teams'][0]['team']['club']['id'])
-                away_id_key = str(info['teams'][0]['team']['club']['id'])
-                stats_home['id'] = info.get('id')
-                stats_away['id'] = info.get('id')
+                away_id_key = str(info['teams'][1]['team']['club']['id'])
 
-                if home_id_key in stats:
-                    home_stats = stats[home_id_key]['M']
-                    for stats in home_stats:
-                        if stats.get('name') != None:
-                            stats_home['home_' + stats.get('name')] = stats.get('value')
 
                 if away_id_key in stats:
-                    away_stats = stats[away_id_key]['M']
-                    for stats in away_stats:
-                        if stats.get('name') != None:
+                    if home_id_key in stats:
+                        away = stats[away_id_key]['M']
+                        home = stats[home_id_key]['M']
+                        stats_away = {'away_' + stats.get('name'): stats.get('value') for stats in away}
+                        stats_home = {'home_' + stats.get('name'): stats.get('value') for stats in home}
+                        stats_temp.update(stats_away)
+                        stats_temp.update(stats_home)
+                        stats_temp.update({'id' : info['id']})
 
-                            stats_away['away_' + stats.get('name')] = stats.get('value')
-                stats_all.append(stats_home)
-                stats_all.append(stats_away)
+                stats_all.append(stats_temp)
         return stats_all
     except TypeError as e:
-        print("Check that data exists and is loaded correctly")
+        print(e, "Check that data exists and is loaded correctly")
 
 if __name__ == '__main__':
     pprint(read_fixturestats(load_fixture_stats(2019)))

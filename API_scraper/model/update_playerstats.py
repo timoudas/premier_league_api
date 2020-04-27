@@ -9,6 +9,8 @@ from directory import StorageConfig
 import pandas as pd
 from pprint import pprint
 from functools import reduce 
+from itertools import zip_longest
+import collections
 
 
 dirs = Directory()
@@ -31,6 +33,18 @@ def load_player_stats(year):
         file = f'EN_PR_{year}_playerstats.json'
         stats_file = dirs.load_json(file, StorageConfig.STATS_DIR)
         stats_file.append({'season': year})
+        return stats_file
+    except FileNotFoundError as e:
+        print(file, "not found")
+
+def load_team_squads(year):
+    """Load team_squads json files into a container
+        Args:
+            year(int): year of team_squads.json
+    """
+    try: 
+        file = f'EN_PR_{year}_teamsquads.json'
+        stats_file = dirs.load_json(file, StorageConfig.STATS_DIR)
         return stats_file
     except FileNotFoundError as e:
         print(file, "not found")
@@ -83,11 +97,62 @@ def read_playerinfo(data):
                 'playerId' : stats.get('playerId'),
                 'season' : data[-1]['season']}
             info_all.append(stats_temp)
-
     # except TypeError as e:
     #     print("Check that data exists and is loaded correctly")
     return info_all
-              
+
+def read_team_squads(data):
+    """Read info from ...playerstats.json into flattened
+    list of dicts. 
+    """
+    info_all = []
+
+    for d in data:
+        stats_temp = {}
+        players = d['players']
+        team = d['team']
+        for player in players:
+            stats_temp = \
+                {'team' : team['name'],
+                'team_id' : deep_get(team, 'club.id'),
+                'team_shortName' : deep_get(team, 'club.shortName'),}
+            stats_temp['id'] = player['id']
+            info_all.append(stats_temp)
+
+
+    return info_all
+
+def merge_playerstats(data):
+    players = read_playerinfo(load_player_stats(data))
+    squads = read_team_squads(load_team_squads(data))
+    #Mergers the two list of dicts if `id-key` is the same
+    res = [{**x, **y}  for y in players for x in squads if x['id'] == y['id']]
+    d = [dict(sorted(d.items())) for d in res]
+    return d
+
+def validate_id(data):
+    players = read_playerinfo(load_player_stats(data))
+    squads = read_team_squads(load_team_squads(data))
+    p_sort = sorted(players, key=lambda k: k['id']) 
+    s_sort = sorted(squads, key=lambda k: k['id']) 
+
+    keyed_players = {a["id"]:a for a in p_sort} # easier access for IN - check
+    keyed_squads = {a["id"]:a for a in s_sort}  # easier access for IN - check
+
+    # iterate players and modify them if squad info given, else printout info
+    for player in p_sort:
+        if player["id"] in keyed_squads:
+            player.update(keyed_squads[player["id"]])
+        else:
+            print("Player", player["id"], "is not in squad info")
+  
+
+    # get squads without players
+    for squad_player in keyed_squads:
+        if squad_player not in keyed_players:
+            print("Player", squad_player, "in squad is not in player info")
+ 
+
 def playerstats(start_year, end_year=None):
     """Data cleaning for playerstats"""
     try:
@@ -109,10 +174,7 @@ def playerstats(start_year, end_year=None):
 
 
 if __name__ == '__main__':
-
-    pprint(read_playerinfo(load_player_stats(2018)))
-
-
-
+    validate_id(2019)
+    #print(len(merge_playerstats(2019)))
 
 

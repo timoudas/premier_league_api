@@ -5,7 +5,7 @@ from functools import reduce
 from pprint import pprint
 from directory import Directory
 from directory import StorageConfig
-from get_stats import SeasonStats
+
 
 
 
@@ -40,6 +40,7 @@ def read_team_standings_stats(data):
         stats_temp = {}
         if 'standing' in d:
             stats_all = d['standing']
+            team = d['team']
             for stats in stats_all:
                 if 'fixtures' in stats:
                     comp = stats['fixtures'][0]
@@ -47,6 +48,9 @@ def read_team_standings_stats(data):
                         {'played' : stats['played'],
                         'points' : stats['points'],
                         'position' : stats['position'],
+                        'team' : deep_get(team, 'name'),
+                        'team_id' : deep_get(team, 'club.id'),
+                        'team_shortName' : deep_get(team, 'club.shortName'),
 
                         'competition' : deep_get(comp, 'gameweek.compSeason.competition.description'),
                         'competition_abbr' : deep_get(comp, 'gameweek.compSeason.competition.abbreviation'),

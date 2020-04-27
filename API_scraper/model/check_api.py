@@ -132,7 +132,7 @@ if __name__ == '__main__':
     #     'https://footballapi.pulselive.com/football/teams/131/compseasons/1/staff?page=0&pageSize=100')
     # print(status)
     d = ValidateParams()
-    d.remove_failed_leagues(d.check_current_season())
+    #d.remove_failed_leagues(d.check_current_season())
     d.main()
 
 

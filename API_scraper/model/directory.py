@@ -94,8 +94,7 @@ class StorageConfig:
   STATS_DIR = PARAMS_DIR / "stats"
 
 if __name__ == '__main__':
-	test = {'key': 'value'}
-	Directory().save_json('test', test ,StorageConfig.STATS_DIR)
+	pass
 	#d = Directory()
 	#print(d.check_path('..', 'json', 'test_leauges.json'))
 
