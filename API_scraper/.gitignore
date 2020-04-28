@@ -1,5 +1,6 @@
 #large file
 
 model/Extra/
-model/__pychache__
+model/__pychache__/
 model/.ipynb_checkpoints
+.ipynb_checkpoints/
