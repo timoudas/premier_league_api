@@ -1,4 +1,5 @@
 import re
+import os
 from tqdm import tqdm
 from api_scraper import Football
 from directory import Directory
@@ -6,7 +7,7 @@ from directory import StorageConfig
 from pprint import pprint
 import time
 
-
+dirs = Directory()
 
 
 
@@ -117,7 +118,7 @@ class Params():
                     elif season_id['id'] == val['competition'] and league not in teams[team]['championships']:
                         teams[team]['championships'][league] = []
                         teams[team]['championships'][league].append(str(season_label))
-            self.dir.save_json('teams_params', teams, StorageConfig.PARAMS_DIR)
+        self.dir.save_json('teams_params', teams, StorageConfig.PARAMS_DIR)
 
 def main():
     """Runs the script to 

@@ -13,10 +13,8 @@ Looks if fixtureID exists in .json, if it doesn't exist it gets append
 """
 from directory import Directory 
 from directory import StorageConfig 
-import pandas as pd
 from pprint import pprint
 from functools import reduce 
-from itertools import zip_longest
 import collections
 
 
@@ -32,13 +30,13 @@ def deep_get(dictionary, keys, default=None):
     return reduce(lambda d, key: d.get(key, default) if isinstance(d, dict) else default, keys.split("."), dictionary)
 
 
-def load_player_stats(year):
+def load_player_stats(league, year):
     """Load player_stats json files into a container
         Args:
             year(int): year of player_stats json
     """
     try: 
-        file = f'EN_PR_{year}_playerstats.json'
+        file = f'{league}_{year}_playerstats.json'
         stats_file = dirs.load_json(file, StorageConfig.STATS_DIR)
         stats_file.append({'season': year})
         return stats_file
@@ -46,26 +44,26 @@ def load_player_stats(year):
         print(file, "not found")
 
 
-def load_team_squads(year):
+def load_team_squads(league, year):
     """Load team_squads json files into a container
         Args:
             year(int): year of team_squads.json
     """
     try: 
-        file = f'EN_PR_{year}_teamsquads.json'
+        file = f'{league}_{year}_teamsquads.json'
         stats_file = dirs.load_json(file, StorageConfig.STATS_DIR)
         return stats_file
     except FileNotFoundError as e:
         print(file, "not found")
 
 
-def load_fixture_stats(year):
+def load_fixture_stats(league, year):
     """Load player_stats json files into a container
         Args:
             year(int): year of player_stats json
     """
     try: 
-        file = f'EN_PR_{year}_fixturestats.json'
+        file = f'{league}_{year}_fixturestats.json'
         stats_file = dirs.load_json(file, StorageConfig.STATS_DIR)
         stats_file.append({'season': year})
         return stats_file
@@ -73,18 +71,19 @@ def load_fixture_stats(year):
         print(file, "not found")
 
 
-def load_team_standings(year):
+def load_team_standings(league, year):
     """Load player_stats json files into a container
         Args:
             year(int): year of player_stats json
     """
     try: 
-        file = f'EN_PR_{year}_teamstandings.json'
+        file = f'{league}_{year}_teamstandings.json'
         stats_file = dirs.load_json(file, StorageConfig.STATS_DIR)
         stats_file.append({'season': year})
         return stats_file
     except FileNotFoundError as e:
         print(file, "not found")
+
 
 
 def read_playerstats(data):
@@ -106,7 +105,6 @@ def read_playerstats(data):
         return stats_all
     except TypeError as e:
         print("Check that data exists and is loaded correctly")
-
 
 def read_playerinfo(data):
     """Read info from ...playerstats.json into flattened
@@ -140,7 +138,6 @@ def read_playerinfo(data):
     #     print("Check that data exists and is loaded correctly")
     return info_all
 
-
 def read_team_squads(data):
     """Read info from ...playerstats.json into flattened
     list of dicts. 
@@ -161,20 +158,6 @@ def read_team_squads(data):
 
 
     return info_all
-
-
-def playerstats(year):
-    players_info = read_playerinfo(load_player_stats(year))
-    squads = read_team_squads(load_team_squads(year))
-    player_stats = read_playerstats(load_player_stats(year))
-
-
-    #Mergers the two list of dicts if `id-key` is the same
-    merge_info_squad = [{**x, **y} for y in players_info for x in squads if x['id'] == y['id']]
-    merge_info_stats = res = [{**x, **y} for x in merge_info_squad for y in player_stats if x['id'] == y['id']]
-    d = [dict(sorted(d.items())) for d in merge_info_stats]
-    return d
-
 
 def validate_id(data):
     players = read_playerinfo(load_player_stats(data))
@@ -197,6 +180,19 @@ def validate_id(data):
     for squad_player in keyed_squads:
         if squad_player not in keyed_players:
             print("Player", squad_player, "in squad is not in player info")
+
+def playerstats(league, year):
+    players_info = read_playerinfo(load_player_stats(league, year))
+    squads = read_team_squads(load_team_squads(league, year))
+    player_stats = read_playerstats(load_player_stats(league, year))
+
+
+    #Mergers the two list of dicts if `id-key` is the same
+    merge_info_squad = [{**x, **y} for y in players_info for x in squads if x['id'] == y['id']]
+    merge_info_stats = res = [{**x, **y} for x in merge_info_squad for y in player_stats if x['id'] == y['id']]
+    d = [dict(sorted(d.items())) for d in merge_info_stats]
+    return d
+
 
 
 def read_fixtureinfo(data):
@@ -278,10 +274,9 @@ def read_fixturestats(data):
     except TypeError as e:
         print(e, "Check that data exists and is loaded correctly")
 
-
-def fixturestats(year):
-    info = read_fixtureinfo(load_fixture_stats(year))
-    stats = read_fixturestats(load_fixture_stats(year))
+def fixturestats(league, year):
+    info = read_fixtureinfo(load_fixture_stats(league, year))
+    stats = read_fixturestats(load_fixture_stats(league, year))
 
 
     #Mergers the two list of dicts if `id-key` is the same
@@ -345,34 +340,15 @@ def read_team_standings_stats(data):
     #     print("Check that data exists and is loaded correctly")
     return info_all
 
-def team_standings(year):
+def team_standings(league, year):
     """Returns team standings"""
-    stats = read_team_standings_stats(load_team_standings(year))
+    stats = read_team_standings_stats(load_team_standings(league, year))
     return stats
 
-def playerstats(start_year, end_year=None):
-    """Data cleaning for playerstats"""
-    try:
-        if end_year == None:
-            end_year = start_year
-        df = pd.DataFrame()
-        data = []
-        for i in range(start_year, end_year):
-            data_sample = load_player_stats(i)
-            stats = read_playerstats(data_sample)
-            info = read_playerinfo(data_sample)
-            df1 = pd.DataFrame(stats)
-            df2 = pd.DataFrame(info)
-            df3 = pd.merge(df1, df2, on='id')
-            df = df.append(df3)
-    except Exception as e:
-        print(e)
-    return df
 
 if __name__ == '__main__':
-    
-    print(len(read_fixtureinfo(load_fixture_stats(2019))))
-    print(len(read_fixturestats(load_fixture_stats(2019))))
-    print(len(fixturestats(2019)))
+    pass
+    #dirs.save_json('test', playerstats('EN_PR', 2019), StorageConfig.DB_DIR)
+
 
 

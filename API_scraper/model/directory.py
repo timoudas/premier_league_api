@@ -89,9 +89,12 @@ class Directory:
 
 class StorageConfig:
 
-  STORAGE_BASE_DIR = Path("../json")
+  STORAGE_BASE_DIR = Path("..")
   PARAMS_DIR = STORAGE_BASE_DIR / "params"
-  STATS_DIR = PARAMS_DIR / "stats"
+  STATS_DIR = STORAGE_BASE_DIR / "raw_data"
+  DB_DIR = STORAGE_BASE_DIR / "clean_data"
+
+
 
 if __name__ == '__main__':
 	pass

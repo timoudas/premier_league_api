@@ -14,18 +14,27 @@ Options:
     -f,  --fixture        Fixturestats
     -s,  --squad          Squad
 """
+"""
+Interactive Command Line for the following tasks:
+    * View Leagues and their Seasons
+    * Download Player/Team/Fixture stats for a League and Season
+    * Clean downloaded data
+    * Insert data in database
+"""
 import sys
 import os
 import pickle
 import cmd 
-import click
+from pprint import pprint
 from docopt import docopt, DocoptExit
 from directory import Directory
 from directory import StorageConfig
 from get_stats import SeasonStats
+import clean_stats as clean
 
 
 dir = Directory()
+
 
 def docopt_cmd(func):
     """
@@ -94,7 +103,7 @@ class StatShell(cmd.Cmd):
                 print('\n')
         else:
             for league in self.leagues.keys():
-                print("{: <10}".format(league), end="")
+                print("{: <10\t}".format(league), end="")
             print('\n')
 
     def downloads_choices(self, type_stats, league, season):
@@ -107,24 +116,69 @@ class StatShell(cmd.Cmd):
 
     @docopt_cmd
     def do_download(self, arg):
-        """Usage: CLIStats$ [options] <LEAGUE> <SEASON>
+        """Usage: CLIStats$ [options] <LEAGUE> <SEASON> ...
 
-Options:
-    -p,  --player         Playerstats
-    -t,  --team           Team standings
-    -f,  --fixture        Fixturestats
-    -s,  --squad          Squad
-        """
+        Options:
+            -p,  --player         Playerstats
+            -t,  --team           Team standings
+            -f,  --fixture        Fixturestats
+            -s,  --squad          Squad
+            """
         league = arg['<LEAGUE>'].upper()
-        season_end = str(int(arg['<SEASON>'])+1)
-        season = str(arg['<SEASON>'] + '/' + season_end)
-        for key, value in arg.items():
-            if value == True:
-                self.downloads_choices(key, league, season)
+        if len(arg['<SEASON>']) == 1:
+            season_end = str(int(arg['<SEASON>'][0])+1)
+            season = str(arg['<SEASON>'][0] + '/' + season_end)
+            for key, value in arg.items():
+                if value == True:
+                    self.downloads_choices(key, league, season)
+        else:
+            for season in range(int(arg['<SEASON>'][0]), int(arg['<SEASON>'][-1])+1):
+                start_season = str(int(season))
+                end_season = str(int(season)+1)
+                temp_season = start_season + '/' + end_season
+                for key, value in arg.items():
+                    if value == True:
+                        self.downloads_choices(key, league, temp_season)  
 
+
+    def loading_choices(self, type_stats, league, season):
+        choices = {'-p': clean.playerstats,
+                   '-t': clean.team_standings,
+                   '-f': clean.fixturestats}
+        if type_stats in choices.keys():
+            return choices.get(type_stats)(league, season)
+
+    @docopt_cmd
+    def do_clean(self, arg):
+        """Usage: CLIStats$ [options] [-s] <LEAGUE> <SEASON>
+
+        Options:
+            -p,  --player         Playerstats
+            -t,  --team           Team standings
+            -f,  --fixture        Fixturestats
+            -s,  --save           Save
+
+            """        
+        file_name = arg['<LEAGUE>'].upper() + '_' + arg['<SEASON>'] + '_'
+        league = arg['<LEAGUE>'].upper()
+        season = str(arg['<SEASON>'])
+        for key, value in arg.items():
+            if value == True and key != '-s':
+                if arg['-s'] == True:
+                    if arg['-p'] == True:
+                        dir.save_json(file_name + 'playerstats', self.loading_choices(key, league, season), StorageConfig.DB_DIR)
+                        print('File was saved')
+                    elif arg['-f'] == True:
+                        dir.save_json(file_name + 'fixturestats', self.loading_choices(key, league, season), StorageConfig.DB_DIR)
+                        print('File was saved')
+                    elif arg['-t'] == True:
+                        dir.save_json(file_name + 'team_standings', self.loading_choices(key, league, season), StorageConfig.DB_DIR)
+                        print('File was saved')
+                    else:
+                        print('File was not saved')
 
     def do_clear(self, arg):
-        """Clear the screen and return turtle to center:  RESET"""
+        """Clear the screen"""
         os.system('clear')
         print(self.intro)
 

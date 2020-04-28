@@ -114,6 +114,7 @@ class ValidateParams():
         return self.remove_failed_leagues(self.check_current_season())
 
 if __name__ == '__main__':
+    ValidateParams().main()
     # def make_request(url):
     #     """Makes a GET request
 
@@ -131,9 +132,9 @@ if __name__ == '__main__':
     # status = make_request(
     #     'https://footballapi.pulselive.com/football/teams/131/compseasons/1/staff?page=0&pageSize=100')
     # print(status)
-    d = ValidateParams()
+    #d = ValidateParams()
     #d.remove_failed_leagues(d.check_current_season())
-    d.main()
+    #d.main()
 
 
 

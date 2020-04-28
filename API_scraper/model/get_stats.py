@@ -249,7 +249,7 @@ class SeasonStats:
         saves output in a json file.
          """
         stats_list = []
-        print("Getting team standings..")
+        print("Getting team standings for: ", self.year)
         with Pool(self.pool) as p:
             team_standings = list(tqdm(p.imap(self.team_standings_singel, self.team_ids), total=len(self.team_ids)))
         print('Getting data from workers..')

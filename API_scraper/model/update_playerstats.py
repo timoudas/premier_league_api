@@ -151,6 +151,8 @@ def validate_id(data):
     for squad_player in keyed_squads:
         if squad_player not in keyed_players:
             print("Player", squad_player, "in squad is not in player info")
+
+
  
 
 def playerstats(start_year, end_year=None):
@@ -174,7 +176,10 @@ def playerstats(start_year, end_year=None):
 
 
 if __name__ == '__main__':
-    validate_id(2019)
+    l = [2017, 2019]
+    for season in l:
+        print(i)
+    #validate_id(2019)
     #print(len(merge_playerstats(2019)))
 
 
