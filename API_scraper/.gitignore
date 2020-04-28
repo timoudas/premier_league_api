@@ -1,2 +1,5 @@
 #large file
-/json/params/all_teams_params.json
+
+model/Extra/
+model/__pychache__
+model/.ipynb_checkpoints
