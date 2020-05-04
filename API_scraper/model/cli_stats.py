@@ -5,7 +5,7 @@ And download stats for a league
 Usage:
     CLIStats$ (-i | --interactive)
     CLIStats$ view [LEAGUE]
-    CLIStats$ [options] <LEAGUE> <SEASON>
+    CLIStats$ clean [options] <LEAGUE> <SEASON>
 
 Options:
     -i, --interactive    Interactive Mode
@@ -103,7 +103,7 @@ class StatShell(cmd.Cmd):
                 print('\n')
         else:
             for league in self.leagues.keys():
-                print("{: <10\t}".format(league), end="")
+                print("{: <10}".format(league), end="")
             print('\n')
 
     def downloads_choices(self, type_stats, league, season):
@@ -150,21 +150,21 @@ class StatShell(cmd.Cmd):
 
     @docopt_cmd
     def do_clean(self, arg):
-        """Usage: CLIStats$ [options] [-s] <LEAGUE> <SEASON>
+        """Usage: CLIStats$ [options] <LEAGUE> <SEASON>
 
         Options:
             -p,  --player         Playerstats
             -t,  --team           Team standings
             -f,  --fixture        Fixturestats
-            -s,  --save           Save
 
-            """        
+            """   
+        print(arg)     
         file_name = arg['<LEAGUE>'].upper() + '_' + arg['<SEASON>'] + '_'
         league = arg['<LEAGUE>'].upper()
         season = str(arg['<SEASON>'])
         for key, value in arg.items():
-            if value == True and key != '-s':
-                if arg['-s'] == True:
+            try:
+                if value == True:
                     if arg['-p'] == True:
                         dir.save_json(file_name + 'playerstats', self.loading_choices(key, league, season), StorageConfig.DB_DIR)
                         print('File was saved')
@@ -174,8 +174,8 @@ class StatShell(cmd.Cmd):
                     elif arg['-t'] == True:
                         dir.save_json(file_name + 'team_standings', self.loading_choices(key, league, season), StorageConfig.DB_DIR)
                         print('File was saved')
-                    else:
-                        print('File was not saved')
+            except TypeError:
+                print("Please check that", file_name, " exists")
 
     def do_clear(self, arg):
         """Clear the screen"""

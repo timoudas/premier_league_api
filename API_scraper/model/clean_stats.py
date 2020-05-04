@@ -43,7 +43,6 @@ def load_player_stats(league, year):
     except FileNotFoundError as e:
         print(file, "not found")
 
-
 def load_team_squads(league, year):
     """Load team_squads json files into a container
         Args:
@@ -55,7 +54,6 @@ def load_team_squads(league, year):
         return stats_file
     except FileNotFoundError as e:
         print(file, "not found")
-
 
 def load_fixture_stats(league, year):
     """Load player_stats json files into a container
@@ -70,7 +68,6 @@ def load_fixture_stats(league, year):
     except FileNotFoundError as e:
         print(file, "not found")
 
-
 def load_team_standings(league, year):
     """Load player_stats json files into a container
         Args:
@@ -83,7 +80,6 @@ def load_team_standings(league, year):
         return stats_file
     except FileNotFoundError as e:
         print(file, "not found")
-
 
 
 def read_playerstats(data):
@@ -283,7 +279,6 @@ def fixturestats(league, year):
     fixture_merged = [{**x, **y} for y in info for x in stats if x['id'] == y['id']]
     d = [dict(sorted(d.items())) for d in fixture_merged]
     return d
-
 
 def read_team_standings_stats(data):
     info_all = []
