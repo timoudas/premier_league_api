@@ -157,8 +157,7 @@ class StatShell(cmd.Cmd):
             -t,  --team           Team standings
             -f,  --fixture        Fixturestats
 
-            """   
-        print(arg)     
+            """      
         file_name = arg['<LEAGUE>'].upper() + '_' + arg['<SEASON>'] + '_'
         league = arg['<LEAGUE>'].upper()
         season = str(arg['<SEASON>'])
@@ -176,6 +175,15 @@ class StatShell(cmd.Cmd):
                         print('File was saved')
             except TypeError:
                 print("Please check that", file_name, " exists")
+
+    def do_db(self, arg):
+        """Usage: CLIStats$ [options] (db name) 
+
+        Options:
+            -p,  --push           Push stats to db
+            -d,  --delete         Delete from db
+            """  
+
 
     def do_clear(self, arg):
         """Clear the screen"""
