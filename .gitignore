@@ -6,3 +6,5 @@
 /model/Extra
 *.sqlite
 *.csv
+/model/.bash_profile
+raw_data/
