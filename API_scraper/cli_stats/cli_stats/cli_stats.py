@@ -33,11 +33,14 @@ from pprint import pprint
 sys.path.insert(0, '../directory')
 sys.path.insert(0, '../clean_stats')
 sys.path.insert(0, '../database')
+sys.path.insert(0, '../pickle')
 sys.path.insert(0, '../pickle/get_stats')
 sys.path.insert(0, '../pickle/api_scraper')
+sys.path.insert(0, '../database')
+
 
 import clean_stats as clean
-import mongo_db
+import mongo_db as db
 
 from directory import Directory
 from directory import StorageConfig
@@ -187,14 +190,32 @@ class StatShell(cmd.Cmd):
             except TypeError:
                 print("Please check that", file_name, " exists")
 
+    def push_choices(self, type_stats, database):
+        choices = {'-p': db.executePushPlayer,
+                   '-t': db.executePushTeam,
+                   '-f': db.executePushFixture}
+        if type_stats in choices.keys():
+            return choices.get(type_stats)(database)
+
     @docopt_cmd
     def do_db(self, arg):
-        """Usage: CLIStats$ [options] (db name) 
+        """Usage: CLIStats$ [options] <LEAGUE> <SEASON>
 
         Options:
-            -p,  --push           Push stats to db
+            -p,  --player         Push Playerstats
+            -t,  --team           Push Team standings
+            -f,  --fixture        Push Fixturestats
             -d,  --delete         Delete from db
             """  
+        data = db.DB(arg['<LEAGUE>'].upper(), arg['<SEASON>'])
+        for key, value in arg.items():
+            if value == True:
+                print("Pushing: ", arg['<LEAGUE>'].upper(), arg['<SEASON>'])
+                self.push_choices(key, data)
+        print("Push completed")
+
+
+
         
 
 

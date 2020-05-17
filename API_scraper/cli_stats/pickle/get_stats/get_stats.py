@@ -8,6 +8,8 @@ import requests
 import sys
 import time
 
+sys.path.insert(0, '../api_scraper')
+sys.path.insert(0, '../../directory')
 from api_scraper import Football
 from directory import Directory
 from directory import StorageConfig

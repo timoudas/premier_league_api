@@ -2,9 +2,13 @@ import datetime
 import multiprocessing
 import os
 import sys
+import time
 import types
 import uuid
 sys.path.insert(0, '../directory')
+import pymongo
+
+from bson.objectid import ObjectId
 from directory import Directory
 from directory import StorageConfig
 from multiprocessing import Pool
@@ -57,7 +61,18 @@ def check_record(collection, record_id):
         Args:
             record_id (str): record _id as in collection
     """
-    return collection.find_one(record_id)
+    return collection.find_one({'id': record_id})
+
+def collection_index(collection, index):
+    """Checks if index exists for collection, 
+    and return a new index if not
+
+        Args:
+            collection (str): Name of collection in database
+            index (str): Dict key to be used as an index
+    """
+    if index not in collection.index_information():
+        return collection.create_index([(index, pymongo.ASCENDING)], unique=True)
 
 def push_upstream(collection, record_id, record):
     """Update record in collection
@@ -66,7 +81,7 @@ def push_upstream(collection, record_id, record):
             record_id (str): record _id to be put for record in collection
             record (dict): Data to be pushed in collection
     """
-    return collection.insert_one({"_id": record_id }, { "$set": record })
+    return collection.insert_one(record)
 
 def update_upstream(collection, record_id, record):
     """Update record in collection
@@ -75,48 +90,55 @@ def update_upstream(collection, record_id, record):
             record_id (str): record _id as in collection
             record (dict): Data to be updated in collection
     """
-    return collection.update({"_id": record_id }, { "$set": record }, upsert=True)
+    return collection.update_one({"id": record_id}, {"$set": record}, upsert=True)
 
 def executePushPlayer(db):
 
     playerstats = load_file(db.playerfile)
     collection = db.DATABASE[db.league + db.season]
+    collection_index(collection, 'id')
     for player in tqdm(playerstats):
         existingPost = check_record(collection, player['id'])
         if existingPost:
             update_upstream(collection, player['id'], player)
         else:
-            update_upstream(collection, player['id'], player)
+            push_upstream(collection, player['id'], player)
+
 
 def executePushFixture(db):
 
     fixturestats = load_file(db.fixturefile)
     collection = db.DATABASE[db.league + db.season]
+    collection_index(collection, 'fixture_id')
     for fixture in tqdm(fixturestats):
         existingPost = check_record(collection, fixture['fixture_id'])
         if existingPost:
             update_upstream(collection, fixture['fixture_id'], fixture)
         else:
-            update_upstream(collection, fixture['fixture_id'], fixture)
+            push_upstream(collection, fixture['fixture_id'], fixture)
 
 def executePushTeam(db):
 
     team_standings = load_file(db.teamfile)
     collection = db.DATABASE[db.league + db.season]
+    collection_index(collection, 'id')
     for team in tqdm(team_standings):
         existingPost = check_record(collection, team['team_id'])
         if existingPost:
             update_upstream(collection, team['team_id'], team)
         else:
-            update_upstream(collection, team['team_id'], team)
+            push_upstream(collection, team['team_id'], team)
 
         
 
 if __name__ == '__main__':
-    test = DB('EN_PR', '2019')
-    #executePushPlayer(test)
-    #executePushFixture(test)
+    test = DB('EN_PR', '2018')
+    executePushPlayer(test)
+    executePushFixture(test)
     executePushTeam(test)
+    # executePushPlayer(test)
+    # executePushFixture(test)
+
 
 # #EXAMPLE db mycol = mydb["playerstats"]
 # def push_playerstats(self):

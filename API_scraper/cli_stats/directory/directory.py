@@ -72,7 +72,7 @@ class Directory:
             filename(str): The file name of the requested file
             *path(str): The path of the file
         """
-
+        #print(filename)
         file = os.path.join(self.working_dir, *path, filename)
         with open(file, 'r') as temp_file:
             return json.load(temp_file)
@@ -95,6 +95,7 @@ class StorageConfig:
     PARAMS_DIR = STORAGE_BASE_DIR / "params"
     STATS_DIR = STORAGE_BASE_DIR / "raw_data"
     DB_DIR = STORAGE_BASE_DIR / "clean_data"
+    PICKLE_DIR = STORAGE_BASE_DIR / "cli_stats/pickle"
 
 
 

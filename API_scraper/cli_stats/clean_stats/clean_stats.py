@@ -16,14 +16,19 @@ Looks if fixtureID exists in .json, if it doesn't exist it gets append
 import collections
 import sys
 sys.path.insert(0, '../directory')
+import uuid 
+
 from directory import Directory
 from directory import StorageConfig
 from functools import reduce
 from pprint import pprint
+  
 
 
 
 
+
+id = uuid.uuid1() 
 dirs = Directory()
 
 
@@ -335,7 +340,8 @@ def read_team_standings_stats(data):
                         'fixture_id' : comp['id'],
 
                         'clock_label' : comp['clock']['label'],
-                        'clock_secs' : comp['clock']['secs'],}
+                        'clock_secs' : comp['clock']['secs'],
+                        'id': str(uuid.uuid4())[:8]}
                     
                 info_all.append(stats_temp)
     # except TypeError as e:
@@ -349,8 +355,7 @@ def team_standings(league, year):
 
 
 if __name__ == '__main__':
-    pass
-    #dirs.save_json('test', playerstats('EN_PR', 2019), StorageConfig.DB_DIR)
+    team_standings('EN_PR', '2019')
 
 
 
