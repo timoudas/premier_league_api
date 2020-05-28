@@ -1,5 +1,9 @@
 import os
 
+import pandas as pd
+
+from pprint import pprint
+
 from pymongo import MongoClient
 
 class DB():
@@ -14,14 +18,25 @@ class DB():
         self.DATABASE = self.client["Database"]
         self.collection = self.DATABASE[self.league + self.season]
 
-    def aggregate(self):
-        return self.collection.aggregate([
-            { "$match": { "season_id": 274} },
-            { "$group": { "_id": "$team_id", "total": { "$sum": "$points" } } }
-            ])
+    
+    def get_fixtures(self):
+        return self.collection.find({ "f_id": { "$exists": "true" } })
+
+    def get_players(self):
+        return self.collection.find({ "p_id": { "$exists": "true" } })
+
+    def get_teams_standing(self):
+        return self.collection.find({ "t_id": { "$exists": "true" } })
+
+
+    def get_position(self, position):
+        return self.collection.find(
+            { "position": position},
+            )
+
 
 if __name__ == '__main__':
-    test = DB('EN_PR', '2019')
-    query = test.aggregate()
-    for result_object in query:
-        print(result_object)
+    test = DB('EN_PR', '2018')
+    query = test.get_fixtures()
+    df = pd.DataFrame.from_dict(query)
+    print(df)

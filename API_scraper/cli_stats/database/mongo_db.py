@@ -100,22 +100,22 @@ def executePushPlayer(db):
     for player in tqdm(playerstats):
         existingPost = check_record(collection, player['id'])
         if existingPost:
-            update_upstream(collection, player['id'], player)
+            update_upstream(collection, player['p_id'], player)
         else:
-            push_upstream(collection, player['id'], player)
+            push_upstream(collection, player['p_id'], player)
 
 
 def executePushFixture(db):
 
     fixturestats = load_file(db.fixturefile)
     collection = db.DATABASE[db.league + db.season]
-    collection_index(collection, 'fixture_id')
+    collection_index(collection, 'id')
     for fixture in tqdm(fixturestats):
-        existingPost = check_record(collection, fixture['fixture_id'])
+        existingPost = check_record(collection, fixture['id'])
         if existingPost:
-            update_upstream(collection, fixture['fixture_id'], fixture)
+            update_upstream(collection, fixture['f_id'], fixture)
         else:
-            push_upstream(collection, fixture['fixture_id'], fixture)
+            push_upstream(collection, fixture['f_id'], fixture)
 
 def executePushTeam(db):
 
@@ -123,21 +123,23 @@ def executePushTeam(db):
     collection = db.DATABASE[db.league + db.season]
     collection_index(collection, 'id')
     for team in tqdm(team_standings):
-        existingPost = check_record(collection, team['team_id'])
+        existingPost = check_record(collection, team['id'])
         if existingPost:
-            update_upstream(collection, team['team_id'], team)
+            update_upstream(collection, team['t_id'], team)
         else:
-            push_upstream(collection, team['team_id'], team)
+            push_upstream(collection, team['t_id'], team)
 
         
 
 if __name__ == '__main__':
-    test = DB('EN_PR', '2018')
-    executePushPlayer(test)
-    executePushFixture(test)
-    executePushTeam(test)
-    # executePushPlayer(test)
-    # executePushFixture(test)
+    en_pr2019 = DB('EN_PR', '2019')
+    executePushPlayer(en_pr2019)
+    executePushFixture(en_pr2019)
+    executePushTeam(en_pr2019)
+    en_pr2018 = DB('EN_PR', '2018')
+    executePushPlayer(en_pr2018)
+    executePushFixture(en_pr2018)
+    executePushTeam(en_pr2018)
 
 
 # #EXAMPLE db mycol = mydb["playerstats"]
