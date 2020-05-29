@@ -3,6 +3,7 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table
+import plotly.express as px
 
 from dash.dependencies import Input
 from dash.dependencies import Output
@@ -12,6 +13,23 @@ import pandas as pd
 
 from mongo_query import DB
 from pprint import pprint
+
+"""
+if command == 'get_teams_standing':
+      data = df.to_dict('records')
+      availible_teams = df['team_shortName'].unique()
+      fig = px.line(df, x="gameweek", y="points", 
+                    hover_name="team_shortName", color="team_shortName")
+      fig.update_xaxes(rangeslider_visible=True,)
+"""
+
+def init_data():
+  query = DB('EN_PR', '2019').get_teams_standing()
+  df = pd.DataFrame.from_dict(query)
+  df = df.drop('_id', 1)
+  return df
+
+df = init_data()
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -31,41 +49,65 @@ colors = {
 }
 
 app.layout = html.Div([
-
-    html.Div(
-        [
+    html.Div([
             dcc.Dropdown(
                 id='data_param_dd',
                 options=stats_param,
-                value='FS',
-                style = {'width':'40%',}
+                value='',
             ),
 
             dcc.Dropdown(
                 id='year_param_dd',
                 options=year_param,
-                value='2019',
-                style = {'width':'40%',}
+                value='',
             ),
-        ],
-    ),
 
-    html.Div(
-        id='dd-output-container',
-    )
+          dash_table.DataTable(
+            id = 'table',
+            data = df.to_dict('records'),
+            columns = [{"name": i, "id": i} for i in df.columns],
+            style_cell={
+              'whiteSpace': 'normal',
+              'height': 'auto',
+            },
+            fixed_columns={
+              'headers': True,
+              'data': 1
+            },
+            style_table={
+              'height': '300px', 
+              'overflowY': 'auto',
+              'minWidth': '100%',
+            },
+          )
+
+    ], style = {'width':'40%',}),
+
+    html.Div([
+        
+        dcc.Dropdown(
+          id='team',
+          options=[],
+        ),
+
+        dcc.Dropdown(
+          id='team_metrics',
+          options=[],
+        ),
+    ],
+    ),
 ])
 
 @app.callback(
 
-    dash.dependencies.Output('dd-output-container', 'children'),
-
+    dash.dependencies.Output('table', 'data'),
     [
         dash.dependencies.Input('data_param_dd', 'value'),
         dash.dependencies.Input('year_param_dd', 'value'),
     ]
 )
-
 def update_output(data, year):
+  if data and year:
     instance = DB('EN_PR', year)
     cmd = {'FS': 'get_fixtures',
            'PS': 'get_players', 
@@ -74,24 +116,14 @@ def update_output(data, year):
     query = getattr(instance, command)()
     df = pd.DataFrame.from_dict(query)
     df = df.drop('_id', 1)
-    columns = [{'name': col, 'id': col} for col in df.columns]
-    data = df.to_dict('records')
-    return [dash_table.DataTable(
-                data=data, 
-                columns=columns,
-                style_cell={
-                    'whiteSpace': 'normal',
-                    'height': 'auto',
-                },
-                fixed_rows={
-                    'headers': True
-                },
-                style_table={
-                    'height': '300px', 
-                    'overflowY': 'auto'
-                },
-            )]
+    return [{
+      'data': df.to_dict('records'),
+      'columns' : [{"name": i, "id": i} for i in df.columns],
+    }]
+  else:
+    pass
+    
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(host='0.0.0.0', debug=True)

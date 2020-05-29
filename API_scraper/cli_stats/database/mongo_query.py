@@ -9,8 +9,10 @@ from pymongo import MongoClient
 class DB():
 
     def __init__(self, league, season):
-        self.db_user = os.environ.get('DB_user')
-        self.db_pass = os.environ.get('DB_pass')
+        #self.db_user = os.environ.get('DB_user')
+        #self.db_pass = os.environ.get('DB_pass')
+        self.db_user = 'Timoudas'
+        self.db_pass = 'adde123'
         self.league = league
         self.season = season
         self.MONGODB_URL = f'mongodb+srv://{self.db_user}:{self.db_pass}@database-mbqxj.mongodb.net/test?retryWrites=true&w=majority'
