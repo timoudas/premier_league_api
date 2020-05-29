@@ -64,9 +64,17 @@ def key_length(league, season):
     print("count", count)
     print("good", good)
 
+def check_id(league, season):
+    data = load_stats(league, season, 'playerstats')
+    count = 0
+    for d in data:
+        if d.get('id') != None:
+            count += 1
+    print(count)
+
 
 # check_len_fixture('EN_PR', '2018')
 # check_len_player('EN_PR', '2018')
 # check_len_team('EN_PR', '2018')
 # check_db_records('EN_PR', '2018')
-check_db_records('EN_PR', '2018')
+check_len_fixture('EN_PR', 2018)

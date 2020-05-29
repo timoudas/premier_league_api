@@ -139,7 +139,8 @@ def read_playerinfo(data):
                 'last' : deep_get(stats, 'name.last'),
                 'nationalTeam' : deep_get(stats, 'nationalTeam.country'),
                 'playerId' : stats.get('playerId'),
-                'season' : data[-1]['season']}
+                'season' : data[-1]['season'],
+                'p_id' : stats.get('id'),}
             info_all.append(stats_temp)
     # except TypeError as e:
     #     print("Check that data exists and is loaded correctly")
@@ -239,7 +240,7 @@ def read_fixtureinfo(data):
                     'fixtureType' : stats.get('fixtureType'),
                     'extraTime' : stats.get('extraTime'),
                     'shootout' : stats.get('shootout'),
-                    'fixture_id' : stats.get('id'),
+                    'f_id' : stats.get('id'),
 
                     'clock_label' : deep_get(stats, 'clock.label'),
                     'clock_secs' : deep_get(stats, 'clock.secs'),}
@@ -301,6 +302,7 @@ def read_team_standings_stats(data):
             stats_all = d['standing']
             team = d['team']
             for stats in stats_all:
+                team_stand_id = str(uuid.uuid4())[:8]
                 if 'fixtures' in stats:
                     comp = stats['fixtures'][0]
                     stats_temp = \
@@ -341,7 +343,8 @@ def read_team_standings_stats(data):
 
                         'clock_label' : comp['clock']['label'],
                         'clock_secs' : comp['clock']['secs'],
-                        'id': str(uuid.uuid4())[:8]}
+                        'id': team_stand_id,
+                        't_id' : team_stand_id}
                     
                 info_all.append(stats_temp)
     # except TypeError as e:
