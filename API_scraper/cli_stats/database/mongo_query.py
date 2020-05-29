@@ -42,3 +42,39 @@ if __name__ == '__main__':
     query = test.get_fixtures()
     df = pd.DataFrame.from_dict(query)
     print(df)
+
+    #           dash_table.DataTable(
+#             id = 'table',
+#             data = df.to_dict('records'),
+#             columns = [{"name": i, "id": i} for i in df.columns],
+#             style_cell={
+#               'whiteSpace': 'normal',
+#               'height': 'auto',
+#             },
+#             fixed_columns={
+#               'headers': True,
+#               'data': 1
+#             },
+#             style_table={
+#               'height': '300px', 
+#               'overflowY': 'auto',
+#               'minWidth': '100%',
+#             },
+#           )
+
+#     ], style = {'width':'40%',}),
+
+#     html.Div([
+        
+#         dcc.Dropdown(
+#           id='team',
+#           options=[],
+#         ),
+
+#         dcc.Dropdown(
+#           id='team_metrics',
+#           options=[],
+#         ),
+#     ],
+#     ),
+# ])
