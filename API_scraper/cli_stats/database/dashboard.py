@@ -34,7 +34,27 @@ def init_data():
     df = df.drop('_id', 1)
     return df
 
+def init_teams():
+    query = DB('EN_PR', '2019').get_teams()
+    df = pd.DataFrame.from_dict({'teams': query})
+    return df
+
+def generate_team_button(team_shortName):
+    return dbc.Button(
+                str(team_shortName),
+                className="btn btn-primary",
+                id=str(team_shortName),
+                style={
+                "margin-right": "10px",
+                "margin-bottom": '10px',
+                }
+
+            )
+        
+
 df = init_data()
+df_teams = init_teams()
+print(df_teams.columns)
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -44,6 +64,7 @@ stats_param = [{'label': 'Fixture Stats', 'value':'FS'},
 
 year_param = [{'label': '2019/2020', 'value':'2019'},
                    {'label': '2018/2019', 'value':'2018'}]
+
 
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -101,23 +122,14 @@ app.layout = html.Div(
                 ], width=2),
 
                 dbc.Col(
-                    dash_table.DataTable(
-                        id = 'table',
-                        data = df.to_dict('records'),
-                        columns = [{"name": i, "id": i} for i in df.columns],
-                        style_table={
-                            'overflowX': 'auto',
-                            'height': '300px', 
-                            'overflowY': 'auto'
-                        },
-                    ),
-                width=8,
-            ),
+                    children=[generate_team_button(i) for i in df_teams['teams']]
+                ), 
 
         ]),
-        dbc.Row([
 
-        ]),
+        dbc.Row(
+
+        ),
 
     ],
 )
@@ -149,6 +161,9 @@ def update_output(n_clicks, data, year):
           'data': df.to_dict('records'),
           'columns' : [{"name": i, "id": i} for i in df.columns],
         }]
+
+
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)

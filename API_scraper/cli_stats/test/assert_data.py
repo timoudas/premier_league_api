@@ -29,14 +29,14 @@ def check_len_fixture(league, season):
     print(f'Total records in {league}\t{season} fixturestats:', records)
 
 def check_len_team(league, season):
-    data = load_stats(league, season, 'playerstats')
-    records = len(data)
-    print(f'Total records in {league}\t{season} playerstats:', records)
-
-def check_len_player(league, season):
     data = load_stats(league, season, 'team_standings')
     records = len(data)
     print(f'Total records in {league}\t{season} team_standings:', records)
+
+def check_len_player(league, season):
+    data = load_stats(league, season, 'playerstats')
+    records = len(data)
+    print(f'Total records in {league}\t{season} playerstats:', records)
 
 
 
@@ -77,4 +77,4 @@ def check_id(league, season):
 # check_len_player('EN_PR', '2018')
 # check_len_team('EN_PR', '2018')
 # check_db_records('EN_PR', '2018')
-check_len_fixture('EN_PR', 2018)
+check_len_team('EN_PR', 2018)

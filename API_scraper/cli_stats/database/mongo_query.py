@@ -9,10 +9,8 @@ from pymongo import MongoClient
 class DB():
 
     def __init__(self, league, season):
-        #self.db_user = os.environ.get('DB_user')
-        #self.db_pass = os.environ.get('DB_pass')
-        self.db_user = 'Timoudas'
-        self.db_pass = 'adde123'
+        self.db_user = os.environ.get('DB_user')
+        self.db_pass = os.environ.get('DB_pass')
         self.league = league
         self.season = season
         self.MONGODB_URL = f'mongodb+srv://{self.db_user}:{self.db_pass}@database-mbqxj.mongodb.net/test?retryWrites=true&w=majority'
@@ -36,45 +34,26 @@ class DB():
             { "position": position},
             )
 
+    def get_teams(self):
+        return self.collection.distinct('team_shortName')
+
+    def get_standings(self):
+        query = self.collection.find(
+            {"t_id": { "$exists": "true" }},
+            {
+            "team_shortName": 1,
+            "gameweek": 1,
+            "points": 1,
+            "played": 1,
+            "_id": 0,
+            })
+        return query
+
 
 if __name__ == '__main__':
     test = DB('EN_PR', '2018')
-    query = test.get_fixtures()
+    query = test.get_standings()
     df = pd.DataFrame.from_dict(query)
     print(df)
 
-    #           dash_table.DataTable(
-#             id = 'table',
-#             data = df.to_dict('records'),
-#             columns = [{"name": i, "id": i} for i in df.columns],
-#             style_cell={
-#               'whiteSpace': 'normal',
-#               'height': 'auto',
-#             },
-#             fixed_columns={
-#               'headers': True,
-#               'data': 1
-#             },
-#             style_table={
-#               'height': '300px', 
-#               'overflowY': 'auto',
-#               'minWidth': '100%',
-#             },
-#           )
 
-#     ], style = {'width':'40%',}),
-
-#     html.Div([
-        
-#         dcc.Dropdown(
-#           id='team',
-#           options=[],
-#         ),
-
-#         dcc.Dropdown(
-#           id='team_metrics',
-#           options=[],
-#         ),
-#     ],
-#     ),
-# ])
