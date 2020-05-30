@@ -35,6 +35,7 @@ class DB():
         self.playerfile = self.league + '_' + self.season + '_playerstats.json'
         self.teamfile = self.league + '_' + self.season + '_team_standings.json'
         self.fixturefile = self.league + '_' + self.season + '_fixturestats.json'
+        self.leaguefile = self.league + '_' + self.season + '_league_standings.json'
         self.func = func
 
     def execute(self):
@@ -98,7 +99,7 @@ def executePushPlayer(db):
     collection = db.DATABASE[db.league + db.season]
     collection_index(collection, 'id')
     for player in tqdm(playerstats):
-        existingPost = check_record(collection, player['id'])
+        existingPost = check_record(collection, player['p_id'])
         if existingPost:
             update_upstream(collection, player['p_id'], player)
         else:
@@ -111,7 +112,7 @@ def executePushFixture(db):
     collection = db.DATABASE[db.league + db.season]
     collection_index(collection, 'id')
     for fixture in tqdm(fixturestats):
-        existingPost = check_record(collection, fixture['id'])
+        existingPost = check_record(collection, fixture['f_id'])
         if existingPost:
             update_upstream(collection, fixture['f_id'], fixture)
         else:
@@ -123,11 +124,23 @@ def executePushTeam(db):
     collection = db.DATABASE[db.league + db.season]
     collection_index(collection, 'id')
     for team in tqdm(team_standings):
-        existingPost = check_record(collection, team['id'])
+        existingPost = check_record(collection, team['t_id'])
         if existingPost:
             update_upstream(collection, team['t_id'], team)
         else:
             push_upstream(collection, team['t_id'], team)
+
+def executePushLeagueStandings(db):
+
+    league_standings = load_file(db.leaguefile)
+    collection = db.DATABASE[db.league + db.season]
+    collection_index(collection, 'id')
+    for team in tqdm(league_standings):
+        existingPost = check_record(collection, team['l_id'])
+        if existingPost:
+            update_upstream(collection, team['l_id'], team)
+        else:
+            push_upstream(collection, team['l_id'], team)
 
         
 

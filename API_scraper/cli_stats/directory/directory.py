@@ -44,7 +44,7 @@ class Directory:
                 os.mkdir(os.path.join(self.working_dir, *path))
                 print(os.path.join(self.working_dir, *path), 'succesfully created')
         except OSError as e:
-            print(folder,'coult not be created', e)
+            print(self.working_dir, *path,'coult not be created', e)
 
     def check_if_file_exist(self, *path):
         if os.path.exists(os.path.join(self.working_dir, *path)):

@@ -124,7 +124,8 @@ class StatShell(cmd.Cmd):
         choices = {'-p': self.pickle[league + '_' + season].player_stats,
                    '-t': self.pickle[league + '_' + season].team_standings,
                    '-f': self.pickle[league + '_' + season].fixture_stats,
-                   '-s': self.pickle[league + '_' + season].team_squad}
+                   '-s': self.pickle[league + '_' + season].team_squad,
+                   '-l': self.pickle[league + '_' + season].league_standings}
         return choices.get(type_stats)()
 
 
@@ -136,7 +137,8 @@ class StatShell(cmd.Cmd):
             -p,  --player         Playerstats
             -t,  --team           Team standings
             -f,  --fixture        Fixturestats
-            -s,  --squad          Squad
+            -s,  --squad          Squads
+            -l,  --league         League standings
             """
         league = arg['<LEAGUE>'].upper()
         if len(arg['<SEASON>']) == 1:
@@ -158,7 +160,8 @@ class StatShell(cmd.Cmd):
     def loading_choices(self, type_stats, league, season):
         choices = {'-p': clean.playerstats,
                    '-t': clean.team_standings,
-                   '-f': clean.fixturestats}
+                   '-f': clean.fixturestats,
+                   '-l': clean.league_standings}
         if type_stats in choices.keys():
             return choices.get(type_stats)(league, season)
 
@@ -170,6 +173,7 @@ class StatShell(cmd.Cmd):
             -p,  --player         Playerstats
             -t,  --team           Team standings
             -f,  --fixture        Fixturestats
+            -l,  --league         League Standings
 
             """      
         file_name = arg['<LEAGUE>'].upper() + '_' + arg['<SEASON>'] + '_'
@@ -187,6 +191,9 @@ class StatShell(cmd.Cmd):
                     elif key == '-t':
                         dir.save_json(file_name + 'team_standings', self.loading_choices(key, league, season), StorageConfig.DB_DIR)
                         print('-t File was saved')
+                    elif key == '-l':
+                        dir.save_json(file_name + 'league_standings', self.loading_choices(key, league, season), StorageConfig.DB_DIR)
+                        print('-l File was saved')
             except TypeError:
                 print("Please check that", file_name, " exists")
 
@@ -205,6 +212,7 @@ class StatShell(cmd.Cmd):
             -p,  --player         Push Playerstats
             -t,  --team           Push Team standings
             -f,  --fixture        Push Fixturestats
+            -l,  --league         Push League Standings
             -d,  --delete         Delete from db
             """  
         data = db.DB(arg['<LEAGUE>'].upper(), arg['<SEASON>'])

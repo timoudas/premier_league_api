@@ -67,7 +67,7 @@ def load_team_squads(league, year):
         print(file, "not found")
 
 def load_fixture_stats(league, year):
-    """Load player_stats json files into a container
+    """Load fixture_stats json files into a container
         Args:
             year(int): year of player_stats json
     """
@@ -80,7 +80,7 @@ def load_fixture_stats(league, year):
         print(file, "not found")
 
 def load_team_standings(league, year):
-    """Load player_stats json files into a container
+    """Load team_standings json files into a container
         Args:
             year(int): year of player_stats json
     """
@@ -88,6 +88,18 @@ def load_team_standings(league, year):
         file = f'{league}_{year}_teamstandings.json'
         stats_file = dirs.load_json(file, StorageConfig.STATS_DIR)
         stats_file.append({'season': year})
+        return stats_file
+    except FileNotFoundError as e:
+        print(file, "not found")
+
+def load_league_standings(league, year):
+    """Load league standings json files into a container
+        Args:
+            year(int): year of player_stats json
+    """
+    try: 
+        file = f'{league}_{year}_league_standings.json'
+        stats_file = dirs.load_json(file, StorageConfig.STATS_DIR)
         return stats_file
     except FileNotFoundError as e:
         print(file, "not found")
@@ -200,7 +212,6 @@ def playerstats(league, year):
     merge_info_stats = res = [{**x, **y} for x in merge_info_squad for y in player_stats if x['id'] == y['id']]
     d = [dict(sorted(d.items())) for d in merge_info_stats]
     return d
-
 
 
 def read_fixtureinfo(data):
@@ -356,9 +367,70 @@ def team_standings(league, year):
     stats = read_team_standings_stats(load_team_standings(league, year))
     return stats
 
+def read_leagueinfo(data):
+    info_all = []
+    try:
+        for d in data:
+            league_stand_id = str(uuid.uuid4())[:8]
+            stats_temp = {}
+            overall = d['overall']
+            home = d['home']
+            away = d['away']
+            grounds = d['ground']
+            team = d['team']
+
+            stats_temp = \
+                {'team_name' : deep_get(team, 'name'),
+                'team_shortName' : deep_get(team, 'club.shortName'),
+                'team_id' : deep_get(team, 'club.id'),
+
+                'position' : d['position'],
+                'overall_played' : deep_get(overall, 'played'),
+                'overall_won' : deep_get(overall, 'won', 0),
+                'overall_draw' : deep_get(overall, 'draw', 0),
+                'overall_lost' : deep_get(overall, 'lost', 0),
+                'overall_goalsFor' : deep_get(overall, 'goalsFor'),
+                'overall_goalsAgainst' : deep_get(overall, 'goalsAgainst'),
+                'overall_goalsDifference' : deep_get(overall, 'goalsDifference'),
+                'overall_points' : deep_get(overall, 'points'),
+
+                'home_played' : deep_get(home, 'played'),
+                'home_won' : deep_get(home, 'won', 0),
+                'home_draw' : deep_get(home, 'draw', 0),
+                'home_lost' : deep_get(home, 'lost', 0),
+                'home_goalsFor' : deep_get(home, 'goalsFor'),
+                'home_goalsAgainst' : deep_get(home, 'goalsAgainst'),
+                'home_goalsDifference' : deep_get(home, 'goalsDifference'),
+                'home_points' : deep_get(home, 'points'),
+
+                'away_played' : deep_get(away, 'played'),
+                'away_won' : deep_get(away, 'won', 0),
+                'away_draw' : deep_get(away, 'draw', 0),
+                'away_lost' : deep_get(away, 'lost', 0),
+                'away_goalsFor' : deep_get(away, 'goalsFor'),
+                'away_goalsAgainst' : deep_get(away, 'goalsAgainst'),
+                'away_goalsDifference' : deep_get(away, 'goalsDifference'),
+                'away_points' : deep_get(away, 'points'),
+
+                'grounds_name' : deep_get(grounds, 'name'),
+                'grounds_id' : deep_get(grounds, 'id'),
+                'grounds_lat': deep_get(grounds, 'location.latitude'),
+                'grounds_long': deep_get(grounds, 'location.longitude'),
+                'grounds_city': deep_get(grounds, 'city'),
+                'l_id': league_stand_id}
+            info_all.append(stats_temp)
+    except TypeError as e:
+        print("Check that data exists and is loaded correctly")
+    return info_all
+
+def league_standings(league, year):
+    """Returns team standings"""
+    stats = read_leagueinfo(load_league_standings(league, year))
+    return stats
+
 
 if __name__ == '__main__':
-    team_standings('EN_PR', '2019')
+    pprint(league_standings('EN_PR', '2019'))
 
 
 

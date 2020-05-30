@@ -109,7 +109,6 @@ class SeasonStats:
         self.fixture_ids = [fix['id'] for fix in self.load_season_fixture().values()]
         self.team_ids = [team['id'] for team in self.load_season_teams().values()]
         self.player_ids = self.load_season_players()
-        self.dir.mkdir('..', 'json', 'params', 'stats')
         self.year = re.search( r'(\d{4})', self.season).group()
 
     def save_completed(self, filename, stats_list, path):
@@ -314,6 +313,27 @@ class SeasonStats:
             print(f'{i} teams retreived had no standings')
         self.save_completed('teamsquads', stats_list, StorageConfig.STATS_DIR)
 
+
+
+    def league_standings(self):
+        """Gets standing for a league"""
+        self.fb.load_leagues()
+        self.fb.leagues[self.league].load_seasons()
+        season_id = self.fb.leagues[self.league].seasons[self.season]['id']
+        print(season_id)
+        response = load_match_data(
+            f'https://footballapi.pulselive.com/football/standings?compSeasons={season_id}')
+        stats_list = response['tables'][0]['entries']
+        print('Completed')
+        self.save_completed('league_standings', stats_list, StorageConfig.STATS_DIR)
+        
+
+
+
+
+
+
+
 class Stats:
     dir = Directory()
     def __init__(self):
@@ -346,7 +366,7 @@ if __name__ == '__main__':
     
 
     stats = SeasonStats('EN_PR', '2019/2020')
-    stats.team_squad()
+    stats.league_standings()
     # season_params = {'EN_PR':['2019/2020', '2018/2019']}
     # gen = ((str(league)+'_'+ str(season_label), SeasonStats(league=league, season=season_label)) for league, seasons in season_params.items() for season_label in seasons)
     # d = dict(gen)

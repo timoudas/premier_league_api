@@ -39,6 +39,11 @@ def init_teams():
     df = pd.DataFrame.from_dict({'teams': query})
     return df
 
+def init_standings:
+    query = DB('EN_PR', '2019').get_standings()
+    df = pd.DataFrame.from_dict({'teams': query})
+    return df
+
 def generate_team_button(team_shortName):
     return dbc.Button(
                 str(team_shortName),
