@@ -17,6 +17,7 @@ from dash.dependencies import State
 
 import pandas as pd
 
+from dashboard_data import DataInit
 from mongo_query import DB
 from pprint import pprint
 
@@ -29,28 +30,12 @@ if command == 'get_teams_standing':
       fig.update_xaxes(rangeslider_visible=True,)
 """
 
-def init_data():
-    query = DB('EN_PR', '2019').get_teams_standing()
-    df = pd.DataFrame.from_dict(query)
-    df = df.drop('_id', 1)
-    return df
+init = DataInit()
 
-def init_teams():
-    query = DB('EN_PR', '2019').get_teams()
-    df = pd.DataFrame.from_dict({'teams': query})
-    return df
+df_teams = init.team_names()
+df_standings = init.league_standings()
+team_series = pd.Series(df_teams['teams'])
 
-def init_standings():
-    query = DB('EN_PR', '2019').get_league_standings_overall()
-    df = pd.DataFrame.from_dict(query)
-    cols = df.columns.tolist()
-    cols = cols[1:2] + cols[0:1] + cols[2:]
-    df = df[cols]
-    df = df.rename(columns={'team_shortName': 'Club', 'position': 'Position', 'overall_played': 'Played',
-                            'overall_won': 'W','overall_draw': 'D', 'overall_lost': 'L', 
-                            'overall_goalsFor': 'GF', 'overall_goalsAgainst':'GA',
-                            'overall_goalsDifference': 'GD', 'overall_points': 'Points'})
-    return df
 
 def generate_team_button(team_shortName):
     return dbc.Button(
@@ -67,15 +52,6 @@ def generate_team_button(team_shortName):
 
 def gen_inputs(value, i_type):
     return Input(str(value), i_type)
-
-
-
-        
-
-df = init_data()
-df_teams = init_teams()
-df_standings = init_standings()
-team_series = pd.Series(df_teams['teams'])
 
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
