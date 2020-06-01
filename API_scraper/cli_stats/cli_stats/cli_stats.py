@@ -200,7 +200,8 @@ class StatShell(cmd.Cmd):
     def push_choices(self, type_stats, database):
         choices = {'-p': db.executePushPlayer,
                    '-t': db.executePushTeam,
-                   '-f': db.executePushFixture}
+                   '-f': db.executePushFixture,
+                   '-l': db.executePushLeagueStandings}
         if type_stats in choices.keys():
             return choices.get(type_stats)(database)
 

@@ -355,7 +355,8 @@ def read_team_standings_stats(data):
                         'clock_label' : comp['clock']['label'],
                         'clock_secs' : comp['clock']['secs'],
                         'id': team_stand_id,
-                        't_id' : team_stand_id}
+                        't_id' : team_stand_id,
+                        'id' : team_stand_id}
                     
                 info_all.append(stats_temp)
     # except TypeError as e:
@@ -417,7 +418,8 @@ def read_leagueinfo(data):
                 'grounds_lat': deep_get(grounds, 'location.latitude'),
                 'grounds_long': deep_get(grounds, 'location.longitude'),
                 'grounds_city': deep_get(grounds, 'city'),
-                'l_id': league_stand_id}
+                'l_id': league_stand_id,
+                'id': league_stand_id}
             info_all.append(stats_temp)
     except TypeError as e:
         print("Check that data exists and is loaded correctly")

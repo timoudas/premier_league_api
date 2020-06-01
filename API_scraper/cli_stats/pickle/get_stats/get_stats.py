@@ -320,7 +320,6 @@ class SeasonStats:
         self.fb.load_leagues()
         self.fb.leagues[self.league].load_seasons()
         season_id = self.fb.leagues[self.league].seasons[self.season]['id']
-        print(season_id)
         response = load_match_data(
             f'https://footballapi.pulselive.com/football/standings?compSeasons={season_id}')
         stats_list = response['tables'][0]['entries']
