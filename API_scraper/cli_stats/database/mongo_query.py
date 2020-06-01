@@ -49,11 +49,39 @@ class DB():
             })
         return query
 
+    def get_league_standings_overall(self):
+        return self.collection.find(
+            { "l_id": { "$exists": "true" }},
+            {
+            "team_shortName": 1,
+            "position": 1,
+            "overall_played": 1,
+            "overall_won": 1,
+            "overall_draw": 1,
+            "overall_lost": 1,
+            "overall_goalsFor": 1,
+            "overall_goalsAgainst": 1,
+            "overall_goalsDifference": 1,
+            "overall_points": 82,
+            "_id": 0,
+            })
+
+    def get_standing_team_id(self, name):
+        return self.collection.find(
+            {'t_id': {'$exists':'true'},
+            'team_shortName': {'$eq': str(name)}},
+            {'_id': 0,
+             't_id': 0,
+             'id': 0
+            }
+            )
+
 
 if __name__ == '__main__':
-    test = DB('EN_PR', '2018')
-    query = test.get_standings()
+    test = DB('EN_PR', '2019')
+    query = test.get_teams()
     df = pd.DataFrame.from_dict(query)
     print(df)
+
 
 
