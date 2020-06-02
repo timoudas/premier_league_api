@@ -66,7 +66,7 @@ class DB():
             "_id": 0,
             })
 
-    def get_standing_team_id(self, name):
+    def get_standing_team_id(self, name, limit):
         return self.collection.find(
             {'t_id': {'$exists':'true'},
             'team_shortName': {'$eq': str(name)}},
@@ -75,11 +75,24 @@ class DB():
              'id': 0
             }
             )
+    def get_five_latest_fixture_team(self, team_shortName, limit=5):
+        query = self.collection.find(
+                                {'t_id': {'$exists':'true'},
+                                'team_shortName': {'$eq': str(team_shortName)}},
+                                {'home_team_shortName': 1,
+                                'away_team_shortName': 1,
+                                'home_team_score': 1,
+                                'away_team_score': 1,
+                                '_id': 0,
+                                'gameweek': 1,
+                                'fixture_id' : 1}
+                                ).sort([('gameweek', -1)]).limit(limit)
+        return query
 
 
 if __name__ == '__main__':
     test = DB('EN_PR', '2019')
-    query = test.get_teams()
+    query = test.get_five_latest_fixture_team('Man Utd')
     df = pd.DataFrame.from_dict(query)
     print(df)
 

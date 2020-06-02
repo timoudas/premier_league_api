@@ -37,7 +37,7 @@ df_standings = init.league_standings()
 team_series = pd.Series(df_teams['teams'])
 
 
-def generate_team_button(team_shortName):
+def gen_team_button(team_shortName):
     return dbc.Button(
                 str(team_shortName),
                 className="btn btn-primary",
@@ -49,6 +49,10 @@ def generate_team_button(team_shortName):
                 n_clicks=0,
 
             )
+def gen_latest_fixtures(team_shortName, limit=5):
+    #TODO gen html.tr elems to put data in a decending order
+    pass
+
 
 def gen_inputs(value, i_type):
     return Input(str(value), i_type)
@@ -123,7 +127,7 @@ app.layout = html.Div(
 
 
                 dbc.Col(
-                    children=[generate_team_button(i) for i in df_teams['teams']]
+                    children=[gen_team_button(i) for i in df_teams['teams']]
                 ), 
 
         ]),
@@ -141,6 +145,7 @@ app.layout = html.Div(
         dbc.Row([
             dbc.Col(
                 dash_table.DataTable(
+                    id='data-table-graph'
                     data=df_standings.to_dict('records'),
                     columns=[{'id': c, 'name': c} for c in df_standings.columns],
                     style_cell_conditional=[
@@ -187,9 +192,15 @@ def update_img(*args):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     team = changed_id.split('.')[0]
     return html.Div([
-        html.Img(src=app.get_asset_url(team + '.png')),
-        html.H2(team)
-        ])
+        html.Img(src=app.get_asset_url(team + '.png'),   
+            style={'position': 'absolute',
+            'margin-top': '35px',
+            'margin-left': '10px',}),
+        html.H2(team, style={'margin-top': '40px', 'margin-left': '80px',
+                            'position': 'absolute', 'color':'#6c757d',
+                            'font-family': 'monospace'}),
+        ], 
+)
 
 
 
