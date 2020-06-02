@@ -26,9 +26,6 @@ from tqdm import tqdm
             // Params : compSeasonIds, sort, fixtures, comps, sys
             'player' : '/stats/player/{id}',"""
 
-    for d in data_temp:
-        d['id'] = int(d['id'])
-    return data_temp
 
 def load_match_data(url):
     """Retreives Ids for different pages on the API"""
