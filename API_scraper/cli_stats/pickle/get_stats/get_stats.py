@@ -106,10 +106,14 @@ class SeasonStats:
         self.pool = multiprocessing.cpu_count()
         self.league = league
         self.season = season
+        self.fb.load_leagues()
+        self.fb.leagues[self.league].load_seasons()
+        self.teams = self.fb.leagues[self.league].seasons[self.season].load_teams()
         self.fixture_ids = [fix['id'] for fix in self.load_season_fixture().values()]
         self.team_ids = [team['id'] for team in self.load_season_teams().values()]
         self.player_ids = self.load_season_players()
         self.year = re.search( r'(\d{4})', self.season).group()
+
 
     def save_completed(self, filename, stats_list, path):
         """Saves dict to json file.
@@ -129,8 +133,7 @@ class SeasonStats:
         """Loads the fixtures for a league-season,
         calls api_scraper.py methods
         """
-        self.fb.load_leagues()
-        self.fb.leagues[self.league].load_seasons()
+
         print(f'Initializing \t {self.league} \t {self.season} fixtures')
         print('Initialization completed')
         self.fb.leagues[self.league].seasons[self.season].load_played_fixtures()
@@ -142,8 +145,6 @@ class SeasonStats:
         """
         print(f'Initializing \t {self.league} \t {self.season} teams')
         player_id = []
-        self.fb.load_leagues()
-        self.fb.leagues[self.league].load_seasons()
         print('Initialization completed')
         return self.fb.leagues[self.league].seasons[self.season].load_teams()
 
@@ -153,10 +154,7 @@ class SeasonStats:
         """
         print(f'Initializing \t {self.league} \t {self.season} players')
         player_id = []
-        self.fb.load_leagues()
-        self.fb.leagues[self.league].load_seasons()
-        teams = self.fb.leagues[self.league].seasons[self.season].load_teams()
-        for team in tqdm(teams.values()):
+        for team in tqdm(self.teams.values()):
             try:
                 players = self.fb.leagues[self.league].seasons[self.season].teams[team['shortName']].load_players()
             except:
@@ -180,8 +178,6 @@ class SeasonStats:
 
         """
         stats_list = []
-        self.fb.load_leagues()
-        self.fb.leagues[self.league].load_seasons()
         print("Getting fixture stats..")
         with Pool(self.pool) as p:
             fixture_stats = list(tqdm(p.imap(self.fixture_stats_singel, self.fixture_ids, chunksize=1), total=len(self.fixture_ids)))
@@ -214,8 +210,6 @@ class SeasonStats:
         saves output in a json file.
          """
         stats_list = []
-        self.fb.load_leagues()
-        self.fb.leagues[self.league].load_seasons()
         print("Getting player stats..")
         with Pool(self.pool) as p:
             player_stats = list(tqdm(p.imap(self.player_stats_singel, self.player_ids), total=len(self.player_ids)))
@@ -239,8 +233,6 @@ class SeasonStats:
 
     def team_standings_singel(self, team_id):
         """Gets standing for a team"""
-        self.fb.load_leagues()
-        self.fb.leagues[self.league].load_seasons()
         season_id = self.fb.leagues[self.league].seasons[self.season]['id']
         ds = load_match_data(
             f'https://footballapi.pulselive.com/football/compseasons/{season_id}/standings/team/{team_id}')
@@ -276,8 +268,6 @@ class SeasonStats:
 
     def team_squad_singel(self, team_id):
         """Gets stats for a player"""
-        self.fb.load_leagues()
-        self.fb.leagues[self.league].load_seasons()
         season_id = self.fb.leagues[self.league].seasons[self.season]['id']
         ds = load_match_data(
             f'https://footballapi.pulselive.com/football/teams/{team_id}/compseasons/{season_id}/staff')
@@ -317,8 +307,6 @@ class SeasonStats:
 
     def league_standings(self):
         """Gets standing for a league"""
-        self.fb.load_leagues()
-        self.fb.leagues[self.league].load_seasons()
         season_id = self.fb.leagues[self.league].seasons[self.season]['id']
         response = load_match_data(
             f'https://footballapi.pulselive.com/football/standings?compSeasons={season_id}')
