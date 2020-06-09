@@ -1,39 +1,29 @@
-# Premier League Betting Calculator
-
-This will become a webb-app for getting odds on primarly PL but also other leagues in the future. Data is feeded through an API to .json files that are loaded into a database. 
-
-To save time a pickled file containg all nesserary id's to fetch playerstats, fixturestats and team standings are stored in a dict where the league and season is the key.
-
-```python
-dict['EN_PR_2019/2020']
-```
+# Premier League CLI and Dashboard
 
 ## CLI
 
-The ```cli_stats.py``` is an interactive command line interface to fetch data from the API. To be able to utilize the ICLI season_params.json and the league_season_init is required. 
+The ```cli_stats.py``` is an interactive command line interface to fetch, clean and push data from the API to a MongoDB. To be able to utilize the ICLI season_params.json and the league_season_init is required.
 
+### Example usage
 
-## Setup
-
-The 
-
-```setup.py```
-
- loads the pickled file league_seasons_init which contains all the id's.This will developed into a CLI where the user can see which leagues exist and how to query them to get stats.
-
-### Example
-```python
-
-import pickle
-with open('league_season_init, 'rb') as f:
-    leagues = pickle.load(f)
-    leagues['EN_PR_2019/2020'].team_standings()
-    leagues['EN_PR_2019/2020'].fixture_stats()
-    leagues['EN_PR_2019/2020'].player_stats()
+```bash 
+>>> python cli_stats.py -i
+>>> download -p en_pr 2019 #Downloads playerstats for PremierLeague season 2019/2020
+>>> clean -p en_pr 2019 #Cleans the data
+>>> db -p en_pr 2019 #Pushes the data to a collection EN_PR2019
+>>> exit
 ```
 
-Files will be saved in ../json/params/stats folder that is created if it doesn't exist.
+## Dashboard
 
-## Data cleaning
+The `dashboard.py` is a build upon `plotly.dash`. This is under development.
 
-To clean the different .json files in json/params/stats to the  
+## Directory
+
+`directory` is a package to help deal with the loading/saving and writing of json-files that are used extensively through out the process.
+This package is needed to use the ICLI and the dashboard. 
+
+### Install
+
+clone the repository and stand in the same directory as the `setup.py` and run below.
+`pip install .`
