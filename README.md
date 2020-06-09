@@ -25,5 +25,5 @@ This package is needed to use the ICLI and the dashboard.
 
 ### Install
 
-clone the repository and stand in the same directory as the `setup.py` and run below.
+clone the repository and stand in the same directory as the `setup.py` and run:
 `pip install .`
