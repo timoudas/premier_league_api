@@ -9,7 +9,7 @@ import sys
 import time
 
 
-from api_scraper.api_scraper import Football
+from .api_scraper.api_scraper import Football
 from directory import Directory
 from multiprocessing import Pool
 from pprint import pprint

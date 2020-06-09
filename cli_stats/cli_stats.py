@@ -30,21 +30,11 @@ from docopt import DocoptExit
 from docopt import docopt
 from pprint import pprint
 
-sys.path.insert(0, '../directory')
-sys.path.insert(0, '../clean_stats')
-sys.path.insert(0, '../database')
-sys.path.insert(0, '../pickle')
-sys.path.insert(0, '../pickle/get_stats')
-sys.path.insert(0, '../pickle/api_scraper')
-sys.path.insert(0, '../database')
-
-
-import clean_stats as clean
-import mongo_db as db
+import clean_stats.clean_stats as clean
 
 from directory import Directory
-from directory import StorageConfig
-from get_stats import SeasonStats
+from get_data.get_stats import SeasonStats
+from storage_config import StorageConfig
 
 
 dir = Directory()
