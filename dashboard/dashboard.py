@@ -139,13 +139,17 @@ app.layout = html.Div(
             html.Div(
                 'TS', id='intermediate-data-dd', style={'display': 'none'}
             ), 
+            html.Div(
+                id='intermediate-f-id', style={'display': 'none'}
+            ), 
         ]),
 
 
         dbc.Row([
             dbc.Col(
                 dash_table.DataTable(
-                    id='data-table-graph'
+                    id='data-table-graph',
+                    # editable=True,
                     data=df_standings.to_dict('records'),
                     columns=[{'id': c, 'name': c} for c in df_standings.columns],
                     style_cell_conditional=[
@@ -163,24 +167,57 @@ app.layout = html.Div(
                     style_cell={'padding': '5px'},
                     style_header={
                         'backgroundColor': 'white',
-                        'fontWeight': 'bold'
+                        'fontWeight': 'bold',
                     },
                     style_as_list_view=True,
                 ),
                 width=4,
             ),
-
-       ]),
-
-        dbc.Row(
             dbc.Col(
                 id='league-table'
             ),
 
-        )
+       ]),
 
     ],
 )
+@app.callback(  Output('intermediate-f-id', 'children'),
+                [Input('data-table-graph', 'active_cell'),
+                Input('data-table-graph', 'data')],
+)
+def get_active_f_id(active_cell, data):
+    if active_cell:
+        row = active_cell.get('row')
+        column = active_cell.get('column_id')
+        if column == 'fixture_id':
+            return data[row].get(column)
+
+
+
+@app.callback(
+    Output('data-table-graph', 'columns'),
+    [Input(str(i), 'n_clicks') for i in df_teams['teams']]
+)
+def form_five_columns(*args):
+    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+    team = changed_id.split('.')[0]
+    df = init.fixture_form_decending(team)
+    data=df.to_dict('records')
+    columns=[{'id': c, 'name': c} for c in df.columns]
+    return columns
+
+@app.callback(
+    Output('data-table-graph', 'data'),
+    [Input(str(i), 'n_clicks') for i in df_teams['teams']]
+)
+def form_five_data(*args):
+    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+    team = changed_id.split('.')[0]
+    df = init.fixture_form_decending(team)
+    data=df.to_dict('records')
+    columns=[{'id': c, 'name': c} for c in df.columns]
+    return data
+
 
 @app.callback(
     Output('team-img', 'children'),
@@ -223,9 +260,7 @@ def data_type(value):
     return value
 
 @app.callback(
-
     Output('league-table', 'children'),
-
 
     [Input('intermediate-year-dd', 'children')]
     +
@@ -240,7 +275,6 @@ def update_league_table(value, *args):
     else:
         team = changed_id.split('.')[0]
         if team in team_series.values:
-            print('true')
             query = DB('EN_PR', value).get_standing_team_id(team)
             df = pd.DataFrame.from_dict(query)
             fig = px.line(df, x="gameweek", y="points")

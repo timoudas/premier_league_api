@@ -47,8 +47,11 @@ class DataInit():
         """
         query = self.db.get_five_latest_fixture_team(team_shortName, limit)
         df = self.to_df(query)
-        df = df.rename(columns={'home_team_shortName': 'HT', 'away_team_shortName': 'AT', 
-                                'home_team_score': 'HT_score', 'away_team_score': 'AT_score'})
+        cols = df.columns.tolist()
+        cols = cols[0:3] + cols[4:5] + cols[3:4]+cols[5:]
+        df = df[cols]
+        df = df.rename(columns={'home_team_shortName': 'HTeam', 'away_team_shortName': 'ATeam', 
+                                'home_team_score': 'H', 'away_team_score': 'A', 'gameweek': 'G'})
         return df
 
 if __name__ == '__main__':
