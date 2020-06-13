@@ -4,7 +4,6 @@ import requests
 import sys
 
 from api_scraper.api_scraper import Football
-from api_scraper.api_scraper import ValidateParams
 from directory import Directory
 from get_id import Params
 from get_stats import SeasonStats
@@ -16,7 +15,7 @@ from pprint import pprint
 
 # params = Params()
 # validation = ValidateParams()
-# stats = Stats().stats
+stats = Stats().stats
 # fb = Football()
 # with open('test_pickle', 'rb') as f:
 #     test = pickle.load(f)

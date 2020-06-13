@@ -6,6 +6,8 @@ import sys
 from directory import Directory
 
 from pprint import pprint
+from storage_config import StorageConfig
+from tqdm import tqdm
 
 
 #TODO
@@ -59,7 +61,8 @@ def load_raw_data(url):
 
     # request to obtain the team info
         try:
-            response = requests.get(url, headers=headers, params=params).json()
+            with requests.Session() as s:
+                response = s.get(url, headers=headers, params=params).json()
             if url.endswith('staff'):
                 data = response['players']
                 return data
@@ -292,9 +295,9 @@ class ValidateParams():
         league = self.leagues
         print('Checking leagues..')
         for league_name, league_id in tqdm(league.items()):
-            status = self.make_request(f'https://footballapi.pulselive.com/football/competitions/{league_id}/compseasons/current')
-            if status != 200:
-                failed.update({league_name:league_id})
+                status = self.make_request(f'https://footballapi.pulselive.com/football/competitions/{league_id}/compseasons/current')
+                if status != 200:
+                    failed.update({league_name:league_id})
         print(failed)
         return failed
 
@@ -343,16 +346,18 @@ class ValidateParams():
         return self.remove_failed_leagues(self.check_current_season())
 
 if __name__ == '__main__':
+    ValidateParams().main()
+
 
     # Dir = Directory() 
-    fb = Football()
+    # fb = Football()
     # lg = League()
     # fx = FixtureInfo()
-    fb.load_leagues()
+    # fb.load_leagues()
     # ds = fb.leagues['EN_PR'].load_seasons()
     # fb.leagues['EN_PR'].seasons['2016/2017'].load_teams()
     # pprint(fb.leagues['EN_PR'].seasons['2016/2017'].teams['Arsenal'].load_players())
-    ds = fb.leagues['EU_CL'].load_seasons()
-    fb.leagues['EU_CL'].seasons['2016/2017'].load_teams()
-    pprint(fb.leagues['EU_CL'].seasons['2016/2017'].teams['Atlético'].load_players())
+    # ds = fb.leagues['EU_CL'].load_seasons()
+    # fb.leagues['EU_CL'].seasons['2016/2017'].load_teams()
+    # pprint(fb.leagues['EU_CL'].seasons['2016/2017'].teams['Atlético'].load_players())
 

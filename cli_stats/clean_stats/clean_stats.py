@@ -73,6 +73,18 @@ def load_fixture_stats(league, year):
     except FileNotFoundError as e:
         print(file, "not found")
 
+def load_fixture_info(league, year):
+    """Load team_squads json files into a container
+        Args:
+            year(int): year of team_squads.json
+    """
+    try: 
+        file = f'{league}_{year}_fixtureinfo.json'
+        stats_file = dirs.load_json(file, StorageConfig.STATS_DIR)
+        return stats_file
+    except FileNotFoundError as e:
+        print(file, "not found")
+
 def load_team_standings(league, year):
     """Load team_standings json files into a container
         Args:
@@ -215,6 +227,8 @@ def read_fixtureinfo(data):
             stats_temp = {}
             if 'info' in d:
                 stats = d['info']
+                home_team = stats['teams'][0]
+                away_team = stats['teams'][1]
                 stats_temp = \
                     {'gameweek_id' : deep_get(stats, 'gameweek.id'),
                     'season_label' : deep_get(stats, 'gameweek.compSeason.label'),
@@ -231,12 +245,12 @@ def read_fixtureinfo(data):
                     'home_team' : stats['teams'][0]['team']['name'],
                     'home_team_id' : stats['teams'][0]['team']['club']['id'],
                     'home_team_shortName' : stats['teams'][0]['team']['shortName'],
-                    'home_team_score' : stats['teams'][0]['score'],
+                    'home_team_score' : deep_get(home_team, 'score', default=0),
 
                     'away_team' : stats['teams'][1]['team']['name'],
                     'away_team_id' : stats['teams'][1]['team']['club']['id'],
                     'away_team_shortName' : stats['teams'][1]['team']['shortName'],
-                    'away_team_score' : stats['teams'][1]['score'],
+                    'away_team_score' : deep_get(away_team, 'score', default=0),
 
                     'ground' : deep_get(stats, 'ground.name'),
                     'grounds_id' : deep_get(stats, 'ground.id'),
@@ -264,7 +278,13 @@ def read_fixturestats(data):
             stats_temp = {}
             stats_home = {}
             stats_away = {}
-            if 'stats' in d:
+            if not 'stats' in d:
+                try:
+                    stats_temp['id'] = d['info']['id']
+                    stats_all.append(stats_temp)
+                except KeyError as e:
+                    pass
+            else:
                 stats = d['stats']
                 info = d['info']
 
@@ -282,20 +302,45 @@ def read_fixturestats(data):
                         stats_temp.update(stats_home)
                         stats_temp.update({'id' : info['id']})
 
+    
+
                 stats_all.append(stats_temp)
         return stats_all
     except TypeError as e:
         print(e, "Check that data exists and is loaded correctly")
 
+def read_fixture_events(data):
+    info_all = []
+    for d in data:
+        match_officals = d['matchOfficials']
+        half_time =d['halfTimeScore']
+        team_list = d['teamLists']
+        events = d['events']
+        stats_temp = \
+            { 'home_halftime' : half_time['homeScore'],
+              'away_halftime' : half_time['awayScore'],
+              'matchOfficials': match_officals,
+              'teamList' : team_list,
+              'events' : events,
+              'id': d['id']
+
+        }
+        info_all.append(stats_temp)
+    return info_all
+
+
 
 def fixturestats(league, year):
     info = read_fixtureinfo(load_fixture_stats(league, year))
     stats = read_fixturestats(load_fixture_stats(league, year))
+    events = read_fixture_events(load_fixture_info(league, year))
 
 
     #Mergers the two list of dicts if `id-key` is the same
     fixture_merged = [{**x, **y} for y in info for x in stats if x['id'] == y['id']]
-    d = [dict(sorted(d.items())) for d in fixture_merged]
+    merge_events = [{**x, **y} for y in fixture_merged for x in events if x['id'] == y['id']]
+    d = [dict(sorted(d.items())) for d in merge_events]
+    print(len(d))
     return d
 
 def read_team_standings_stats(data):
@@ -426,7 +471,7 @@ def league_standings(league, year):
 
 
 if __name__ == '__main__':
-    load_team_standings('EN_PR', 2019)
+    pprint(read_fixture_events(load_fixture_info('EN_PR', 2019)))
 
 
 

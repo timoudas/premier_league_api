@@ -32,6 +32,8 @@ from pprint import pprint
 
 import clean_stats.clean_stats as clean
 
+from database import mongo_db as db
+
 from directory import Directory
 from get_data.get_stats import SeasonStats
 from storage_config import StorageConfig
@@ -97,8 +99,9 @@ class StatShell(cmd.Cmd):
         if arg['LEAGUE']:
             league = arg['LEAGUE'].upper()
             if league in self.leagues:
-                seasons = self.leagues[league]
-                print(league,'seasons:')
+                seasons = self.leagues[league]['label']
+                show_league = self.leagues[league]['league_name']
+                print(show_league,'seasons:')
                 for season in seasons:
                     print("{: <20}".format(season), end="")
                 print('\n')
@@ -115,7 +118,8 @@ class StatShell(cmd.Cmd):
                    '-t': self.pickle[league + '_' + season].team_standings,
                    '-f': self.pickle[league + '_' + season].fixture_stats,
                    '-s': self.pickle[league + '_' + season].team_squad,
-                   '-l': self.pickle[league + '_' + season].league_standings}
+                   '-l': self.pickle[league + '_' + season].league_standings,
+                   '-i': self.pickle[league + '_' + season].fixture_info}
         return choices.get(type_stats)()
 
 
@@ -126,9 +130,10 @@ class StatShell(cmd.Cmd):
         Options:
             -p,  --player         Playerstats
             -t,  --team           Team standings
-            -f,  --fixture        Fixturestats
+            -f,  --fixture        FixtureStats
             -s,  --squad          Squads
             -l,  --league         League standings
+            -i,  --league         FixtureInfo
             """
         league = arg['<LEAGUE>'].upper()
         if len(arg['<SEASON>']) == 1:

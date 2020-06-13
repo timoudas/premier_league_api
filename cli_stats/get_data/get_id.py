@@ -67,21 +67,19 @@ class Params():
         """
         #Gets the league abbreviations from fb_league
         league_abbreviation = [league['abbreviation'] for league in self.fb_league.values()]
+        league_description = [league['description'] for league in self.fb_league.values()]
         season_info = {} #Placeholder-dict for league-season
-        season_info_id = {}
-        #Iterates over all league_abbreviations
-        for abbreviation in tqdm(league_abbreviation):
+        league_abb_des = zip(league_abbreviation, league_description)
+        for abbreviation, description in tqdm(league_abb_des, total=len(league_abbreviation)):
             #loads all seasons for each abbreviation
             league_info = self.fb_league[abbreviation].load_seasons()
-            season_info[abbreviation] = []#Initiates empty list as value
-            season_info_id[abbreviation] = []#Initiates empty list as value
+            season_info[abbreviation] = {'league_name':None, 'label':[]}#Initiates empty list as value
             for i in league_info.values():
                 if self.season_label(i['label']).startswith('2'):
-                    season_info[abbreviation] += [self.season_label(i['label'])]
-                    season_info_id[abbreviation] += [{'label':self.season_label(i['label']) , 'id': i['id']}]
+                    season_info[abbreviation]['label'] += [self.season_label(i['label'])]
+                    season_info[abbreviation].update({'league_name': description})
         #Saves season_info as season_params.json in params folder
         self.dir.save_json('season_params', season_info, StorageConfig.PARAMS_DIR)
-        self.dir.save_json('season_params_id', season_info_id, StorageConfig.PARAMS_DIR)
 
     def get_team_param(self):
         """Generates a .json with a all team info, where the teamID acts as key.
@@ -131,8 +129,8 @@ def main():
     print('Retrieving league-seasons..')
     d.league_season_param()
     print('Retrieving teams..')
-    d.get_team_param()
-    print('Finished')
+    # d.get_team_param()
+    # print('Finished')
 
 if __name__ == '__main__':
     main()

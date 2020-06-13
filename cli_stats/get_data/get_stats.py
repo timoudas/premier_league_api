@@ -62,6 +62,7 @@ class SeasonStats:
         self.season = season
         self.fb.load_leagues()
         self.fb.leagues[self.league].load_seasons()
+        self.season_id = self.fb.leagues[self.league].seasons[self.season]['id']
         self.teams = self.fb.leagues[self.league].seasons[self.season].load_teams()
         self.fixture_ids = [fix['id'] for fix in self.load_season_fixture().values()]
         self.team_ids = [team['id'] for team in self.load_season_teams().values()]
@@ -139,8 +140,8 @@ class SeasonStats:
         i = 0
         for fixture in fixture_stats:
             stats = {}
+            stats['info'] = fixture['entity']
             if 'data' in fixture:
-                stats['info'] = fixture['entity']
                 stats['stats'] = fixture['data']
             else:
                 i += 1
@@ -152,8 +153,40 @@ class SeasonStats:
             print(f'{i} games retreived had no stats')
         self.save_completed('fixturestats', stats_list, StorageConfig.STATS_DIR)
 
+    def fixture_info_singel(self, fixture_id):
+        """Gets stats for a fixture"""
+        ds = load_match_data(f'https://footballapi.pulselive.com/football/fixtures/{fixture_id}')
+        return ds
+
+    def fixture_info(self):
+        """Gets stats for all fixtures in a league-season using multithreading
+        saves output in a json file.
+
+        """
+        stats_list = []
+        print("Getting fixture info..")
+        with Pool(self.pool) as p:
+            fixture_info = list(tqdm(p.imap(self.fixture_info_singel, self.fixture_ids, chunksize=1), total=len(self.fixture_ids)))
+        print('Getting data from workers..')
+        i = 0
+        for info in fixture_info:
+            stats = {}
+            if info:
+                stats = info
+            else:
+                i += 1
+            if stats:
+                stats_list.append(stats)
+
+        print('Completed')
+        if i >0:
+            print(f'{i} games retreived had no stats')
+        self.save_completed('fixtureinfo', stats_list, StorageConfig.STATS_DIR)
+
     def player_stats_singel(self, player):
         """Gets stats for a player"""
+        self.fb.load_leagues()
+        self.fb.leagues[self.league].load_seasons()
         season_id = self.fb.leagues[self.league].seasons[self.season]['id']
         ds = load_match_data(
             f'https://footballapi.pulselive.com/football/stats/player/{player}?compSeasons={season_id}')
@@ -187,6 +220,8 @@ class SeasonStats:
 
     def team_standings_singel(self, team_id):
         """Gets standing for a team"""
+        self.fb.load_leagues()
+        self.fb.leagues[self.league].load_seasons()
         season_id = self.fb.leagues[self.league].seasons[self.season]['id']
         ds = load_match_data(
             f'https://footballapi.pulselive.com/football/compseasons/{season_id}/standings/team/{team_id}')
@@ -222,6 +257,8 @@ class SeasonStats:
 
     def team_squad_singel(self, team_id):
         """Gets stats for a player"""
+        self.fb.load_leagues()
+        self.fb.leagues[self.league].load_seasons()
         season_id = self.fb.leagues[self.league].seasons[self.season]['id']
         ds = load_match_data(
             f'https://footballapi.pulselive.com/football/teams/{team_id}/compseasons/{season_id}/staff')
@@ -257,22 +294,46 @@ class SeasonStats:
             print(f'{i} teams retreived had no standings')
         self.save_completed('teamsquads', stats_list, StorageConfig.STATS_DIR)
 
-
-
     def league_standings(self):
         """Gets standing for a league"""
-        season_id = self.fb.leagues[self.league].seasons[self.season]['id']
+        # self.fb.load_leagues()
+        # self.fb.leagues[self.league].load_seasons()
+        # season_id = self.fb.leagues[self.league].seasons[self.season]['id']
         response = load_match_data(
-            f'https://footballapi.pulselive.com/football/standings?compSeasons={season_id}')
+            f'https://footballapi.pulselive.com/football/standings?compSeasons={self.season_id}')
         stats_list = response['tables'][0]['entries']
         print('Completed')
         self.save_completed('league_standings', stats_list, StorageConfig.STATS_DIR)
+
+class SeasonStatsUpdate:
+
+    def __init__(self, league, season):
+        self.league = league
+        self.season = season
+
+    # def load_file(self, type):
+    #     try:
+    #         types = {'f_info': '_fixtureinfo',
+    #                  'f_stats': '_fixturestats',
+    #                  'p_stats': '_playerstats',
+    #                  't_squad': '_teamsquads',
+    #                  't_stand': '_teamstandings'}
+
+
+    def update_fixture_info(self):
+        #TODO make a while loop to stop iter if anything differ
+        file = f'{self.league}_{self.year}_fixtureinfo.json'
+        existing_data = self.dir.load_json(file, StorageConfig.STATS_DIR)
+        for d in existing_data:
+            d_id = d['id']
+            new_data = self.fixture_info_singel(d_id)
+            mismatch = {key for key in d.keys() & new_data if d[key] != new_data[key]}
+            if mismatch:
+                break
+        print('loop exit')
+            
+
         
-
-
-
-
-
 
 
 class Stats:
@@ -286,7 +347,7 @@ class Stats:
         the ens of the season.
         """
 
-        data = self.dir.load_json('season_params.json', '..', 'json', 'params')
+        data = self.dir.load_json('season_params.json', StorageConfig.PARAMS_DIR)
         holder = {str(league)+'_'+ str(season_label):
                     SeasonStats(league=league, season=season_label) 
                         for league, seasons in data.items() for season_label in seasons}
