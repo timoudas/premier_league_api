@@ -1,12 +1,16 @@
-import argparse
 import json
 import multiprocessing
 import os
-import pickle
 import re
 import requests
 import sys
 import time
+import uuid 
+
+import datetime
+
+from datetime import date
+
 
 
 from .api_scraper.api_scraper import Football
@@ -67,7 +71,7 @@ class Base():
         """
         year = self.year 
         filename = self.league + '_' + year + '_' + filename
-        self.dir.save_json(filename, stats_list, StorageConfig.STATS_DIR)
+        self.dir.save_json(filename, stats_list, path)
         print(f'Saved as {filename}.json in {path}')
 
 class PlayerStats(Base):
@@ -120,6 +124,7 @@ class PlayerStats(Base):
         for player in all_players:
             stats = {"info": {}}
             stats["info"] = player['entity']
+            stats['uuid'] = str(uuid.uuid4())
             if player['stats']:
                 stats['stats'] = player['stats']
                 stats['stats'].append({'id':player['entity']['id']})
@@ -171,6 +176,7 @@ class FixtureStats(Base):
         for fixture in fixture_stats:
             stats = {}
             stats['info'] = fixture['entity']
+            stats['uuid'] = str(uuid.uuid4())
             if 'data' in fixture:
                 stats['stats'] = fixture['data']
             else:
@@ -203,6 +209,7 @@ class FixtureStats(Base):
             stats = {}
             if info:
                 stats = info
+                stats['uuid'] = str(uuid.uuid4())
             else:
                 i += 1
             if stats:
@@ -253,6 +260,7 @@ class TeamStats(Base):
         team_standing = team_standings
         for team in team_standing:
             stats = {"season": {}, "team": {}, "standing": {}}
+            stats['uuid'] = str(uuid.uuid4())
             if 'compSeason' in team:
                 stats['season'] = team['compSeason']
             if 'team' in team:
@@ -287,6 +295,7 @@ class TeamStats(Base):
         team_squad = team_squads
         for team in team_squad:
             stats = {"season": {}, "team": {}, "officials": {}}
+            stats['uuid'] = str(uuid.uuid4())
             if 'compSeason' in team:
                 stats['season'] = team['compSeason']
             if 'team' in team:
@@ -315,9 +324,10 @@ class LeagueStats(Base):
             response = load_match_data(
                 f'https://footballapi.pulselive.com/football/standings?compSeasons={self.season_id}')
             stats_list = response['tables'][0]['entries']
+            for d in stats_list:
+                d['uuid'] = str(uuid.uuid4())
             print('Completed')
             self.save_completed('league_standings', stats_list, StorageConfig.STATS_DIR)
-
 
 class SeasonStats(PlayerStats, TeamStats, FixtureStats, LeagueStats):
 
@@ -353,37 +363,84 @@ class SeasonStats(PlayerStats, TeamStats, FixtureStats, LeagueStats):
         else:
             raise(ValueError)
 
-
-        
-        
-
-
 class SeasonStatsUpdate:
+    dir = Directory()
 
     def __init__(self, league, season):
+        self.today = date.today().strftime("%s")
         self.league = league
         self.season = season
-
-    # def load_file(self, type):
-    #     try:
-    #         types = {'f_info': '_fixtureinfo',
-    #                  'f_stats': '_fixturestats',
-    #                  'p_stats': '_playerstats',
-    #                  't_squad': '_teamsquads',
-    #                  't_stand': '_teamstandings'}
+        self.year = re.search( r'(\d{4})', self.season).group()
+        self.pool = multiprocessing.cpu_count()
 
 
-    def update_fixture_info(self):
-        #TODO make a while loop to stop iter if anything differ
-        file = f'{self.league}_{self.year}_fixtureinfo.json'
-        existing_data = self.dir.load_json(file, StorageConfig.STATS_DIR)
-        for d in existing_data:
-            d_id = d['id']
-            new_data = self.fixture_info_singel(d_id)
-            mismatch = {key for key in d.keys() & new_data if d[key] != new_data[key]}
-            if mismatch:
-                break
-        print('loop exit')
+    def check_fixture_diffs(self, data):
+        try:
+            timestamp = data['kickoff']['millis']
+            if self.today <= timestamp:
+                return True
+        except KeyError as e:
+            return False
+
+    def get_fixture_diffs(self):
+        if check_fixture_diffs:
+            pass
+
+
+
+    def file_types(self, file_type):
+        types = {'f_stats': 'fixturestats.json',
+                 'p_stats': 'playerstats.json',
+                 't_squad': 'teamsquads.json',
+                 't_stand': 'teamstandings.json',
+                 'l_stats': 'league_standings.json'}
+        return types.get(file_type)
+
+    def fixture_info_singel(self, fixture_id):
+        """Gets stats for a fixture"""
+        ds = load_match_data(f'https://footballapi.pulselive.com/football/fixtures/{fixture_id}')
+        return ds
+
+    def check_if_stats_exist(self, file_type):
+        """Checks if json file exists.
+
+        Args:
+            filename(str): The name of the file
+            path(str): The path to were the content is to be saved
+
+        """
+        file_stats = self.file_types(file_type)
+        filename = self.league + '_' + self.year + '_' + file_stats
+        try:
+            self.dir.load_json(filename, StorageConfig.STATS_DIR)
+            return filename
+        except FileNotFoundError as e:
+            return False
+
+    def check_diff_single(self, data):
+        stats_diff = []
+        stats = {}
+        d_id = data['info']['id']
+        new_data = self.fixture_info_singel(d_id)
+        stats[d_id] = []
+        mismatch = {key for key in data.keys() & new_data if data[key] != new_data[key]}
+        if mismatch:
+            stats[d_id].append(missmatch)
+            stats_diff.append(stats)
+        return stats_diff
+
+    def check_diff(self, file):
+        filename = self.check_if_stats_exist(file)
+        if filename:
+            data = self.dir.load_json(filename, StorageConfig.STATS_DIR)
+
+            with Pool(self.pool) as p:
+                team_squads = list(tqdm(p.imap(self.check_diff_single, data), total=len(data)))
+            return team_squads
+        else:
+            print('No diffs')
+                
+        
             
 
         
@@ -411,8 +468,10 @@ class Stats:
 if __name__ == '__main__': 
     
 
-    stats = SeasonStats()
-    stats('player_stats', 'EN_PR', '2019/2020')
+    stats = SeasonStatsUpdate('EN_PR', '2019/2020')
+    # print(stats.check_diff('f_stats'))
+
+
 
 
     # season_params = {'EN_PR':['2019/2020', '2018/2019']}
