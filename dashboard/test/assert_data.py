@@ -8,13 +8,12 @@ from docopt import DocoptExit
 from docopt import docopt
 from pprint import pprint
 
-sys.path.insert(0, '../directory')
-sys.path.insert(0, '../database')
+sys.path.insert(0, '../cli_stats')
 
 
-from directory import StorageConfig
-from mongo_db import DB
-from mongo_db import Directory
+
+from directory import Directory
+from storage_config import StorageConfig
 
 dir = Directory()
 
@@ -77,4 +76,4 @@ def check_id(league, season):
 # check_len_player('EN_PR', '2018')
 # check_len_team('EN_PR', '2018')
 # check_db_records('EN_PR', '2018')
-check_len_team('EN_PR', 2018)
+check_len_fixture('EN_PR', 2018)

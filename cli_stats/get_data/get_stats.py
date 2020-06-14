@@ -18,14 +18,6 @@ from tqdm import tqdm
 
 
 
-"""         // Lists all the statistics for a given match
-            // Params : compSeasonIds, sort, sys
-            'match' : '/stats/match/{id}',
-            // Lists all the statistics for a given player
-            // Params : compSeasonIds, sort, fixtures, comps, sys
-            'player' : '/stats/player/{id}',"""
-
-
 def load_match_data(url):
     """Retreives Ids for different pages on the API"""
     headers = {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -42,17 +34,13 @@ def load_match_data(url):
         print(e, 'Something went wrong with the request')
         return {}
 
-class SeasonStats:
+class Base():
     fb = Football()
     dir = Directory()
 
     def __init__(self, league, season):
         """Initiates the class by counting the cores for later multiprocessing.
-        Fixture, team and player IDs are loaded into lists from method within the class.
-        That is so that they don't have to be created everytime that they are needed, and 
-        save time. A directory stats/ is created in ..json/params/ folder to store all the
-        downloaded stats. 
-            
+
             Args:
                 league(str): A league in the form of it's abbreviation. Ex. 'EN_PR'
                 season(str): A season that exists for that specific league EX. '2019/2020'
@@ -64,10 +52,8 @@ class SeasonStats:
         self.fb.leagues[self.league].load_seasons()
         self.season_id = self.fb.leagues[self.league].seasons[self.season]['id']
         self.teams = self.fb.leagues[self.league].seasons[self.season].load_teams()
-        self.fixture_ids = [fix['id'] for fix in self.load_season_fixture().values()]
-        self.team_ids = [team['id'] for team in self.load_season_teams().values()]
-        self.player_ids = self.load_season_players()
         self.year = re.search( r'(\d{4})', self.season).group()
+
 
 
     def save_completed(self, filename, stats_list, path):
@@ -84,24 +70,16 @@ class SeasonStats:
         self.dir.save_json(filename, stats_list, StorageConfig.STATS_DIR)
         print(f'Saved as {filename}.json in {path}')
 
-    def load_season_fixture(self):
-        """Loads the fixtures for a league-season,
-        calls api_scraper.py methods
-        """
+class PlayerStats(Base):
 
-        print(f'Initializing \t {self.league} \t {self.season} fixtures')
-        print('Initialization completed')
-        self.fb.leagues[self.league].seasons[self.season].load_played_fixtures()
-        return self.fb.leagues[self.league].seasons[self.season].load_played_fixtures()
+    def __init__(self, *args, **kwargs):
+        """Player IDs are loaded into a list from method within the class.
+        That is so that they don't have to be created everytime that they are needed, and 
+        save time."""
+        Base.__init__(self, *args, **kwargs)
+        self.player_ids = self.load_season_players()
+        self.player_dispatch_map = { 'player_stats' : self.player_stats}
 
-    def load_season_teams(self):
-        """Loads the teams for a league-season,
-        calls api_scraper.py methods
-        """
-        print(f'Initializing \t {self.league} \t {self.season} teams')
-        player_id = []
-        print('Initialization completed')
-        return self.fb.leagues[self.league].seasons[self.season].load_teams()
 
     def load_season_players(self):
         """Loads the players for a league-season,
@@ -121,6 +99,58 @@ class SeasonStats:
             ('No players found..')
         print('Initialization completed')
         return player_id
+
+    def player_stats_singel(self, player):
+        """Gets stats for a player"""
+        ds = load_match_data(
+            f'https://footballapi.pulselive.com/football/stats/player/{player}?compSeasons={self.season_id}')
+        return ds
+
+    def player_stats(self):
+        """Gets stats for all players in a league-season using multithreading
+        saves output in a json file.
+         """
+        stats_list = []
+        print("Getting player stats..")
+        with Pool(self.pool) as p:
+            player_stats = list(tqdm(p.imap(self.player_stats_singel, self.player_ids), total=len(self.player_ids)))
+        print('Getting data from workers..')
+        all_players = player_stats
+        i = 0
+        for player in all_players:
+            stats = {"info": {}}
+            stats["info"] = player['entity']
+            if player['stats']:
+                stats['stats'] = player['stats']
+                stats['stats'].append({'id':player['entity']['id']})
+            else:
+                i += 1
+            stats_list.append(stats)
+
+        print('Completed')
+        if i > 0:
+            print(f'{i} players retreived had no stats')
+        self.save_completed('playerstats', stats_list, StorageConfig.STATS_DIR)
+
+class FixtureStats(Base):
+
+    def __init__(self, *args, **kwargs):
+        """Fixture IDs are loaded into a list from method within the class.
+        That is so that they don't have to be created everytime that they are needed, and 
+        save time."""
+        Base.__init__(self, *args, **kwargs)
+        self.fixture_ids = [fix['id'] for fix in self.load_season_fixture().values()]
+        self.fixture_dispatch_map = {'fixture_stats' : self.fixture_stats,
+                             'fixture_info': self.fixture_info}
+
+    def load_season_fixture(self):
+        """Loads the fixtures for a league-season,
+        calls api_scraper.py methods
+        """
+
+        print(f'Initializing \t {self.league} \t {self.season} fixtures')
+        print('Initialization completed')
+        return self.fb.leagues[self.league].seasons[self.season].load_played_fixtures()
 
     def fixture_stats_singel(self, fixture):
         """Gets stats for a fixture"""
@@ -183,48 +213,31 @@ class SeasonStats:
             print(f'{i} games retreived had no stats')
         self.save_completed('fixtureinfo', stats_list, StorageConfig.STATS_DIR)
 
-    def player_stats_singel(self, player):
-        """Gets stats for a player"""
-        self.fb.load_leagues()
-        self.fb.leagues[self.league].load_seasons()
-        season_id = self.fb.leagues[self.league].seasons[self.season]['id']
-        ds = load_match_data(
-            f'https://footballapi.pulselive.com/football/stats/player/{player}?compSeasons={season_id}')
-        return ds
+class TeamStats(Base):
 
-    def player_stats(self):
-        """Gets stats for all players in a league-season using multithreading
-        saves output in a json file.
-         """
-        stats_list = []
-        print("Getting player stats..")
-        with Pool(self.pool) as p:
-            player_stats = list(tqdm(p.imap(self.player_stats_singel, self.player_ids), total=len(self.player_ids)))
-        print('Getting data from workers..')
-        all_players = player_stats
-        i = 0
-        for player in all_players:
-            stats = {"info": {}}
-            stats["info"] = player['entity']
-            if player['stats']:
-                stats['stats'] = player['stats']
-                stats['stats'].append({'id':player['entity']['id']})
-            else:
-                i += 1
-            stats_list.append(stats)
+    def __init__(self, *args, **kwargs):
+        """Team IDs are loaded into a list from method within the class.
+        That is so that they don't have to be created everytime that they are needed, and 
+        save time."""
+        Base.__init__(self, *args, **kwargs)
+        self.team_ids = [team['id'] for team in self.load_season_teams().values()]
+        self.team_dispatch_map = {'team_standings' : self.team_standings,
+                             'team_squad': self.team_squad}
 
-        print('Completed')
-        if i > 0:
-            print(f'{i} players retreived had no stats')
-        self.save_completed('playerstats', stats_list, StorageConfig.STATS_DIR)
+
+    def load_season_teams(self):
+        """Loads the teams for a league-season,
+        calls api_scraper.py methods
+        """
+        print(f'Initializing \t {self.league} \t {self.season} teams')
+        player_id = []
+        print('Initialization completed')
+        return self.fb.leagues[self.league].seasons[self.season].load_teams()
 
     def team_standings_singel(self, team_id):
         """Gets standing for a team"""
-        self.fb.load_leagues()
-        self.fb.leagues[self.league].load_seasons()
-        season_id = self.fb.leagues[self.league].seasons[self.season]['id']
         ds = load_match_data(
-            f'https://footballapi.pulselive.com/football/compseasons/{season_id}/standings/team/{team_id}')
+            f'https://footballapi.pulselive.com/football/compseasons/{self.season_id}/standings/team/{team_id}')
         return ds
 
     def team_standings(self):
@@ -257,11 +270,8 @@ class SeasonStats:
 
     def team_squad_singel(self, team_id):
         """Gets stats for a player"""
-        self.fb.load_leagues()
-        self.fb.leagues[self.league].load_seasons()
-        season_id = self.fb.leagues[self.league].seasons[self.season]['id']
         ds = load_match_data(
-            f'https://footballapi.pulselive.com/football/teams/{team_id}/compseasons/{season_id}/staff')
+            f'https://footballapi.pulselive.com/football/teams/{team_id}/compseasons/{self.season_id}/staff')
         return ds
 
     def team_squad(self):
@@ -294,16 +304,59 @@ class SeasonStats:
             print(f'{i} teams retreived had no standings')
         self.save_completed('teamsquads', stats_list, StorageConfig.STATS_DIR)
 
-    def league_standings(self):
-        """Gets standing for a league"""
-        # self.fb.load_leagues()
-        # self.fb.leagues[self.league].load_seasons()
-        # season_id = self.fb.leagues[self.league].seasons[self.season]['id']
-        response = load_match_data(
-            f'https://footballapi.pulselive.com/football/standings?compSeasons={self.season_id}')
-        stats_list = response['tables'][0]['entries']
-        print('Completed')
-        self.save_completed('league_standings', stats_list, StorageConfig.STATS_DIR)
+class LeagueStats(Base):
+
+        def __init__(self, *args, **kwargs):
+            Base.__init__(self, *args, **kwargs)
+            self.league_dispatch_map = { 'league_standings' : self.league_standings}
+
+        def league_standings(self):
+            """Gets standing for a league"""
+            response = load_match_data(
+                f'https://footballapi.pulselive.com/football/standings?compSeasons={self.season_id}')
+            stats_list = response['tables'][0]['entries']
+            print('Completed')
+            self.save_completed('league_standings', stats_list, StorageConfig.STATS_DIR)
+
+
+class SeasonStats(PlayerStats, TeamStats, FixtureStats, LeagueStats):
+
+    def __init__(self, *args, **kwargs):
+        """Empty construtor for lazy initiation of inherited
+        sub-classes."""
+        pass
+
+
+    def __call__(self, called_method, *args, **kwargs):
+        """Calls a method from a sub-class
+
+            Args:
+                called_method (str): Existing method in one of the sub-classes
+                *args (str): League and Season
+        """
+
+        if hasattr(PlayerStats, called_method):
+            PlayerStats.__init__(self, *args, **kwargs)
+            self.player_dispatch_map.get(called_method)()
+
+        elif hasattr(TeamStats, called_method):
+            TeamStats.__init__(self, *args, **kwargs)
+            self.team_dispatch_map.get(called_method)()
+
+        elif hasattr(FixtureStats, called_method):
+            FixtureStats.__init__(self, *args, **kwargs)
+            self.fixture_dispatch_map.get(called_method)()
+
+        elif hasattr(LeagueStats, called_method):
+            LeagueStats.__init__(self, *args, **kwargs)
+            self.league_dispatch_map.get(called_method)()
+        else:
+            raise(ValueError)
+
+
+        
+        
+
 
 class SeasonStatsUpdate:
 
@@ -355,20 +408,13 @@ class Stats:
             pickle.dump(holder, f)
 
 
-
-
-
-
-
-#stat = Stats()
-
-
-
 if __name__ == '__main__': 
     
 
-    stats = SeasonStats('EN_PR', '2019/2020')
-    stats.league_standings()
+    stats = SeasonStats()
+    stats('player_stats', 'EN_PR', '2019/2020')
+
+
     # season_params = {'EN_PR':['2019/2020', '2018/2019']}
     # gen = ((str(league)+'_'+ str(season_label), SeasonStats(league=league, season=season_label)) for league, seasons in season_params.items() for season_label in seasons)
     # d = dict(gen)

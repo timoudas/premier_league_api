@@ -114,13 +114,15 @@ class StatShell(cmd.Cmd):
             print('\n')
 
     def downloads_choices(self, type_stats, league, season):
-        choices = {'-p': self.pickle[league + '_' + season].player_stats,
-                   '-t': self.pickle[league + '_' + season].team_standings,
-                   '-f': self.pickle[league + '_' + season].fixture_stats,
-                   '-s': self.pickle[league + '_' + season].team_squad,
-                   '-l': self.pickle[league + '_' + season].league_standings,
-                   '-i': self.pickle[league + '_' + season].fixture_info}
-        return choices.get(type_stats)()
+        stats = SeasonStats()
+        choices = {'-p': ['player_stats', league, season],
+                   '-t': ['team_standings', league, season],
+                   '-f': ['fixture_stats', league, season],
+                   '-s': ['team_squad', league, season],
+                   '-l': ['league_standings', league, season],
+                   '-i': ['fixture_info', league, season]}
+        params = choices.get(type_stats)
+        return stats(*params)
 
 
     @docopt_cmd
