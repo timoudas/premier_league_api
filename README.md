@@ -2,7 +2,7 @@
 
 ## CLI
 
-The ```cli_stats.py``` is an interactive command line interface to fetch, clean and push data from the API to a MongoDB. To be able to utilize the ICLI season_params.json and the league_season_init is required.
+The ```cli_stats.py``` is an interactive command line interface to fetch, clean and push data from the API to a MongoDB. To be able to utilize the ICLI season_params.json is required. Interface to link to custom MongoDB is not supported and has to be changed manually in ``database/mongo_db.py`
 
 ### Example usage
 
@@ -26,4 +26,4 @@ This package is needed to use the ICLI and the dashboard.
 ### Install
 
 clone the repository and stand in the same directory as the `setup.py` and run:
-`pip install .`
+`pip install .` to install the `directory` package.
