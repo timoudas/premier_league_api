@@ -19,8 +19,9 @@ from multiprocessing import Pool
 from pprint import pprint
 from storage_config import StorageConfig
 from tqdm import tqdm
+from validate_etags import ValidateEtag
 
-
+etag_validation = 
 
 def load_match_data(url):
     """Retreives Ids for different pages on the API"""
@@ -31,7 +32,8 @@ def load_match_data(url):
     params = (('pageSize', '100'),)
     # request to obtain the team info
     try:
-        response = requests.get(url, params = params, headers=headers).json()
+        with requests.Session() as s:
+            response = s.get(url, headers=headers, params=params).json()
         data = response
         return data
     except Exception as e:
@@ -41,6 +43,8 @@ def load_match_data(url):
 class Base():
     fb = Football()
     dir = Directory()
+    e_tag = ValidateEtag()
+
 
     def __init__(self, league, season):
         """Initiates the class by counting the cores for later multiprocessing.
@@ -106,6 +110,7 @@ class PlayerStats(Base):
 
     def player_stats_singel(self, player):
         """Gets stats for a player"""
+        
         ds = load_match_data(
             f'https://footballapi.pulselive.com/football/stats/player/{player}?compSeasons={self.season_id}')
         return ds
@@ -287,7 +292,7 @@ class TeamStats(Base):
         saves output in a json file.
          """
         stats_list = []
-        print("Getting team standings..")
+        print("Getting team squads..")
         with Pool(self.pool) as p:
             team_squads = list(tqdm(p.imap(self.team_squad_singel, self.team_ids), total=len(self.team_ids)))
         print('Getting data from workers..')
@@ -321,6 +326,7 @@ class LeagueStats(Base):
 
         def league_standings(self):
             """Gets standing for a league"""
+            print("Getting league standings..")
             response = load_match_data(
                 f'https://footballapi.pulselive.com/football/standings?compSeasons={self.season_id}')
             stats_list = response['tables'][0]['entries']
@@ -363,7 +369,7 @@ class SeasonStats(PlayerStats, TeamStats, FixtureStats, LeagueStats):
         else:
             raise(ValueError)
 
-class SeasonStatsUpdate:
+class SeasonStatsUpdateFixture(FixtureStats):
     dir = Directory()
 
     def __init__(self, league, season):
