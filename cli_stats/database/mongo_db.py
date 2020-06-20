@@ -69,7 +69,7 @@ def load_file(file):
 def check_record(collection, index_dict):
     """Check if record exists in collection
         Args:
-            record_id (str): record _id as in collection
+            index_dict (dict): key, value
     """
     return collection.find_one(index_dict)
 
@@ -80,6 +80,7 @@ def collection_index(collection, index, *args):
         Args:
             collection (str): Name of collection in database
             index (str): Dict key to be used as an index
+            args (str): Additional dict keys to create compound indexs
     """
     compound_index = tuple((arg, ASCENDING) for arg in args)
     if index not in collection.index_information():
@@ -98,7 +99,7 @@ def update_upstream(collection, index_dict, record):
     """Update record in collection
         Args:
             collection (str): Name of collection in database
-            record_id (str): record _id as in collection
+            index_dict (dict): key, value
             record (dict): Data to be updated in collection
     """
     return collection.update_one(index_dict, {"$set": record}, upsert=True)
