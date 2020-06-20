@@ -11,11 +11,20 @@ import uuid
 from bson.objectid import ObjectId
 from directory import Directory
 from multiprocessing import Pool
+from pymongo import ASCENDING
+from pymongo import DESCENDING
 from pymongo import MongoClient
 from storage_config import StorageConfig
 from tqdm import tqdm
 
 dir = Directory()
+
+def DB_collections(collection_type):
+    types = {'p': 'player_stats',
+             't': 'team_standings',
+             'f': 'fixture_stats',
+             'l': 'league_standings'}
+    return types.get(collection_type)
 
 
 
@@ -24,9 +33,9 @@ class DB():
     def __init__(self, league, season, func=None):
         self.db_user = os.environ.get('DB_user')
         self.db_pass = os.environ.get('DB_pass')
-        self.MONGODB_URL = f'mongodb+srv://{self.db_user}:{self.db_pass}@database-mbqxj.mongodb.net/test?retryWrites=true&w=majority'
+        self.MONGODB_URL = f'mongodb+srv://{self.db_user}:{self.db_pass}@cluster0-mbqxj.mongodb.net/<dbname>?retryWrites=true&w=majority'
         self.client = MongoClient(self.MONGODB_URL)
-        self.DATABASE = self.client["Database"]
+        self.DATABASE = self.client[league + season]
 
         self.league = league
         self.season = season
@@ -57,14 +66,14 @@ def load_file(file):
     except FileNotFoundError:
         print("Please check that", loaded_file, "exists")
 
-def check_record(collection, record_id):
+def check_record(collection, index_dict):
     """Check if record exists in collection
         Args:
             record_id (str): record _id as in collection
     """
-    return collection.find_one({'id': record_id})
+    return collection.find_one(index_dict)
 
-def collection_index(collection, index):
+def collection_index(collection, index, *args):
     """Checks if index exists for collection, 
     and return a new index if not
 
@@ -72,8 +81,9 @@ def collection_index(collection, index):
             collection (str): Name of collection in database
             index (str): Dict key to be used as an index
     """
+    compound_index = tuple((arg, ASCENDING) for arg in args)
     if index not in collection.index_information():
-        return collection.create_index([(index, pymongo.ASCENDING)], unique=True)
+        return collection.create_index([(index, DESCENDING), *compound_index], unique=True)
 
 def push_upstream(collection, record_id, record):
     """Update record in collection
@@ -84,24 +94,25 @@ def push_upstream(collection, record_id, record):
     """
     return collection.insert_one(record)
 
-def update_upstream(collection, record_id, record):
+def update_upstream(collection, index_dict, record):
     """Update record in collection
         Args:
             collection (str): Name of collection in database
             record_id (str): record _id as in collection
             record (dict): Data to be updated in collection
     """
-    return collection.update_one({"id": record_id}, {"$set": record}, upsert=True)
+    return collection.update_one(index_dict, {"$set": record}, upsert=True)
 
 def executePushPlayer(db):
 
     playerstats = load_file(db.playerfile)
-    collection = db.DATABASE[db.league + db.season]
-    collection_index(collection, 'id')
+    collection_name = DB_collections('p')
+    collection = db.DATABASE[collection_name]
+    collection_index(collection, 'p_id')
     for player in tqdm(playerstats):
-        existingPost = check_record(collection, player['p_id'])
+        existingPost = check_record(collection, {'p_id': player['p_id']})
         if existingPost:
-            update_upstream(collection, player['p_id'], player)
+            update_upstream(collection, {'p_id': player['p_id']}, player)
         else:
             push_upstream(collection, player['p_id'], player)
 
@@ -109,38 +120,43 @@ def executePushPlayer(db):
 def executePushFixture(db):
 
     fixturestats = load_file(db.fixturefile)
-    collection = db.DATABASE[db.league + db.season]
-    collection_index(collection, 'id')
+    collection_name = DB_collections('f')
+    collection = db.DATABASE[collection_name]
+    collection_index(collection, 'f_id')
     for fixture in tqdm(fixturestats):
-        existingPost = check_record(collection, fixture['f_id'])
+        existingPost = check_record(collection, {'f_id': fixture['f_id']})
         if existingPost:
-            update_upstream(collection, fixture['f_id'], fixture)
+            update_upstream(collection, {'f_id': fixture['f_id']}, fixture)
         else:
             push_upstream(collection, fixture['f_id'], fixture)
 
 def executePushTeam(db):
 
     team_standings = load_file(db.teamfile)
-    collection = db.DATABASE[db.league + db.season]
-    collection_index(collection, 'id')
+    collection_name = DB_collections('t')
+    collection = db.DATABASE[collection_name]
+    collection_index(collection, 'team_shortName', 'played')
     for team in tqdm(team_standings):
-        existingPost = check_record(collection, team['t_id'])
+        existingPost = check_record(collection, {'team_shortName': team['team_shortName'],
+                                                 'played': team['played']})
         if existingPost:
-            update_upstream(collection, team['t_id'], team)
+            update_upstream(collection, {'team_shortName': team['team_shortName'],
+                                        'played': team['played']}, team)
         else:
-            push_upstream(collection, team['t_id'], team)
+            push_upstream(collection, team['team_shortName'], team)
 
 def executePushLeagueStandings(db):
 
     league_standings = load_file(db.leaguefile)
-    collection = db.DATABASE[db.league + db.season]
-    collection_index(collection, 'id')
+    collection_name = DB_collections('l')
+    collection = db.DATABASE[collection_name]
+    collection_index(collection, 'team_shortName')
     for team in tqdm(league_standings):
-        existingPost = check_record(collection, team['l_id'])
+        existingPost = check_record(collection, {'team_shortName': team['team_shortName']})
         if existingPost:
-            update_upstream(collection, team['l_id'], team)
+            update_upstream(collection, {'team_shortName': team['team_shortName']}, team)
         else:
-            push_upstream(collection, team['l_id'], team)
+            push_upstream(collection, team['team_shortName'], team)
 
         
 

@@ -22,7 +22,6 @@ from functools import reduce
 from pprint import pprint
 from storage_config import StorageConfig
 
-id = uuid.uuid1() 
 dirs = Directory()
 
 
@@ -219,7 +218,6 @@ def playerstats(league, year):
     d = [dict(sorted(d.items())) for d in merge_info_stats]
     return d
 
-
 def read_fixtureinfo(data):
     info_all = []
     try:
@@ -328,8 +326,6 @@ def read_fixture_events(data):
         info_all.append(stats_temp)
     return info_all
 
-
-
 def fixturestats(league, year):
     info = read_fixtureinfo(load_fixture_stats(league, year))
     stats = read_fixturestats(load_fixture_stats(league, year))
@@ -340,7 +336,6 @@ def fixturestats(league, year):
     fixture_merged = [{**x, **y} for y in info for x in stats if x['id'] == y['id']]
     merge_events = [{**x, **y} for y in fixture_merged for x in events if x['id'] == y['id']]
     d = [dict(sorted(d.items())) for d in merge_events]
-    print(len(d))
     return d
 
 def read_team_standings_stats(data):
@@ -352,50 +347,48 @@ def read_team_standings_stats(data):
             stats_all = d['standing']
             team = d['team']
             for stats in stats_all:
-                team_stand_id = str(uuid.uuid4())[:8]
                 if 'fixtures' in stats:
-                    comp = stats['fixtures'][0]
-                    stats_temp = \
-                        {'played' : stats['played'],
-                        'points' : stats['points'],
-                        'position' : stats['position'],
-                        'team' : deep_get(team, 'name'),
-                        'team_id' : deep_get(team, 'club.id'),
-                        'team_shortName' : deep_get(team, 'club.shortName'),
+                    for fixture in range(len(stats['fixtures'])):
+                        comp = stats['fixtures'][fixture]
+                        stats_temp = \
+                            {'played' : stats['played'],
+                            'points' : stats['points'],
+                            'position' : stats['position'],
+                            'team' : deep_get(team, 'name'),
+                            'team_id' : deep_get(team, 'club.id'),
+                            'team_shortName' : deep_get(team, 'club.shortName'),
 
-                        'competition' : deep_get(comp, 'gameweek.compSeason.competition.description'),
-                        'competition_abbr' : deep_get(comp, 'gameweek.compSeason.competition.abbreviation'),
-                        'competition_id' : deep_get(comp, 'gameweek.compSeason.competition.id'),
-                        'season_label': deep_get(d, 'season.label'),
-                        'season_id': deep_get(d, 'season.id'),
+                            'competition' : deep_get(comp, 'gameweek.compSeason.competition.description'),
+                            'competition_abbr' : deep_get(comp, 'gameweek.compSeason.competition.abbreviation'),
+                            'competition_id' : deep_get(comp, 'gameweek.compSeason.competition.id'),
+                            'season_label': deep_get(d, 'season.label'),
+                            'season_id': deep_get(d, 'season.id'),
 
-                        'gameweek' : deep_get(comp, 'gameweek.gameweek'),
-                        'kickoff' : deep_get(comp, 'kickoff.label'),
-                        'kickoff_millis' : deep_get(comp, 'kickoff.millis'),
+                            'gameweek' : deep_get(comp, 'gameweek.gameweek'),
+                            'kickoff' : deep_get(comp, 'kickoff.label'),
+                            'kickoff_millis' : deep_get(comp, 'kickoff.millis'),
+                            'fixtures' : stats['fixtures']}
 
-                        'home_team' : comp['teams'][0]['team']['name'],
-                        'home_team_id' : comp['teams'][0]['team']['club']['id'],
-                        'home_team_shortName' : comp['teams'][0]['team']['shortName'],
-                        'home_team_score' : comp['teams'][0]['score'],
+                            # 'home_team' : comp['teams'][0]['team']['name'],
+                            # 'home_team_id' : comp['teams'][0]['team']['club']['id'],
+                            # 'home_team_shortName' : comp['teams'][0]['team']['shortName'],
+                            # 'home_team_score' : comp['teams'][0]['score'],
 
-                        'away_team' : comp['teams'][1]['team']['name'],
-                        'away_team_id' : comp['teams'][1]['team']['club']['id'],
-                        'away_team_shortName' : comp['teams'][1]['team']['shortName'],
-                        'away_team_score' : comp['teams'][1]['score'],
-                        'ground' : comp['ground']['name'],
-                        'grounds_id' : comp['ground']['id'],
+                            # 'away_team' : comp['teams'][1]['team']['name'],
+                            # 'away_team_id' : comp['teams'][1]['team']['club']['id'],
+                            # 'away_team_shortName' : comp['teams'][1]['team']['shortName'],
+                            # 'away_team_score' : comp['teams'][1]['score'],
+                            # 'ground' : comp['ground']['name'],
+                            # 'grounds_id' : comp['ground']['id'],
 
-                        'city' : comp['ground']['city'],
-                        'fixtureType' : comp['fixtureType'],
-                        'extraTime' : comp['extraTime'],
-                        'shootout' : comp['shootout'],
-                        'fixture_id' : comp['id'],
+                            # 'city' : comp['ground']['city'],
+                            # 'fixtureType' : comp['fixtureType'],
+                            # 'extraTime' : comp['extraTime'],
+                            # 'shootout' : comp['shootout'],
+                            # 'fixture_id' : comp['id'],
 
-                        'clock_label' : comp['clock']['label'],
-                        'clock_secs' : comp['clock']['secs'],
-                        'id': team_stand_id,
-                        't_id' : team_stand_id,
-                        'id' : team_stand_id}
+                            # 'clock_label' : comp['clock']['label'],
+                            # 'clock_secs' : comp['clock']['secs'],}
                     
                 info_all.append(stats_temp)
     # except TypeError as e:
@@ -456,9 +449,7 @@ def read_leagueinfo(data):
                 'grounds_id' : deep_get(grounds, 'id'),
                 'grounds_lat': deep_get(grounds, 'location.latitude'),
                 'grounds_long': deep_get(grounds, 'location.longitude'),
-                'grounds_city': deep_get(grounds, 'city'),
-                'l_id': league_stand_id,
-                'id': league_stand_id}
+                'grounds_city': deep_get(grounds, 'city'),}
             info_all.append(stats_temp)
     except TypeError as e:
         print("Check that data exists and is loaded correctly")
@@ -466,7 +457,7 @@ def read_leagueinfo(data):
 
 def league_standings(league, year):
     """Returns team standings"""
-    stats = read_leagueinfo(load_team_standings(league, year))
+    stats = read_leagueinfo(load_league_standings(league, year))
     return stats
 
 

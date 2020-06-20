@@ -14,14 +14,14 @@ from datetime import date
 
 
 from .api_scraper.api_scraper import Football
+from .static_types import *
+from .validate_etags import ValidateEtag
 from directory import Directory
 from multiprocessing import Pool
 from pprint import pprint
 from storage_config import StorageConfig
 from tqdm import tqdm
-from validate_etags import ValidateEtag
 
-etag_validation = 
 
 def load_match_data(url):
     """Retreives Ids for different pages on the API"""
@@ -43,7 +43,6 @@ def load_match_data(url):
 class Base():
     fb = Football()
     dir = Directory()
-    e_tag = ValidateEtag()
 
 
     def __init__(self, league, season):
@@ -61,6 +60,7 @@ class Base():
         self.season_id = self.fb.leagues[self.league].seasons[self.season]['id']
         self.teams = self.fb.leagues[self.league].seasons[self.season].load_teams()
         self.year = re.search( r'(\d{4})', self.season).group()
+        self.league_season = self.league + '_' + self.year + '_'
 
 
 
@@ -73,8 +73,7 @@ class Base():
             path(str): The path to were the content is to be saved
 
         """
-        year = self.year 
-        filename = self.league + '_' + year + '_' + filename
+        filename = self.league + '_' + self.year + '_' + filename
         self.dir.save_json(filename, stats_list, path)
         print(f'Saved as {filename}.json in {path}')
 
@@ -87,6 +86,7 @@ class PlayerStats(Base):
         Base.__init__(self, *args, **kwargs)
         self.player_ids = self.load_season_players()
         self.player_dispatch_map = { 'player_stats' : self.player_stats}
+        self.e_tag = ValidateEtag()
 
 
     def load_season_players(self):
@@ -108,12 +108,14 @@ class PlayerStats(Base):
         print('Initialization completed')
         return player_id
 
+
     def player_stats_singel(self, player):
         """Gets stats for a player"""
         
         ds = load_match_data(
             f'https://footballapi.pulselive.com/football/stats/player/{player}?compSeasons={self.season_id}')
         return ds
+
 
     def player_stats(self):
         """Gets stats for all players in a league-season using multithreading
@@ -129,7 +131,6 @@ class PlayerStats(Base):
         for player in all_players:
             stats = {"info": {}}
             stats["info"] = player['entity']
-            stats['uuid'] = str(uuid.uuid4())
             if player['stats']:
                 stats['stats'] = player['stats']
                 stats['stats'].append({'id':player['entity']['id']})
@@ -181,7 +182,6 @@ class FixtureStats(Base):
         for fixture in fixture_stats:
             stats = {}
             stats['info'] = fixture['entity']
-            stats['uuid'] = str(uuid.uuid4())
             if 'data' in fixture:
                 stats['stats'] = fixture['data']
             else:
@@ -265,13 +265,16 @@ class TeamStats(Base):
         team_standing = team_standings
         for team in team_standing:
             stats = {"season": {}, "team": {}, "standing": {}}
-            stats['uuid'] = str(uuid.uuid4())
             if 'compSeason' in team:
                 stats['season'] = team['compSeason']
             if 'team' in team:
                 stats['team'] = team['team']
             if 'entries' in team:
-                stats['standing'] = team['entries']
+                entries = team['entries']
+                stats['standing'] = []
+                for entry in entries:
+                    if 'fixtures' in entry:
+                        stats['standing'].append(entry)
             else:
                 i += 1
             stats_list.append(stats)
@@ -300,7 +303,6 @@ class TeamStats(Base):
         team_squad = team_squads
         for team in team_squad:
             stats = {"season": {}, "team": {}, "officials": {}}
-            stats['uuid'] = str(uuid.uuid4())
             if 'compSeason' in team:
                 stats['season'] = team['compSeason']
             if 'team' in team:
@@ -330,8 +332,6 @@ class LeagueStats(Base):
             response = load_match_data(
                 f'https://footballapi.pulselive.com/football/standings?compSeasons={self.season_id}')
             stats_list = response['tables'][0]['entries']
-            for d in stats_list:
-                d['uuid'] = str(uuid.uuid4())
             print('Completed')
             self.save_completed('league_standings', stats_list, StorageConfig.STATS_DIR)
 
@@ -341,7 +341,6 @@ class SeasonStats(PlayerStats, TeamStats, FixtureStats, LeagueStats):
         """Empty construtor for lazy initiation of inherited
         sub-classes."""
         pass
-
 
     def __call__(self, called_method, *args, **kwargs):
         """Calls a method from a sub-class
@@ -373,6 +372,7 @@ class SeasonStatsUpdateFixture(FixtureStats):
     dir = Directory()
 
     def __init__(self, league, season):
+        FixtureStats.__init__(self, *args, **kwargs)
         self.today = date.today().strftime("%s")
         self.league = league
         self.season = season
@@ -395,12 +395,8 @@ class SeasonStatsUpdateFixture(FixtureStats):
 
 
     def file_types(self, file_type):
-        types = {'f_stats': 'fixturestats.json',
-                 'p_stats': 'playerstats.json',
-                 't_squad': 'teamsquads.json',
-                 't_stand': 'teamstandings.json',
-                 'l_stats': 'league_standings.json'}
-        return types.get(file_type)
+        """Returns the filename"""
+        return static_types.FILE_NAMES.get(file_type)
 
     def fixture_info_singel(self, fixture_id):
         """Gets stats for a fixture"""
@@ -474,8 +470,8 @@ class Stats:
 if __name__ == '__main__': 
     
 
-    stats = SeasonStatsUpdate('EN_PR', '2019/2020')
-    # print(stats.check_diff('f_stats'))
+    stats = SeasonStats()
+    stats('team_standings', 'EN_PR', '2019/2020')
 
 
 

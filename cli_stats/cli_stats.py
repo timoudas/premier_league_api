@@ -191,7 +191,7 @@ class StatShell(cmd.Cmd):
                     elif key == '-l':
                         dir.save_json(file_name + 'league_standings', self.loading_choices(key, league, season), StorageConfig.DB_DIR)
                         print('-l File was saved')
-            except TypeError:
+            except FileExistsError:
                 print("Please check that", file_name, " exists")
 
     def push_choices(self, type_stats, database):
