@@ -15,7 +15,6 @@ from datetime import date
 
 from .api_scraper.api_scraper import Football
 from .static_types import *
-from .validate_etags import ValidateEtag
 from directory import Directory
 from multiprocessing import Pool
 from pprint import pprint

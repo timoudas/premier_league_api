@@ -3,10 +3,18 @@ import pandas as pd
 
 from mongo_query import DB
 
+def DB_collections(collection_type):
+    types = {'p': 'player_stats',
+             't': 'team_standings',
+             'f': 'fixture_stats',
+             'l': 'league_standings'}
+    return types.get(collection_type)
+
 class DataInit():
 
     def __init__(self, league='EN_PR', season='2019'):
-        self.db = DB(league, season)
+        self.league = league
+        self.season = season
 
     @staticmethod
     def to_df(query):
@@ -14,20 +22,26 @@ class DataInit():
 
     def team_standing(self):
         """Returns all documents with a t_id key"""
-        query = self.db.get_teams_standing()
+        stats_type = DB_collections('t')
+        db = DB(stats_type, self.league, self.season)
+        query = db.get_teams_standing()
         df = self.to_df(query)
         df = df.drop('_id', 1)
         return df
 
     def team_names(self):
         """Returns all the unique team names"""
-        query = self.db.get_teams()
+        stats_type = DB_collections('t')
+        db = DB(stats_type, self.league, self.season)
+        query = db.get_teams()
         df = self.to_df({'teams': query})
         return df
 
     def league_standings(self):
         """Returns the league standings"""
-        query = self.db.get_league_standings_overall()
+        stats_type = DB_collections('l')
+        db = DB(stats_type, self.league, self.season)
+        query = db.get_league_standings_overall()
         df = self.to_df(query)
         cols = df.columns.tolist()
         cols = cols[1:2] + cols[0:1] + cols[2:]
@@ -45,7 +59,10 @@ class DataInit():
                 team_shortName: A teams shortname
                 limit: The number of latest games
         """
-        query = self.db.get_five_latest_fixture_team(team_shortName, limit)
+        stats_type = DB_collections('f')
+        print(stats_type)
+        db = DB(stats_type, self.league, self.season)
+        query = db.get_five_latest_fixture_team(team_shortName, limit)
         df = self.to_df(query)
         cols = df.columns.tolist()
         cols = cols[0:3] + cols[4:5] + cols[3:4]+cols[5:]

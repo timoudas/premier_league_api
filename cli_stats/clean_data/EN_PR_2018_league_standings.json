@@ -6,7 +6,7 @@
         "position": 1,
         "overall_played": 38,
         "overall_won": 32,
-        "overall_draw": 0,
+        "overall_draw": 2,
         "overall_lost": 4,
         "overall_goalsFor": 95,
         "overall_goalsAgainst": 23,
@@ -32,9 +32,7 @@
         "grounds_id": 457,
         "grounds_lat": 53.4832,
         "grounds_long": -2.20042,
-        "grounds_city": "Manchester",
-        "l_id": "2fecc6b1",
-        "id": "2fecc6b1"
+        "grounds_city": "Manchester"
     },
     {
         "team_name": "Liverpool",
@@ -43,7 +41,7 @@
         "position": 2,
         "overall_played": 38,
         "overall_won": 30,
-        "overall_draw": 0,
+        "overall_draw": 7,
         "overall_lost": 1,
         "overall_goalsFor": 89,
         "overall_goalsAgainst": 22,
@@ -69,9 +67,7 @@
         "grounds_id": 901,
         "grounds_lat": 53.4313,
         "grounds_long": -2.96158,
-        "grounds_city": "Liverpool",
-        "l_id": "a3d50d12",
-        "id": "a3d50d12"
+        "grounds_city": "Liverpool"
     },
     {
         "team_name": "Chelsea",
@@ -80,7 +76,7 @@
         "position": 3,
         "overall_played": 38,
         "overall_won": 21,
-        "overall_draw": 0,
+        "overall_draw": 9,
         "overall_lost": 8,
         "overall_goalsFor": 63,
         "overall_goalsAgainst": 39,
@@ -106,9 +102,7 @@
         "grounds_id": 30,
         "grounds_lat": 51.4816,
         "grounds_long": -0.191016,
-        "grounds_city": "London",
-        "l_id": "f5a727fd",
-        "id": "f5a727fd"
+        "grounds_city": "London"
     },
     {
         "team_name": "Tottenham Hotspur",
@@ -117,7 +111,7 @@
         "position": 4,
         "overall_played": 38,
         "overall_won": 23,
-        "overall_draw": 0,
+        "overall_draw": 2,
         "overall_lost": 13,
         "overall_goalsFor": 67,
         "overall_goalsAgainst": 39,
@@ -143,9 +137,7 @@
         "grounds_id": 1734,
         "grounds_lat": null,
         "grounds_long": null,
-        "grounds_city": "London",
-        "l_id": "cdb9a2d5",
-        "id": "cdb9a2d5"
+        "grounds_city": "London"
     },
     {
         "team_name": "Arsenal",
@@ -154,7 +146,7 @@
         "position": 5,
         "overall_played": 38,
         "overall_won": 21,
-        "overall_draw": 0,
+        "overall_draw": 7,
         "overall_lost": 10,
         "overall_goalsFor": 73,
         "overall_goalsAgainst": 51,
@@ -180,9 +172,7 @@
         "grounds_id": 52,
         "grounds_lat": 51.5548,
         "grounds_long": -0.108533,
-        "grounds_city": "London",
-        "l_id": "0f5e3707",
-        "id": "0f5e3707"
+        "grounds_city": "London"
     },
     {
         "team_name": "Manchester United",
@@ -191,7 +181,7 @@
         "position": 6,
         "overall_played": 38,
         "overall_won": 19,
-        "overall_draw": 0,
+        "overall_draw": 9,
         "overall_lost": 10,
         "overall_goalsFor": 65,
         "overall_goalsAgainst": 54,
@@ -217,9 +207,7 @@
         "grounds_id": 42,
         "grounds_lat": 53.4626,
         "grounds_long": -2.29103,
-        "grounds_city": "Manchester",
-        "l_id": "4ebc7b94",
-        "id": "4ebc7b94"
+        "grounds_city": "Manchester"
     },
     {
         "team_name": "Wolverhampton Wanderers",
@@ -228,7 +216,7 @@
         "position": 7,
         "overall_played": 38,
         "overall_won": 16,
-        "overall_draw": 0,
+        "overall_draw": 9,
         "overall_lost": 13,
         "overall_goalsFor": 47,
         "overall_goalsAgainst": 46,
@@ -254,9 +242,7 @@
         "grounds_id": 913,
         "grounds_lat": 52.5904,
         "grounds_long": -2.13077,
-        "grounds_city": "Wolverhampton",
-        "l_id": "8f9f1ac5",
-        "id": "8f9f1ac5"
+        "grounds_city": "Wolverhampton"
     },
     {
         "team_name": "Everton",
@@ -265,7 +251,7 @@
         "position": 8,
         "overall_played": 38,
         "overall_won": 15,
-        "overall_draw": 0,
+        "overall_draw": 9,
         "overall_lost": 14,
         "overall_goalsFor": 54,
         "overall_goalsAgainst": 46,
@@ -291,9 +277,7 @@
         "grounds_id": 31,
         "grounds_lat": 53.4387,
         "grounds_long": -2.96639,
-        "grounds_city": "Liverpool",
-        "l_id": "08942b4f",
-        "id": "08942b4f"
+        "grounds_city": "Liverpool"
     },
     {
         "team_name": "Leicester City",
@@ -302,7 +286,7 @@
         "position": 9,
         "overall_played": 38,
         "overall_won": 15,
-        "overall_draw": 0,
+        "overall_draw": 7,
         "overall_lost": 16,
         "overall_goalsFor": 51,
         "overall_goalsAgainst": 48,
@@ -328,9 +312,7 @@
         "grounds_id": 49,
         "grounds_lat": 52.62,
         "grounds_long": -1.1415,
-        "grounds_city": "Leicester",
-        "l_id": "4be50455",
-        "id": "4be50455"
+        "grounds_city": "Leicester"
     },
     {
         "team_name": "West Ham United",
@@ -339,7 +321,7 @@
         "position": 10,
         "overall_played": 38,
         "overall_won": 15,
-        "overall_draw": 0,
+        "overall_draw": 7,
         "overall_lost": 16,
         "overall_goalsFor": 52,
         "overall_goalsAgainst": 55,
@@ -365,9 +347,7 @@
         "grounds_id": 431,
         "grounds_lat": null,
         "grounds_long": null,
-        "grounds_city": "London",
-        "l_id": "bbdf3df5",
-        "id": "bbdf3df5"
+        "grounds_city": "London"
     },
     {
         "team_name": "Watford",
@@ -376,7 +356,7 @@
         "position": 11,
         "overall_played": 38,
         "overall_won": 14,
-        "overall_draw": 0,
+        "overall_draw": 8,
         "overall_lost": 16,
         "overall_goalsFor": 52,
         "overall_goalsAgainst": 59,
@@ -402,9 +382,7 @@
         "grounds_id": 136,
         "grounds_lat": 51.6496,
         "grounds_long": -0.401731,
-        "grounds_city": "Watford",
-        "l_id": "79b431cd",
-        "id": "79b431cd"
+        "grounds_city": "Watford"
     },
     {
         "team_name": "Crystal Palace",
@@ -413,7 +391,7 @@
         "position": 12,
         "overall_played": 38,
         "overall_won": 14,
-        "overall_draw": 0,
+        "overall_draw": 7,
         "overall_lost": 17,
         "overall_goalsFor": 51,
         "overall_goalsAgainst": 53,
@@ -439,9 +417,7 @@
         "grounds_id": 45,
         "grounds_lat": 51.3979,
         "grounds_long": -0.085923,
-        "grounds_city": "London",
-        "l_id": "8f9c85da",
-        "id": "8f9c85da"
+        "grounds_city": "London"
     },
     {
         "team_name": "Newcastle United",
@@ -450,7 +426,7 @@
         "position": 13,
         "overall_played": 38,
         "overall_won": 12,
-        "overall_draw": 0,
+        "overall_draw": 9,
         "overall_lost": 17,
         "overall_goalsFor": 42,
         "overall_goalsAgainst": 48,
@@ -476,9 +452,7 @@
         "grounds_id": 27,
         "grounds_lat": 54.9752,
         "grounds_long": -1.62235,
-        "grounds_city": "Newcastle",
-        "l_id": "85cf3410",
-        "id": "85cf3410"
+        "grounds_city": "Newcastle"
     },
     {
         "team_name": "AFC Bournemouth",
@@ -487,7 +461,7 @@
         "position": 14,
         "overall_played": 38,
         "overall_won": 13,
-        "overall_draw": 0,
+        "overall_draw": 6,
         "overall_lost": 19,
         "overall_goalsFor": 56,
         "overall_goalsAgainst": 70,
@@ -513,9 +487,7 @@
         "grounds_id": 914,
         "grounds_lat": 50.7349,
         "grounds_long": -1.83899,
-        "grounds_city": "Bournemouth",
-        "l_id": "b6c6f7e7",
-        "id": "b6c6f7e7"
+        "grounds_city": "Bournemouth"
     },
     {
         "team_name": "Burnley",
@@ -524,7 +496,7 @@
         "position": 15,
         "overall_played": 38,
         "overall_won": 11,
-        "overall_draw": 0,
+        "overall_draw": 7,
         "overall_lost": 20,
         "overall_goalsFor": 45,
         "overall_goalsAgainst": 68,
@@ -550,9 +522,7 @@
         "grounds_id": 47,
         "grounds_lat": 53.7885,
         "grounds_long": -2.23149,
-        "grounds_city": "Burnley",
-        "l_id": "58fd2d71",
-        "id": "58fd2d71"
+        "grounds_city": "Burnley"
     },
     {
         "team_name": "Southampton",
@@ -561,7 +531,7 @@
         "position": 16,
         "overall_played": 38,
         "overall_won": 9,
-        "overall_draw": 0,
+        "overall_draw": 12,
         "overall_lost": 17,
         "overall_goalsFor": 45,
         "overall_goalsAgainst": 65,
@@ -587,9 +557,7 @@
         "grounds_id": 48,
         "grounds_lat": 50.9065,
         "grounds_long": -1.39082,
-        "grounds_city": "Southampton",
-        "l_id": "3ad2a959",
-        "id": "3ad2a959"
+        "grounds_city": "Southampton"
     },
     {
         "team_name": "Brighton and Hove Albion",
@@ -598,7 +566,7 @@
         "position": 17,
         "overall_played": 38,
         "overall_won": 9,
-        "overall_draw": 0,
+        "overall_draw": 9,
         "overall_lost": 20,
         "overall_goalsFor": 35,
         "overall_goalsAgainst": 60,
@@ -624,9 +592,7 @@
         "grounds_id": 1684,
         "grounds_lat": 50.8606,
         "grounds_long": -0.082237,
-        "grounds_city": "Falmer",
-        "l_id": "2fe590d5",
-        "id": "2fe590d5"
+        "grounds_city": "Falmer"
     },
     {
         "team_name": "Cardiff City",
@@ -635,7 +601,7 @@
         "position": 18,
         "overall_played": 38,
         "overall_won": 10,
-        "overall_draw": 0,
+        "overall_draw": 4,
         "overall_lost": 24,
         "overall_goalsFor": 34,
         "overall_goalsAgainst": 69,
@@ -661,9 +627,7 @@
         "grounds_id": 41,
         "grounds_lat": 51.4745,
         "grounds_long": -3.19981,
-        "grounds_city": "Cardiff",
-        "l_id": "672c1fe3",
-        "id": "672c1fe3"
+        "grounds_city": "Cardiff"
     },
     {
         "team_name": "Fulham",
@@ -672,7 +636,7 @@
         "position": 19,
         "overall_played": 38,
         "overall_won": 7,
-        "overall_draw": 0,
+        "overall_draw": 5,
         "overall_lost": 26,
         "overall_goalsFor": 34,
         "overall_goalsAgainst": 81,
@@ -698,9 +662,7 @@
         "grounds_id": 16,
         "grounds_lat": 51.4745,
         "grounds_long": -0.220993,
-        "grounds_city": "London",
-        "l_id": "e3754581",
-        "id": "e3754581"
+        "grounds_city": "London"
     },
     {
         "team_name": "Huddersfield Town",
@@ -709,7 +671,7 @@
         "position": 20,
         "overall_played": 38,
         "overall_won": 3,
-        "overall_draw": 0,
+        "overall_draw": 7,
         "overall_lost": 28,
         "overall_goalsFor": 22,
         "overall_goalsAgainst": 76,
@@ -735,8 +697,6 @@
         "grounds_id": 65,
         "grounds_lat": 53.6539,
         "grounds_long": -1.76906,
-        "grounds_city": "Huddersfield",
-        "l_id": "5136340c",
-        "id": "5136340c"
+        "grounds_city": "Huddersfield"
     }
 ]

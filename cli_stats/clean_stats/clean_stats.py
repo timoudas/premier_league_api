@@ -258,6 +258,7 @@ def read_fixtureinfo(data):
                     'extraTime' : stats.get('extraTime'),
                     'shootout' : stats.get('shootout'),
                     'f_id' : stats.get('id'),
+                    'status': stats.get('status'),
 
                     'clock_label' : deep_get(stats, 'clock.label'),
                     'clock_secs' : deep_get(stats, 'clock.secs'),}
@@ -420,7 +421,7 @@ def read_leagueinfo(data):
                 'position' : d['position'],
                 'overall_played' : deep_get(overall, 'played'),
                 'overall_won' : deep_get(overall, 'won', 0),
-                'overall_draw' : deep_get(overall, 'draw', 0),
+                'overall_draw' : deep_get(overall, 'drawn', 0),
                 'overall_lost' : deep_get(overall, 'lost', 0),
                 'overall_goalsFor' : deep_get(overall, 'goalsFor'),
                 'overall_goalsAgainst' : deep_get(overall, 'goalsAgainst'),

@@ -6,17 +6,24 @@ from pprint import pprint
 
 from pymongo import MongoClient
 
+def DB_collections(collection_type):
+    types = {'p': 'player_stats',
+             't': 'team_standings',
+             'f': 'fixture_stats',
+             'l': 'league_standings'}
+    return types.get(collection_type)
+
 class DB():
 
-    def __init__(self, league, season):
+    def __init__(self, stats_type, league, season):
         self.db_user = os.environ.get('DB_user')
         self.db_pass = os.environ.get('DB_pass')
         self.league = league
         self.season = season
-        self.MONGODB_URL = f'mongodb+srv://{self.db_user}:{self.db_pass}@database-mbqxj.mongodb.net/test?retryWrites=true&w=majority'
+        self.MONGODB_URL = f'mongodb+srv://{self.db_user}:{self.db_pass}@cluster0-mbqxj.mongodb.net/<dbname>?retryWrites=true&w=majorit'
         self.client = MongoClient(self.MONGODB_URL)
-        self.DATABASE = self.client["Database"]
-        self.collection = self.DATABASE[self.league + self.season]
+        self.DATABASE = self.client[self.league + self.season]
+        self.collection = self.DATABASE[stats_type]
 
     
     def get_fixtures(self):
@@ -51,7 +58,7 @@ class DB():
 
     def get_league_standings_overall(self):
         return self.collection.find(
-            { "l_id": { "$exists": "true" }},
+            {},
             {
             "team_shortName": 1,
             "position": 1,
@@ -77,16 +84,16 @@ class DB():
             )
     def get_five_latest_fixture_team(self, team_shortName, limit=5):
         query = self.collection.find(
-                                {'t_id': {'$exists':'true'},
-                                'team_shortName': {'$eq': str(team_shortName)}},
-                                {'home_team_shortName': 1,
+                                {"$or": [{"away_team_shortName": {'$eq': str(team_shortName)}},
+                                        {"home_team_shortName": {'$eq': str(team_shortName)}}]},
+                                {'away_team_score': 1,
+                                 'home_team_score': 1,
+                                'home_team_shortName': 1,
                                 'away_team_shortName': 1,
-                                'home_team_score': 1,
-                                'away_team_score': 1,
                                 '_id': 0,
                                 'gameweek': 1,
-                                'fixture_id' : 1}
-                                ).sort([('gameweek', -1)]).limit(limit)
+                                "id" : 1}
+                                ).sort([('gameweek', -1)])
         return query
 
     def get_fixture_id(self, f_id):
@@ -97,8 +104,8 @@ class DB():
 
 
 if __name__ == '__main__':
-    test = DB('EN_PR', '2019')
-    query = test.get_fixture_id(46855)
+    test = DB('fixture_stats', 'EN_PR', '2019')
+    query = test.get_five_latest_fixture_team('Arsenal')
     df = pd.DataFrame.from_dict(query)
     print(df)
 

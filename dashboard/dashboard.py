@@ -33,6 +33,7 @@ if command == 'get_teams_standing':
 init = DataInit()
 
 df_teams = init.team_names()
+print(df_teams)
 df_standings = init.league_standings()
 team_series = pd.Series(df_teams['teams'])
 
