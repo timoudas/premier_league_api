@@ -1,5 +1,6 @@
 import os
 
+import json
 import pandas as pd
 
 from pprint import pprint
@@ -16,48 +17,69 @@ class DBConnector:
         self.season = season
         self.MONGODB_URL = f'mongodb+srv://{self.db_user}:{self.db_pass}@cluster0-mbqxj.mongodb.net/<dbname>?retryWrites=true&w=majorit'
         self.client = MongoClient(self.MONGODB_URL)
-        self.database = self.client[self.league + self.season]
-        self.collections = self.database.collection_names()
+        self.DATABASE = self.client[self.league + self.season]
+        self.collections = self.DATABASE.collection_names()
 
-class LeagueDB(DBConnector):
-    def __init__(self, *args, **kwargs):
-        DBConnector.__init__(*args, **kwargs)
-        self.collection = 'league_standings'
+    def collection_names(self):
+        return self.collections
 
-class PlayersDB(DBConnector):
-    def __init__(self, *args, **kwargs):
-        DBConnector.__init__(*args, **kwargs)
-        self.collection = 'player_stats'
 
-class FixturesDB(DBConnector):
-    def __init__(self, *args, **kwargs):
-        DBConnector.__init__(*args, **kwargs)
-        self.collection = 'fixture_stats'
+class Collections(DBConnector):   
+    def __init__(self, league, season):
+        DBConnector.__init__(self, league, season)
+        collections = {collection: self.DATABASE[collection]
+                                for collection in self.collection_names()}
+        self.__dict__.update(collections)
 
-class TeamsDB(DBConnector):
-    def __init__(self, *args, **kwargs):
-        DBConnector.__init__(*args, **kwargs)
-        self.collection = 'team_standings'
 
-class Query(LeagueDB, TeamsDB):
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
-    def test():
-        
+class LeagueDB(Collections):
+    def __init__(self, league, season):
+        Collections.__init__(self, league, season)
+        self.collection = self.league_standings
 
-    def get_standings(self):
-        query = self.collection.find(
-            {"t_id": { "$exists": "true" }},
+    def get_league_teams(self):
+        return self.collection.distinct('team_shortName')
+
+    def get_league_standings_overall(self):
+        return self.collection.find(
+            {},
             {
             "team_shortName": 1,
-            "gameweek": 1,
-            "points": 1,
-            "played": 1,
+            "position": 1,
+            "overall_played": 1,
+            "overall_won": 1,
+            "overall_draw": 1,
+            "overall_lost": 1,
+            "overall_goalsFor": 1,
+            "overall_goalsAgainst": 1,
+            "overall_goalsDifference": 1,
+            "overall_points": 82,
             "_id": 0,
             })
-        return query
+
+class PlayersDB(Collections):
+    def __init__(self, league, season):
+        Collections.__init__(self, league, season)
+        self.collection = self.player_stats
+
+class FixturesDB(Collections):
+    def __init__(self, league, season):
+        Collections.__init__(self, league, season)
+        self.collection = self.fixture_stats
+
+    def get_fixtures(self):
+        return self.collection.find({ "id": { "$exists": "true" } })
+
+class TeamsDB(Collections):
+    def __init__(self, league, season):
+        Collections.__init__(self, league, season)
+        self.collection = self.team_standings
+
+
+
+
+
 
 
 
@@ -66,5 +88,6 @@ class Query(LeagueDB, TeamsDB):
 
 if __name__ == '__main__':
 
-    print(Query('EN_PR', '2019').get_standing())
+    for i in FixturesDB('EN_PR', '2019').get_fixtures():
+        print(i)
 

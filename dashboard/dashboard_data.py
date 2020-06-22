@@ -1,14 +1,11 @@
 
 import pandas as pd
 
-from mongo_query import DB
+from db_connector import FixturesDB
+from db_connector import LeagueDB
+from db_connector import PlayersDB
+from db_connector import TeamsDB
 
-def DB_collections(collection_type):
-    types = {'p': 'player_stats',
-             't': 'team_standings',
-             'f': 'fixture_stats',
-             'l': 'league_standings'}
-    return types.get(collection_type)
 
 class DataInit():
 
@@ -22,8 +19,7 @@ class DataInit():
 
     def team_standing(self):
         """Returns all documents with a t_id key"""
-        stats_type = DB_collections('t')
-        db = DB(stats_type, self.league, self.season)
+        db = TeamsDB(self.league, self.season)
         query = db.get_teams_standing()
         df = self.to_df(query)
         df = df.drop('_id', 1)
@@ -31,16 +27,14 @@ class DataInit():
 
     def team_names(self):
         """Returns all the unique team names"""
-        stats_type = DB_collections('t')
-        db = DB(stats_type, self.league, self.season)
-        query = db.get_teams()
+        db = LeagueDB(self.league, self.season)
+        query = db.get_league_teams()
         df = self.to_df({'teams': query})
         return df
 
     def league_standings(self):
         """Returns the league standings"""
-        stats_type = DB_collections('l')
-        db = DB(stats_type, self.league, self.season)
+        db = LeagueDB(self.league, self.season)
         query = db.get_league_standings_overall()
         df = self.to_df(query)
         cols = df.columns.tolist()
@@ -59,9 +53,7 @@ class DataInit():
                 team_shortName: A teams shortname
                 limit: The number of latest games
         """
-        stats_type = DB_collections('f')
-        print(stats_type)
-        db = DB(stats_type, self.league, self.season)
+        db = FixturesDB(self.league, self.season)
         query = db.get_five_latest_fixture_team(team_shortName, limit)
         df = self.to_df(query)
         cols = df.columns.tolist()
