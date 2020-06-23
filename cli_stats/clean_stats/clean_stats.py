@@ -257,7 +257,6 @@ def read_fixtureinfo(data):
                     'fixtureType' : stats.get('fixtureType'),
                     'extraTime' : stats.get('extraTime'),
                     'shootout' : stats.get('shootout'),
-                    'f_id' : stats.get('id'),
                     'status': stats.get('status'),
 
                     'clock_label' : deep_get(stats, 'clock.label'),
@@ -318,12 +317,83 @@ def read_fixture_events(data):
         stats_temp = \
             { 'home_halftime' : half_time['homeScore'],
               'away_halftime' : half_time['awayScore'],
-              'matchOfficials': match_officals,
-              'teamList' : team_list,
-              'events' : events,
-              'id': d['id']
+              'matchOfficials': [],
+              'lineUps': [],
+              'substitutes': [],
+              'events' : [],
+              'id': d['id'],
+              'f_id': d['id']
 
         }
+        for official in match_officals:
+            match_officals_temp = {}
+            match_officals_temp = \
+            {'role': deep_get(official, 'role'),
+             'matchOfficialId': official['matchOfficialId'],
+             'first': deep_get(official, 'name.first'),
+             'last': deep_get(official, 'name.last'),
+             'name': deep_get(official, 'name.display'),
+             'm_id': official['id']
+            }
+            stats_temp['matchOfficials'].append(match_officals_temp)
+
+        for lineups in team_list:
+            if lineups:
+                team_id = lineups['teamId']
+                linup = lineups['lineup']
+                substitutes = lineups['substitutes']
+                for l in linup:
+                    lineup_temp = {}
+                    lineup_temp = \
+                    {'teamId': team_id,
+                     'matchPosition': deep_get(l, 'matchPosition'),
+                     'captain': deep_get(l, 'captain'),
+                     'playerId': deep_get(l, 'playerId'),
+                     'position': deep_get(l, 'info.position'),
+                     'shirtNum': deep_get(l, 'info.shirtNum'),
+                     'positionInfo': deep_get(l, 'info.positionInfo'),
+                     'name': deep_get(l, 'name.display'),
+                     'first': deep_get(l, 'name.first'),
+                     'last': deep_get(l, 'name.last'),
+                     'id': l['id']
+                    }
+                    stats_temp['lineUps'].append(lineup_temp)
+
+                for s in substitutes:
+                    substitutes_temp = {}
+                    substitutes_temp = \
+                    {'teamId': team_id,
+                     'matchPosition': deep_get(s, 'matchPosition'),
+                     'captain': deep_get(s, 'captain'),
+                     'playerId': deep_get(s, 'playerId'),
+                     'position': deep_get(s, 'info.position'),
+                     'shirtNum': deep_get(s, 'info.shirtNum'),
+                     'positionInfo': deep_get(s, 'info.positionInfo'),
+                     'name': deep_get(s, 'name.display'),
+                     'first': deep_get(s, 'name.first'),
+                     'last': deep_get(s, 'name.last'),
+                     'id': l['id']
+                    }
+                
+                    stats_temp['substitutes'].append(substitutes_temp)
+
+        for event in events:
+            if event:
+                events_temp = {}
+                events_temp = \
+                {'clockSecs': deep_get(event, 'clock.secs'),
+                 'clockLabel': deep_get(event, 'clock.label'),
+                 'phase': deep_get(event, 'phase'),
+                 'type': deep_get(event, 'type'),
+                 'timeMillis': deep_get(event, 'time.millis'),
+                 'timeLabel': deep_get(event, 'time.label'),
+                 'homeScore': deep_get(event, 'score.homeScore'),
+                 'awayScore': deep_get(event, 'score.awayScore'),
+                 'id': deep_get(event, 'id'),
+                }
+            stats_temp['events'].append(events_temp)
+
+
         info_all.append(stats_temp)
     return info_all
 
@@ -463,7 +533,8 @@ def league_standings(league, year):
 
 
 if __name__ == '__main__':
-    pprint(read_fixture_events(load_fixture_info('EN_PR', 2019)))
+    # pprint(read_fixture_events(load_fixture_info('EN_PR', 2019)))
+    pprint(fixturestats('EN_PR', '2019'))
 
 
 

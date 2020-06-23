@@ -77,9 +77,7 @@ class StatShell(cmd.Cmd):
 
     def __init__(self):
         super(StatShell, self).__init__()
-        self.leagues = dir.load_json('season_params.json', StorageConfig.PARAMS_DIR)
-        with open('league_seasons_init', 'rb') as f:
-            self.pickle = pickle.load(f)        
+        self.leagues = dir.load_json('season_params.json', StorageConfig.PARAMS_DIR)     
 
 
     os.system('clear')
