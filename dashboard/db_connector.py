@@ -11,17 +11,25 @@ from pymongo import MongoClient
 class DBConnector:
 
     def __init__(self, league, season):
-        self.db_user = os.environ.get('DB_user')
-        self.db_pass = os.environ.get('DB_pass')
+        self.db_user = "Timoudas"#os.environ.get('DB_user')
+        self.db_pass = "adde123"#os.environ.get('DB_pass')
         self.league = league
         self.season = season
-        self.MONGODB_URL = f'mongodb+srv://{self.db_user}:{self.db_pass}@cluster0-mbqxj.mongodb.net/<dbname>?retryWrites=true&w=majorit'
+        self.MONGODB_URL = f'mongodb+srv://{self.db_user}:{self.db_pass}@cluster0-mbqxj.mongodb.net/EN_PR2019?authSource=admin'
         self.client = MongoClient(self.MONGODB_URL)
         self.DATABASE = self.client[self.league + self.season]
-        self.collections = self.DATABASE.collection_names()
+        self.collections = self.DATABASE.list_collection_names()
 
     def collection_names(self):
         return self.collections
+
+    def query(self, query_dict, fields=None, limit=None):
+      """Returns a custom query on a collection"""
+      return self.collection.find(query_dict, fields).limit(limit)
+    
+    def aggregate(self, pipeline):
+      """Returns an aggregation"""
+      return self.collection.aggregate(pipeline)
 
 
 class Collections(DBConnector):   
@@ -87,7 +95,10 @@ class TeamsDB(Collections):
 
 
 if __name__ == '__main__':
-
-    for i in FixturesDB('EN_PR', '2019').get_fixtures():
-        print(i)
+    fixDB = FixturesDB('EN_PR', '2019')
+    pipeline = [{"$unwind": "$events"},{"$limit": 1} ]
+    cust_query, fields = {}, {'events.0.phase': 1, '_id': 0}
+    nested = {"events":{"$elemMatch":{"$in":['phase']}} }
+    for i in fixDB.aggregate(pipeline):
+      print(i)
 
