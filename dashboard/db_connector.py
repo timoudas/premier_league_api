@@ -23,7 +23,7 @@ class DBConnector:
     def collection_names(self):
         return self.collections
 
-    def query(self, query_dict, fields=None, limit=None):
+    def find(self, query_dict=None, fields=None, limit=0):
       """Returns a custom query on a collection"""
       return self.collection.find(query_dict, fields).limit(limit)
     
@@ -84,6 +84,36 @@ class TeamsDB(Collections):
         Collections.__init__(self, league, season)
         self.collection = self.team_standings
 
+    def get_latest_fixtures(self, team_shortName, limit=5):
+        """Get the latest fixtures for a team
+            Args:
+                team_shortName (str): A teams shortname
+                limit (int): Total number of documents to retrieve
+
+        """
+        return self.collection.aggregate([
+            {"$match": 
+                {"team_shortName": team_shortName}
+            },
+            {"$sort": {"gameweek": -1}},
+            {"$unwind": "$fixtures"},
+
+            {
+            "$project": {
+                "_id": 0,
+                'HTeam': "$fixtures.home_team_shortName", 
+                'ATeam': "$fixtures.away_team_shortName", 
+                'H': '$fixtures.home_team_score',
+                'A': '$fixtures.away_team_score',
+                'G': '$fixtures.gameweek',
+                'Id': "$fixtures.f_id"
+                }
+            },
+            {
+            "$limit": limit
+            }
+            ])
+
 
 
 
@@ -95,10 +125,18 @@ class TeamsDB(Collections):
 
 
 if __name__ == '__main__':
-    fixDB = FixturesDB('EN_PR', '2019')
-    pipeline = [{"$unwind": "$events"},{"$limit": 1} ]
-    cust_query, fields = {}, {'events.0.phase': 1, '_id': 0}
-    nested = {"events":{"$elemMatch":{"$in":['phase']}} }
-    for i in fixDB.aggregate(pipeline):
-      print(i)
+    TeamDB = TeamsDB('EN_PR', '2019')
+    pipeline = [{"$unwind": "$fixtures"},{"$limit": 1} ]
+    cust_query, fields = {}, {'fixtures.away_team': 1, '_id': 0}
+    # cust_query = {}
+    # fields = {'_id':0 , 'fixtures': 1}
+
+    # nested = {"events":{"$elemMatch":{"$in":['phase']}} }
+    # result = list(TeamDB.find(cust_query, fields))
+    # df = pd.DataFrame(i['fixtures'] for i in result)
+    # print(df)
+    result = TeamDB.get_latest_fixtures('Arsenal')
+
+    for i in result:
+        pprint(i)
 

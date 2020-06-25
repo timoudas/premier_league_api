@@ -53,14 +53,12 @@ class DataInit():
                 team_shortName: A teams shortname
                 limit: The number of latest games
         """
-        db = FixturesDB(self.league, self.season)
-        query = db.get_five_latest_fixture_team(team_shortName, limit)
+        db = TeamsDB(self.league, self.season)
+        query = db.get_latest_fixtures(team_shortName, limit)
         df = self.to_df(query)
         cols = df.columns.tolist()
-        cols = cols[0:3] + cols[4:5] + cols[3:4]+cols[5:]
+        cols = cols[4:5] + cols[0:1] + cols[2:4]+ cols[1:2] + cols[5:]
         df = df[cols]
-        df = df.rename(columns={'home_team_shortName': 'HTeam', 'away_team_shortName': 'ATeam', 
-                                'home_team_score': 'H', 'away_team_score': 'A', 'gameweek': 'G'})
         return df
 
 if __name__ == '__main__':

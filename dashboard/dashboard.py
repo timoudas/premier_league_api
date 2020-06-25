@@ -18,7 +18,10 @@ from dash.dependencies import State
 import pandas as pd
 
 from dashboard_data import DataInit
-from mongo_query import DB
+from db_connector import FixturesDB
+from db_connector import LeagueDB
+from db_connector import PlayersDB
+from db_connector import TeamsDB
 from pprint import pprint
 
 """
@@ -33,7 +36,6 @@ if command == 'get_teams_standing':
 init = DataInit()
 
 df_teams = init.team_names()
-print(df_teams)
 df_standings = init.league_standings()
 team_series = pd.Series(df_teams['teams'])
 
@@ -199,7 +201,7 @@ def get_active_f_id(active_cell, data):
     Output('data-table-graph', 'columns'),
     [Input(str(i), 'n_clicks') for i in df_teams['teams']]
 )
-def form_five_columns(*args):
+def columns_form_five(*args):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     team = changed_id.split('.')[0]
     df = init.fixture_form_decending(team)
@@ -211,7 +213,7 @@ def form_five_columns(*args):
     Output('data-table-graph', 'data'),
     [Input(str(i), 'n_clicks') for i in df_teams['teams']]
 )
-def form_five_data(*args):
+def data_form_five(*args):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     team = changed_id.split('.')[0]
     df = init.fixture_form_decending(team)
@@ -260,29 +262,29 @@ def data_year(value):
 def data_type(value):
     return value
 
-@app.callback(
-    Output('league-table', 'children'),
+# @app.callback(
+#     Output('league-table', 'children'),
 
-    [Input('intermediate-year-dd', 'children')]
-    +
-    [Input(str(i), 'n_clicks') for i in df_teams['teams']]
+#     [Input('intermediate-year-dd', 'children')]
+#     +
+#     [Input(str(i), 'n_clicks') for i in df_teams['teams']]
         
-)
+# )
 
-def update_league_table(value, *args):
-    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-    if changed_id == 'intermediate-year-dd.children':
-        return dash.no_update
-    else:
-        team = changed_id.split('.')[0]
-        if team in team_series.values:
-            query = DB('EN_PR', value).get_standing_team_id(team)
-            df = pd.DataFrame.from_dict(query)
-            fig = px.line(df, x="gameweek", y="points")
-            return dcc.Graph(
-                id=str(team) + '-graph',
-                figure=fig
-                )
+# def update_league_table(value, *args):
+#     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+#     if changed_id == 'intermediate-year-dd.children':
+#         return dash.no_update
+#     else:
+#         team = changed_id.split('.')[0]
+#         if team in team_series.values:
+#             query = DB('EN_PR', value).get_standing_team_id(team)
+#             df = pd.DataFrame.from_dict(query)
+#             fig = px.line(df, x="gameweek", y="points")
+#             return dcc.Graph(
+#                 id=str(team) + '-graph',
+#                 figure=fig
+#                 )
 
 
     # team = team_buttons_dict.get(changed_id)
