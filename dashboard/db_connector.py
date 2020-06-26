@@ -11,8 +11,10 @@ from pymongo import MongoClient
 class DBConnector:
 
     def __init__(self, league, season):
-        self.db_user = os.environ.get('DB_user')
-        self.db_pass = os.environ.get('DB_pass')
+        self.db_user = "Timoudas"
+        self.db_pass = "adde123"
+        #self.db_user = os.environ.get('DB_user')
+        #self.db_pass = os.environ.get('DB_pass')
         self.league = league
         self.season = season
         self.MONGODB_URL = f'mongodb+srv://{self.db_user}:{self.db_pass}@cluster0-mbqxj.mongodb.net/EN_PR2019?authSource=admin'
@@ -79,6 +81,30 @@ class FixturesDB(Collections):
     def get_fixtures(self):
         return self.collection.find({ "id": { "$exists": "true" } })
 
+    def get_fixture_events(self, fixture_id, limit=5):
+        return self.collection.aggregate([
+            {"$match": 
+            {"f_id": fixture_id}
+            },
+            {"$unwind": "$events"},
+
+            {
+            "$project": {
+                "_id": 0,
+                'Type': "$events.types", 
+                'HS': "$events.awayScore", 
+                'AS': '$events.homeScore',
+                'Phase': '$events.phase',
+                'clockLabel': '$fixtures.clockLabel',
+                'Id': "$events.id"
+                }
+            },
+            {
+              '$limit': limit
+            }
+
+        ])
+
 class TeamsDB(Collections):
     def __init__(self, league, season):
         Collections.__init__(self, league, season)
@@ -115,28 +141,8 @@ class TeamsDB(Collections):
             ])
 
 
-
-
-
-
-
-
-
-
-
 if __name__ == '__main__':
-    TeamDB = TeamsDB('EN_PR', '2019')
-    pipeline = [{"$unwind": "$fixtures"},{"$limit": 1} ]
-    cust_query, fields = {}, {'fixtures.away_team': 1, '_id': 0}
-    # cust_query = {}
-    # fields = {'_id':0 , 'fixtures': 1}
-
-    # nested = {"events":{"$elemMatch":{"$in":['phase']}} }
-    # result = list(TeamDB.find(cust_query, fields))
-    # df = pd.DataFrame(i['fixtures'] for i in result)
-    # print(df)
-    result = TeamDB.get_latest_fixtures('Arsenal')
-
-    for i in result:
-        pprint(i)
+    results = FixturesDB('EN_PR', '2019').get_fixture_events(46605)
+    for i in results:
+      pprint(i)
 
