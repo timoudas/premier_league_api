@@ -11,10 +11,8 @@ from pymongo import MongoClient
 class DBConnector:
 
     def __init__(self, league, season):
-        self.db_user = "Timoudas"
-        self.db_pass = "adde123"
-        #self.db_user = os.environ.get('DB_user')
-        #self.db_pass = os.environ.get('DB_pass')
+        self.db_user = os.environ.get('DB_user')
+        self.db_pass = os.environ.get('DB_pass')
         self.league = league
         self.season = season
         self.MONGODB_URL = f'mongodb+srv://{self.db_user}:{self.db_pass}@cluster0-mbqxj.mongodb.net/EN_PR2019?authSource=admin'
