@@ -79,7 +79,7 @@ class FixturesDB(Collections):
     def get_fixtures(self):
         return self.collection.find({ "id": { "$exists": "true" } })
 
-    def get_fixture_events(self, fixture_id, limit=5):
+    def get_fixture_events(self, fixture_id):
         return self.collection.aggregate([
             {"$match": 
             {"f_id": fixture_id}
@@ -97,11 +97,63 @@ class FixturesDB(Collections):
                 'Id': "$events.id"
                 }
             },
-            {
-              '$limit': limit
-            }
-
         ])
+
+    def get_fixture_lineups(self, fixture_id):
+        return self.collection.aggregate([
+              {
+                "$match": {
+                  "f_id": 46605
+                }
+              },
+              {
+                "$unwind": "$lineUps"
+              },
+              {
+                "$project": {
+                  "_id": 0,
+                  "teamId": "$lineUps.teamId",
+                  "matchPosition": "$lineUps.matchPosition",
+                  "id": "$lineUps.id",
+                  "captain": "$lineUps.captain",
+                  "playerId": "$lineUps.playerId",
+                  "position": "$lineUps.position",
+                  "shirtNum": "$lineUps.shirtNum",
+                  "positionInfo": "$lineUps.positionInfo",
+                  "name": "$lineUps.name",
+                  "first": "$lineUps.first",
+                  
+                }
+              }
+            ])
+
+    def get_fixture_substitutes(self, fixture_id):
+        return self.collection.aggregate([
+            {
+                "$match": {
+                  "f_id": 46605
+                }
+            },
+            {
+                "$unwind": "$substitutes"
+            },
+            {
+                "$project": {
+                      "_id": 0,
+                      "teamId": "$substitutes.teamId",
+                      "matchPosition": "$substitutes.matchPosition",
+                      "id": "$substitutes.id",
+                      "captain": "$substitutes.captain",
+                      "playerId": "$substitutes.playerId",
+                      "position": "$substitutes.position",
+                      "shirtNum": "$substitutes.shirtNum",
+                      "positionInfo": "$substitutes.positionInfo",
+                      "name": "$substitutes.name",
+                      "first": "$substitutes.first",
+                  
+                }
+            }
+            ])
 
 class TeamsDB(Collections):
     def __init__(self, league, season):
@@ -140,7 +192,7 @@ class TeamsDB(Collections):
 
 
 if __name__ == '__main__':
-    results = FixturesDB('EN_PR', '2019').get_fixture_events(46605)
-    for i in results:
-      pprint(i)
+    results = FixturesDB('EN_PR', '2019').get_fixture_substitutes(46609)
+    df = pd.DataFrame(results)
+    print(df)
 
