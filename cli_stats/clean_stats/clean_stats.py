@@ -322,7 +322,8 @@ def read_fixture_events(data):
               'substitutes': [],
               'events' : [],
               'id': d['id'],
-              'f_id': d['id']
+              'f_id': d['id'],
+              'formation':{},
 
         }
         for official in match_officals:
@@ -342,6 +343,7 @@ def read_fixture_events(data):
                 team_id = lineups['teamId']
                 linup = lineups['lineup']
                 substitutes = lineups['substitutes']
+                formation = lineups['formation']
                 for l in linup:
                     lineup_temp = {}
                     lineup_temp = \
@@ -355,9 +357,10 @@ def read_fixture_events(data):
                      'name': deep_get(l, 'name.display'),
                      'first': deep_get(l, 'name.first'),
                      'last': deep_get(l, 'name.last'),
-                     'id': l['id']
+                     'id': l['id'],
                     }
                     stats_temp['lineUps'].append(lineup_temp)
+                    stats_temp['formation'].update(formation)
 
                 for s in substitutes:
                     substitutes_temp = {}
