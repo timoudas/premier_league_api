@@ -84,6 +84,9 @@ colors = {
     'text': '#7FDBFF'
 }
 
+
+
+
 app.layout = html.Div(
     [
         dbc.Jumbotron([
@@ -104,9 +107,37 @@ app.layout = html.Div(
             ),
         ],
         fluid=True,
+        style={'margin-bottom': '0px'}
         ),
 
+
+
+        dbc.Navbar(
+            [
+                html.A(
+                    # Use row and col to control vertical alignment of logo / brand
+                    dbc.Row(
+                        [
+                            dbc.Col(dbc.NavbarBrand("Home", className="ml-2", href="/home")),
+                            dbc.Col(dbc.NavbarBrand("League", className="ml-2", href="/league")),
+                            dbc.Col(dbc.NavbarBrand("Teams", className="ml-2", href="/teams")),
+                            dbc.Col(dbc.NavbarBrand("Fixtures", className="ml-2", href="/fixtures")),
+                            dbc.Col(dbc.NavbarBrand("Players", className="ml-2", href="/players")),
+                        ],
+                        align="center",
+                        no_gutters=True,
+                    ),
+                ),
+                dbc.NavbarToggler(id="navbar-toggler"),
+            ],
+            color="dark",
+            dark=True,
+            style={'margin-bottom': '20px'}
+        ),
+
+
         dbc.Row([
+
                 dbc.Col([
                     dbc.Select(
                         options=stats_param,
@@ -143,7 +174,7 @@ app.layout = html.Div(
                 'TS', id='intermediate-data-dd', style={'display': 'none'}
             ), 
             html.Div(
-                id='intermediate-f-id', style={'display': 'none'}
+                46987, id='intermediate-f_id', style={'display': 'none'}
             ), 
         ]),
 
@@ -184,7 +215,23 @@ app.layout = html.Div(
 
     ],
 )
-@app.callback(  Output('intermediate-f-id', 'children'),
+# @app.callback(  
+#         Output('data-table-graph', 'data'),
+#         Output('data-table-graph', 'columns'),        
+#     [
+#         Input('data-table-graph', 'active_cell'),
+#         Input('data-table-graph', 'data')
+#     ],
+# )
+# def get_active_f_id(active_cell, data):
+#     if active_cell:
+#         row = active_cell.get('row')
+#         column = active_cell.get('column_id')
+#         if column == 'Id':
+#             return data[row].get(column)
+
+
+@app.callback(  Output('intermediate-f_id', 'children'),
                 [Input('data-table-graph', 'active_cell'),
                 Input('data-table-graph', 'data')],
 )
@@ -192,7 +239,7 @@ def get_active_f_id(active_cell, data):
     if active_cell:
         row = active_cell.get('row')
         column = active_cell.get('column_id')
-        if column == 'fixture_id':
+        if column == 'Id':
             return data[row].get(column)
 
 
