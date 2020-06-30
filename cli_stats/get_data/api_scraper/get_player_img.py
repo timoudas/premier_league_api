@@ -2,6 +2,7 @@ from api_scraper import Football
 import requests
 from bs4 import BeautifulSoup
 import shutil
+from pprint import pprint
 
 IMG_SAVE_PATH = '../../../dashboard/assets/'
 
@@ -14,7 +15,7 @@ def get_team_url(teamID):
 def get_team_ids():
   fb.load_leagues()
   fb.leagues['EN_PR'].load_seasons()
-  team_keys = fb.leagues['EN_PR'].seasons['2016/2017'].load_teams().keys()
+  team_keys = fb.leagues['EN_PR'].seasons['2018/2019'].load_teams().keys()
   team_id = [i for i in team_keys]
   return team_id
 
@@ -60,4 +61,22 @@ def download_images():
         shutil.copyfileobj(response.raw, out_file)
       del response
 
-print(all_player_imgs())
+def get_team_names():
+  team_names = []
+  fb.load_leagues()
+  fb.leagues['EN_PR'].load_seasons()
+  team_values = fb.leagues['EN_PR'].seasons['2018/2019'].load_teams()
+  for value in team_values.values():
+   team._names.append(value['club']['shortName'])
+  return team_names
+
+get_team_names()
+
+def test():
+  
+  fb.load_leagues()
+  fb.leagues['EN_PR'].load_seasons()
+  fb.leagues['EN_PR'].seasons['2019/2020'].load_teams()
+  players = fb.leagues['EN_PR'].seasons['2019/2020'].teams['Arsenal'].load_players()
+  for key, value in players.items():
+    print(value['id'])
