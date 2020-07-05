@@ -98,9 +98,10 @@ class TeamPlayers(dict):
         super().__init__(*args, **kwargs)
 
     def load_players_for_team(self, team, season):
-        #self.clear()
         ds = load_raw_data(
             f'https://footballapi.pulselive.com/football/teams/{team}/compseasons/{season}/staff')
+        self._players.clear()
+        self.clear()
         for d in ds:
             if d:
                 self._players[d['id']] = d

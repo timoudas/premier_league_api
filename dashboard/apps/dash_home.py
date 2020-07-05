@@ -53,7 +53,8 @@ stats_param = [{'label': 'Fixture Stats', 'value':'FS'},
 year_param = [{'label': '2019/2020', 'value':'2019'},
                    {'label': '2018/2019', 'value':'2018'}]
 
-layout = html.Div(
+def serve_layout():
+	return html.Div(
     [
   
         dbc.Row([
@@ -105,8 +106,8 @@ layout = html.Div(
 	                dash_table.DataTable(
 	                    id='data-table-graph',
 	                    # editable=True,
-	                    data=df_standings.to_dict('records'),
-	                    columns=[{'id': c, 'name': c} for c in df_standings.columns],
+	                    data=init.league_standings().to_dict('records'),
+	                    columns=[{'id': c, 'name': c} for c in init.league_standings().columns],
 	                    style_cell_conditional=[
 	                        {
 	                            'if': {

@@ -8,3 +8,4 @@
 *.csv
 /model/.bash_profile
 raw_data/
+*.png

@@ -66,7 +66,7 @@ app.layout = html.Div([
         ),
 
     ]),
-    
+
     html.Div(id='page-content')
 
 ])
@@ -76,7 +76,15 @@ app.layout = html.Div([
 
 def display_page(pathname):
     if pathname == '/home':
-        return dash_home.layout
+        return dash_home.serve_layout()
+    elif pathname == '/league':
+        return dash_league.layout
+    elif pathname == '/teams':
+        return dash_teams.layout
+    elif pathname == '/fixtures':
+        return dash_fixtures.layout
+    elif pathname == '/players':
+        return dash_players.layout
     else:
         return '404'
 
