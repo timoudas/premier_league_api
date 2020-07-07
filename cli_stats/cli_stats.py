@@ -218,6 +218,43 @@ class StatShell(cmd.Cmd):
                 self.push_choices(key, data)
         print("Push completed")
 
+    @docopt_cmd
+    def do_weekly(self, arg):
+        """Usage: CLIStats$ (LEAGUE) (SEASON)"""
+        #Download all files
+        if not len(arg['SEASON']) == 4:
+            print('Season should be YYYY')
+        else:
+            download_params = ['-p', '-t', '-f', '-s', '-l', '-i']
+            clean_params = ['-p', '-t', '-f', '-l']
+            db_params = ['-p', '-t', '-f', '-l']
+            data = db.DB(arg['LEAGUE'].upper(), arg['SEASON'])
+            league = arg['LEAGUE'].upper()
+            season_end = str(int(arg['SEASON'])+1)
+            season = str(arg['SEASON'] + '/' + season_end)
+            file_season = str(arg['SEASON'])
+            file_name = arg['LEAGUE'].upper() + '_' + arg['SEASON'] + '_'
+            for i in download_params:
+                self.downloads_choices(i, arg['LEAGUE'].upper(), season)  
+            for i in clean_params:
+                if i == '-p':
+                    dir.save_json(file_name + 'playerstats', self.loading_choices(i, league, file_season), StorageConfig.DB_DIR)
+                    print('-p File was saved')
+                elif i == '-f':
+                    dir.save_json(file_name + 'fixturestats', self.loading_choices(i, league, file_season), StorageConfig.DB_DIR)
+                    print('-f File was saved')
+                elif i == '-t':
+                    dir.save_json(file_name + 'team_standings', self.loading_choices(i, league, file_season), StorageConfig.DB_DIR)
+                    print('-t File was saved')
+                elif i == '-l':
+                    dir.save_json(file_name + 'league_standings', self.loading_choices(i, league, file_season), StorageConfig.DB_DIR)
+                    print('-l File was saved')
+            for i in db_params:
+                self.push_choices(i, data)
+
+
+        
+
 
 
         

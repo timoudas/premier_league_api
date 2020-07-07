@@ -13,11 +13,11 @@ from datetime import date
 
 
 
-from .api_scraper.api_scraper import Football
-from .static_types import *
+from api_scraper.api_scraper import Football
 from directory import Directory
 from multiprocessing import Pool
 from pprint import pprint
+from static_types import *
 from storage_config import StorageConfig
 from tqdm import tqdm
 
@@ -85,7 +85,6 @@ class PlayerStats(Base):
         Base.__init__(self, *args, **kwargs)
         self.player_ids = self.load_season_players()
         self.player_dispatch_map = { 'player_stats' : self.player_stats}
-        self.e_tag = ValidateEtag()
 
 
     def load_season_players(self):
@@ -99,11 +98,11 @@ class PlayerStats(Base):
                 players = self.fb.leagues[self.league].seasons[self.season].teams[team['shortName']].load_players()
             except:
                 print(f"Found no players for {self.league} {self.season} {team}")
-        if players:
-            for player in players.keys():
-                player_id.append(player)
-        else:
-            ('No players found..')
+            if players:
+                for player in players.keys():
+                    player_id.append(player)
+            else:
+                ('No players found..')          
         print('Initialization completed')
         return player_id
 
@@ -150,8 +149,11 @@ class FixtureStats(Base):
         save time."""
         Base.__init__(self, *args, **kwargs)
         self.fixture_ids = [fix['id'] for fix in self.load_season_fixture().values()]
-        self.fixture_dispatch_map = {'fixture_stats' : self.fixture_stats,
-                             'fixture_info': self.fixture_info}
+        self.fixture_dispatch_map = {'fixture_player_stats': self.fixture_player_stats,
+                                     'fixture_stats' : self.fixture_stats,
+                                     'fixture_info': self.fixture_info,}
+
+
 
     def load_season_fixture(self):
         """Loads the fixtures for a league-season,
@@ -213,7 +215,6 @@ class FixtureStats(Base):
             stats = {}
             if info:
                 stats = info
-                stats['uuid'] = str(uuid.uuid4())
             else:
                 i += 1
             if stats:
@@ -223,6 +224,40 @@ class FixtureStats(Base):
         if i >0:
             print(f'{i} games retreived had no stats')
         self.save_completed('fixtureinfo', stats_list, StorageConfig.STATS_DIR)
+    
+    def fixture_player_stats(self):
+        stats_list = []
+        print("Getting fixture players..")
+        with Pool(self.pool) as p:
+            fixture_info = list(tqdm(p.imap(self.fixture_info_singel, self.fixture_ids, chunksize=1), total=len(self.fixture_ids)))
+        print('Getting data from workers..')
+        i = 0
+        for info in fixture_info:
+            stats = {}
+            if info:
+                stats = {info['id']: []}
+            if 'teamLists' in info:
+                team_list = info['teamLists']
+                for lineups in team_list:
+                    if lineups:
+                        team_id = lineups['teamId']
+                        lineup = lineups['lineup']
+                        substitutes = lineups['substitutes']
+                        for l in lineup:
+                            p_id = l['id']
+                            stats[info['id']].append(l['id'])
+                        for s in substitutes:
+                            stats[info['id']].append(s['id'])
+            else:
+                i += 1
+            if stats:
+                stats_list.append(stats)
+        pprint(stats_list)
+        # print('Completed')
+        # if i >0:
+        #     print(f'{i} games retreived had no stats')
+        # self.save_completed('fixture_', stats_list, StorageConfig.STATS_DIR)
+
 
 class TeamStats(Base):
 
@@ -348,7 +383,6 @@ class SeasonStats(PlayerStats, TeamStats, FixtureStats, LeagueStats):
                 called_method (str): Existing method in one of the sub-classes
                 *args (str): League and Season
         """
-
         if hasattr(PlayerStats, called_method):
             PlayerStats.__init__(self, *args, **kwargs)
             self.player_dispatch_map.get(called_method)()
@@ -365,7 +399,7 @@ class SeasonStats(PlayerStats, TeamStats, FixtureStats, LeagueStats):
             LeagueStats.__init__(self, *args, **kwargs)
             self.league_dispatch_map.get(called_method)()
         else:
-            raise(ValueError)
+            raise ValueError(f'The called "{called_method}" method was not found')
 
 class SeasonStatsUpdateFixture(FixtureStats):
     dir = Directory()
@@ -467,10 +501,10 @@ class Stats:
 
 
 if __name__ == '__main__': 
-    
-
+    # f = FixtureStats('EN_PR', '2019/2020')
+    # print(dir(f.fixture_dispatch_map))
     stats = SeasonStats()
-    stats('team_standings', 'EN_PR', '2019/2020')
+    stats('fixture_player_stats', 'EN_PR', '2019/2020')
 
 
 

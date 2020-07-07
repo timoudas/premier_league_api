@@ -348,16 +348,16 @@ class ValidateParams():
         return self.remove_failed_leagues(self.check_current_season())
 
 if __name__ == '__main__':
-    ValidateParams().main()
+    # ValidateParams().main()
 
 
     # Dir = Directory() 
-    # fb = Football()
+    fb = Football()
     # lg = League()
     # fx = FixtureInfo()
-    # fb.load_leagues()
-    # ds = fb.leagues['EN_PR'].load_seasons()
-    # fb.leagues['EN_PR'].seasons['2016/2017'].load_teams()
+    fb.load_leagues()
+    pprint(fb.leagues['EN_PR'].load_seasons())
+    pprint(fb.leagues['EN_PR'].seasons['2019/2020'].load_teams())
     # pprint(fb.leagues['EN_PR'].seasons['2016/2017'].teams['Arsenal'].load_players())
     # ds = fb.leagues['EU_CL'].load_seasons()
     # fb.leagues['EU_CL'].seasons['2016/2017'].load_teams()

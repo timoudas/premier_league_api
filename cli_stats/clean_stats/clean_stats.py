@@ -391,7 +391,7 @@ def read_fixture_events(data):
                      'name': deep_get(s, 'name.display'),
                      'first': deep_get(s, 'name.first'),
                      'last': deep_get(s, 'name.last'),
-                     'id': l['id']
+                     'id': s['id']
                     }
                 
                     stats_temp['substitutes'].append(substitutes_temp)
@@ -563,7 +563,7 @@ def league_standings(league, year):
 
 if __name__ == '__main__':
     # pprint(read_fixture_events(load_fixture_info('EN_PR', 2019)))
-    pprint(len(read_team_standings_stats(load_team_standings('EN_PR', '2019'))))
+    pprint(read_playerstats(load_player_stats('EN_PR', '2019')))
 
 
 

@@ -71,6 +71,92 @@ class PlayersDB(Collections):
         Collections.__init__(self, league, season)
         self.collection = self.player_stats
 
+    def gk_test(self):
+        return self.collection.aggregate([
+            {"$match":{
+                "position": "G"
+                },
+            },
+            {"$project":{
+                'total_goal_kicks': 1,
+                }
+            }
+        ])
+
+    def get_goalkeeper_avg_stats(self):
+        """Get goalkeeper average stats"""
+        prefix = 'avg_'
+        return self.collection.aggregate([
+            {"$match":{
+                "position": "G"
+                },
+            },
+            {"$project":{
+                'total_clearance': 1,
+                # prefix + 'accurate_back_zone_pass': { 
+                #     '$multiply': [{'$divide': ['$accurate_back_zone_pass', '$total_back_zone_pass']}, '$appearances']
+                # },
+                # prefix + 'accurate_chipped_pass': { 
+                #     '$multiply': [{'$divide': ['$accurate_chipped_pass', '$total_chipped_pass']}, '$appearances']
+                # },
+                # prefix + 'accurate_fwd_zone_pass': { 
+                #     '$multiply': [{'$divide': ['$accurate_fwd_zone_pass', '$total_fwd_zone_pass']}, '$appearances']
+                # },
+                # prefix + 'accurate_goal_kicks': { 
+                #     '$multiply': [{'$divide': ['$accurate_goal_kicks', '$goal_kicks']}, '$appearances']
+                # },
+                # prefix + 'accurate_keeper_throws': { 
+                #     '$multiply': [{'$divide': ['$accurate_keeper_throws', '$keeper_throws']}, '$appearances']
+                # },
+                # prefix + 'accurate_long_balls': { 
+                #     '$multiply': [{'$divide': ['$accurate_long_balls', '$total_long_balls']}, '$appearances']
+                # },
+                # prefix + 'accurate_pass': { 
+                #     '$multiply': [{'$divide': ['$accurate_pass', '$total_pass']}, '$appearances']
+                # },
+                # prefix + 'effective_clearance': { 
+                #     '$multiply': [{'$divide': ['$effective_clearance', '$total_clearance']}, '$appearances']
+                # },
+                # prefix + 'accurate_back_zone_pass': { 
+                #     '$multiply': [{'$divide': ['$final_third_entries', '$total_final_third_passes']}, '$appearances']
+                # },
+                # prefix + 'accurate_back_zone_pass': { 
+                #     '$multiply': [{'$divide': ['$', '$total_launches']}, '$appearances']
+                # },
+                '_id': 0,
+                'name': '$name'
+
+                },
+            },
+            {'$sort': {prefix + 'accurate_back_zone_pass': -1}}
+
+        ])
+
+    def avg_rank_goalkeepers(self, metric, total_metric):
+        prefix = 'avg_'
+        return self.collection.aggregate([
+            {
+                "$match":{
+                    "position": "G"
+                },
+            },
+            {
+                "$project":{
+                    'accurate_back_zone_pass': { 
+                        '$multiply': [{'$divide': ['$' + metric, '$' + total_metric]}, '$appearances']
+                    },
+                'name': '$name',
+                '_id': 0,
+                },
+            },
+            {
+                '$sort': {
+                    'accurate_back_zone_pass': -1
+                }
+            }
+        ])
+
+
 class FixturesDB(Collections):
     def __init__(self, league, season):
         Collections.__init__(self, league, season)
@@ -192,7 +278,30 @@ class TeamsDB(Collections):
 
 
 if __name__ == '__main__':
-    results = FixturesDB('EN_PR', '2019').get_fixture_substitutes(46609)
+    metric_tuple = [
+        ('accurate_back_zone_pass', 'total_back_zone_pass'),
+        ('accurate_chipped_pass', 'total_chipped_pass'),
+        ('accurate_fwd_zone_pass', 'total_fwd_zone_pass'),
+        ('accurate_goal_kicks', 'goal_kicks'), #goal_kicks: total_goal_kicks
+        ('accurate_keeper_sweeper', 'total_keeper_sweeper'),
+        ('accurate_keeper_throws', 'keeper_throws'), #keeper_throws: total_keeper_throws
+        ('accurate_launches', 'total_launches'),
+        ('accurate_long_balls', 'total_long_balls'),
+        ('accurate_pass', 'total_pass'),
+        # ('aerial_lost', 'aerial_lost + aerial_won') #total_aerial: 'aerial_lost + aerial_won'
+        # ('aerial_won', 'aerial_lost + aerial_won')
+        # ('attempts_conceded_ibox', 'attempts_conceded_ibox + attempts_conceded_obox') #total_attempts_conceded: 'attempts_conceded_ibox + attempts_conceded_obox'
+        # ('attempts_conceded_obox', 'attempts_conceded_ibox + attempts_conceded_obox')
+        ('goals_conceded_ibox', 'goals_conceded'), #total_goals_coneded: goals_conceded
+        ('goals_conceded_obox', 'goals_conceded'),
+        ('', 'total_contest')
+
+
+
+
+
+    ]
+    results = PlayersDB('EN_PR', '2019').gk_test()
     df = pd.DataFrame(results)
     print(df)
 

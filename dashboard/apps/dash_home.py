@@ -19,7 +19,6 @@ from dashboard_data import DataInit
 init = DataInit()
 
 df_teams = init.team_names()
-df_standings = init.league_standings()
 team_series = pd.Series(df_teams['teams'])
 
 
