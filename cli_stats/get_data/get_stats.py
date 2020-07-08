@@ -13,11 +13,11 @@ from datetime import date
 
 
 
-from api_scraper.api_scraper import Football
+from .api_scraper.api_scraper import Football
 from directory import Directory
 from multiprocessing import Pool
 from pprint import pprint
-from static_types import *
+from .static_types import *
 from storage_config import StorageConfig
 from tqdm import tqdm
 
@@ -293,11 +293,12 @@ class FixtureStats(Base):
             stats['info'] = fixture['entity']
             if 'stats' in fixture:
                 stats['stats'] = fixture['stats']
+                stats['stats'].append({'id':fixture['entity']['id']})
             else:
                 i += 1
             if stats:
                 stats_list.append(stats)
-            print('Completed')
+        print('Completed')
         if i >0:
             print(f'{i} games retreived had no stats')
         self.save_completed('player_fixture', stats_list, StorageConfig.STATS_DIR)

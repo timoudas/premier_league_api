@@ -118,7 +118,8 @@ class StatShell(cmd.Cmd):
                    '-f': ['fixture_stats', league, season],
                    '-s': ['team_squad', league, season],
                    '-l': ['league_standings', league, season],
-                   '-i': ['fixture_info', league, season]}
+                   '-i': ['fixture_info', league, season],
+                   '-e': ['fixture_player_stats', league, season]}
         params = choices.get(type_stats)
         return stats(*params)
 
@@ -129,12 +130,14 @@ class StatShell(cmd.Cmd):
 
         Options:
             -p,  --player         Playerstats
-            -t,  --team           Team standings
+            -t,  --team           TeamStandings
             -f,  --fixture        FixtureStats
             -s,  --squad          Squads
-            -l,  --league         League standings
+            -l,  --league         LeagueStandings
             -i,  --league         FixtureInfo
+            -e   --fixtureplayer   PlayerStats for Fixture
             """
+        print(arg)
         league = arg['<LEAGUE>'].upper()
         if len(arg['<SEASON>']) == 1:
             season_end = str(int(arg['<SEASON>'][0])+1)
@@ -156,7 +159,8 @@ class StatShell(cmd.Cmd):
         choices = {'-p': clean.playerstats,
                    '-t': clean.team_standings,
                    '-f': clean.fixturestats,
-                   '-l': clean.league_standings}
+                   '-l': clean.league_standings,
+                   '-e': clean.fixture_player_stats}
         if type_stats in choices.keys():
             return choices.get(type_stats)(league, season)
 
@@ -166,11 +170,11 @@ class StatShell(cmd.Cmd):
 
         Options:
             -p,  --player         Playerstats
+            -e,  --player_fixture Player stats for fixture
             -t,  --team           Team standings
             -f,  --fixture        Fixturestats
             -l,  --league         League Standings
-
-            """      
+            """  
         file_name = arg['<LEAGUE>'].upper() + '_' + arg['<SEASON>'] + '_'
         league = arg['<LEAGUE>'].upper()
         season = str(arg['<SEASON>'])
@@ -189,6 +193,9 @@ class StatShell(cmd.Cmd):
                     elif key == '-l':
                         dir.save_json(file_name + 'league_standings', self.loading_choices(key, league, season), StorageConfig.DB_DIR)
                         print('-l File was saved')
+                    elif key == '-e':
+                        dir.save_json(file_name + 'player_fixture', self.loading_choices(key, league, season), StorageConfig.DB_DIR)
+                        print('-e File was saved')
             except FileExistsError:
                 print("Please check that", file_name, " exists")
 
@@ -209,7 +216,6 @@ class StatShell(cmd.Cmd):
             -t,  --team           Push Team standings
             -f,  --fixture        Push Fixturestats
             -l,  --league         Push League Standings
-            -d,  --delete         Delete from db
             """  
         data = db.DB(arg['<LEAGUE>'].upper(), arg['<SEASON>'])
         for key, value in arg.items():
