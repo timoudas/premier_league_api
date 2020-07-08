@@ -226,17 +226,28 @@ class FixtureStats(Base):
             print(f'{i} games retreived had no stats')
         self.save_completed('fixtureinfo', stats_list, StorageConfig.STATS_DIR)
 
-
-    def fixture_player_stats_singel(self, fixture_id, player_id):
-        """Gets stats for a fixture"""
-        ds = load_match_data(f'https://footballapi.pulselive.com/football/stats/player/{player_id}?fixtures={fixture_id}')
-        return ds
-
     def fixture_player_stats_singel_wrapper(self, params):
         """Wrapper to pass tuple args to multiprocess"""
         return self.fixture_player_stats_singel(*params)
+
+    def fixture_player_stats_singel(self, fixture_id, player_id):
+        """Gets stats for a fixture"""
+        fixture = load_match_data(f'https://footballapi.pulselive.com/football/stats/player/{player_id}?fixtures={fixture_id}')
+        i = 0
+        stats = {}
+        stats['info'] = fixture['entity']
+        stats['info'].update({'f_id': fixture_id})
+        if 'stats' in fixture:
+            stats['stats'] = fixture['stats']
+            stats['stats'].append({'id':fixture['entity']['id']})
+        else:
+            i += 1
+        if stats:
+            return stats
+
     
     def load_fixture_player_stats(self):
+        """Loads all the players for each fixture"""
         stats_list = []
 
         print("Getting fixture players..")
@@ -256,7 +267,6 @@ class FixtureStats(Base):
                         lineup = lineups['lineup']
                         substitutes = lineups['substitutes']
                         for l in lineup:
-                            p_id = l['id']
                             stats[info['id']].append(l['id'])
                         for s in substitutes:
                             stats[info['id']].append(s['id'])
@@ -286,18 +296,11 @@ class FixtureStats(Base):
         print("Getting player info for all fixtures..")
         with Pool(self.pool) as p:
             fixture_stats = list(tqdm(p.imap(self.fixture_player_stats_singel_wrapper, fixture_tuples, chunksize=1), total=len(fixture_tuples)))
-        print('Getting data from workers..')
-        i = 0
-        for fixture in fixture_stats:
-            stats = {}
-            stats['info'] = fixture['entity']
-            if 'stats' in fixture:
-                stats['stats'] = fixture['stats']
-                stats['stats'].append({'id':fixture['entity']['id']})
-            else:
-                i += 1
-            if stats:
-                stats_list.append(stats)
+            for fixture in fixture_stats:
+                if fixture:
+                    stats_list.append(fixture)
+                else:
+                    i += 1
         print('Completed')
         if i >0:
             print(f'{i} games retreived had no stats')
@@ -551,6 +554,8 @@ if __name__ == '__main__':
     # print(dir(f.fixture_dispatch_map))
     stats = SeasonStats()
     stats('fixture_player_stats', 'EN_PR', '2019/2020')
+    # f = FixtureStats('EN_PR', '2019/2020')
+    # pprint(f.fixture_player_stats_singel('38313', '4287'))
 
 
 

@@ -203,7 +203,8 @@ class StatShell(cmd.Cmd):
         choices = {'-p': db.executePushPlayer,
                    '-t': db.executePushTeam,
                    '-f': db.executePushFixture,
-                   '-l': db.executePushLeagueStandings}
+                   '-l': db.executePushLeagueStandings,
+                   '-e': db.executePushFixturePlayerStats}
         if type_stats in choices.keys():
             return choices.get(type_stats)(database)
 
@@ -216,7 +217,9 @@ class StatShell(cmd.Cmd):
             -t,  --team           Push Team standings
             -f,  --fixture        Push Fixturestats
             -l,  --league         Push League Standings
+            -e,  --player_fixture Push Player Fixture Stats
             """  
+        print(arg)
         data = db.DB(arg['<LEAGUE>'].upper(), arg['<SEASON>'])
         for key, value in arg.items():
             if value == True:
@@ -231,9 +234,9 @@ class StatShell(cmd.Cmd):
         if not len(arg['SEASON']) == 4:
             print('Season should be YYYY')
         else:
-            download_params = ['-p', '-t', '-f', '-s', '-l', '-i']
-            clean_params = ['-p', '-t', '-f', '-l']
-            db_params = ['-p', '-t', '-f', '-l']
+            download_params = ['-p', '-t', '-f', '-s', '-l', '-i', '-e']
+            clean_params = ['-p', '-t', '-f', '-l', '-e']
+            db_params = ['-p', '-t', '-f', '-l', '-e']
             data = db.DB(arg['LEAGUE'].upper(), arg['SEASON'])
             league = arg['LEAGUE'].upper()
             season_end = str(int(arg['SEASON'])+1)

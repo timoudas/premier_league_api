@@ -23,7 +23,8 @@ def DB_collections(collection_type):
     types = {'p': 'player_stats',
              't': 'team_standings',
              'f': 'fixture_stats',
-             'l': 'league_standings'}
+             'l': 'league_standings',
+             'pf': 'fixture_players_stats'}
     return types.get(collection_type)
 
 
@@ -45,6 +46,7 @@ class DB():
         self.teamfile = self.league + '_' + self.season + '_team_standings.json'
         self.fixturefile = self.league + '_' + self.season + '_fixturestats.json'
         self.leaguefile = self.league + '_' + self.season + '_league_standings.json'
+        self.player_fixture = self.league + '_' + self.season + '_player_fixture.json'
         self.func = func
 
     def execute(self):
@@ -86,7 +88,7 @@ def collection_index(collection, index, *args):
     if index not in collection.index_information():
         return collection.create_index([(index, DESCENDING), *compound_index], unique=True)
 
-def push_upstream(collection, record_id, record):
+def push_upstream(collection, record):
     """Update record in collection
         Args:
             collection (str): Name of collection in database
@@ -115,7 +117,7 @@ def executePushPlayer(db):
         if existingPost:
             update_upstream(collection, {'p_id': player['p_id']}, player)
         else:
-            push_upstream(collection, player['p_id'], player)
+            push_upstream(collection, player)
 
 
 def executePushFixture(db):
@@ -129,7 +131,7 @@ def executePushFixture(db):
         if existingPost:
             update_upstream(collection, {'f_id': fixture['f_id']}, fixture)
         else:
-            push_upstream(collection, fixture['f_id'], fixture)
+            push_upstream(collection, fixture)
 
 def executePushTeam(db):
 
@@ -144,7 +146,7 @@ def executePushTeam(db):
             update_upstream(collection, {'team_shortName': team['team_shortName'],
                                         'played': team['played']}, team)
         else:
-            push_upstream(collection, team['team_shortName'], team)
+            push_upstream(collection, team)
 
 def executePushLeagueStandings(db):
 
@@ -157,19 +159,37 @@ def executePushLeagueStandings(db):
         if existingPost:
             update_upstream(collection, {'team_shortName': team['team_shortName']}, team)
         else:
-            push_upstream(collection, team['team_shortName'], team)
+            push_upstream(collection, team)
 
-        
+def executePushFixturePlayerStats(db):
+
+    player_fixture = load_file(db.player_fixture)
+    collection_name = DB_collections('pf')
+    collection = db.DATABASE[collection_name]
+    collection_index(collection, 'f_id', 'id')
+    for player in tqdm(player_fixture):
+        existingPost = check_record(collection, {'f_id': player['f_id'],
+                                                 'id': player['id']})
+        if existingPost:
+            update_upstream(collection, {'f_id': player['f_id'],
+                                        'id': player['id']}, player)
+        else:
+            push_upstream(collection, player)     
 
 if __name__ == '__main__':
-    en_pr2019 = DB('EN_PR', '2019')
-    executePushPlayer(en_pr2019)
-    executePushFixture(en_pr2019)
-    executePushTeam(en_pr2019)
-    en_pr2018 = DB('EN_PR', '2018')
-    executePushPlayer(en_pr2018)
-    executePushFixture(en_pr2018)
-    executePushTeam(en_pr2018)
+    db = DB('EN_PR', '2019')
+    player_fixture = load_file(db.player_fixture)
+    for i in player_fixture:
+        print(i['f_id'])
+    # print(os.environ.get('DB_user'))
+    # en_pr2019 = DB('EN_PR', '2019')
+    # executePushPlayer(en_pr2019)
+    # executePushFixture(en_pr2019)
+    # executePushTeam(en_pr2019)
+    # en_pr2018 = DB('EN_PR', '2018')
+    # executePushPlayer(en_pr2018)
+    # executePushFixture(en_pr2018)
+    # executePushTeam(en_pr2018)
 
 
 # #EXAMPLE db mycol = mydb["playerstats"]

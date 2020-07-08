@@ -42,7 +42,6 @@ def load_player_stats(league, year):
     try: 
         file = f'{league}_{year}_playerstats.json'
         stats_file = dirs.load_json(file, StorageConfig.STATS_DIR)
-        stats_file.append({'season': year})
         return stats_file
     except FileNotFoundError as e:
         print(file, "not found")
@@ -159,6 +158,7 @@ def read_player_fixture_all(data):
                 stats = d['info']
                 stats_temp.update(
                     {'age' : stats.get('age'),
+                    'f_id': stats.get('f_id'),
                     'id' : stats.get('id'),
                     'birth' : deep_get(stats, 'birth.date.label'),
                     'birth_exact' : deep_get(stats, 'birth.date.millis'),
@@ -297,11 +297,6 @@ def validate_id(data):
 
 def fixture_player_stats(league, year):
     players_info = read_player_fixture_all(load_fixture_player_stats(league, year))
-    # player_stats = read_playerstats(load_fixture_player_stats(league, year))
-    print(len(players_info))
-    #Mergers the two list of dicts if `id-key` is the same
-    # merge_info_stats = [{**x, **y} for y in players_info for x in player_stats if x['id'] == y['id']]
-    # d = [dict(sorted(d.items())) for d in merge_info_stats]
     return players_info
 
 def playerstats(league, year):
