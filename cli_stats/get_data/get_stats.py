@@ -76,6 +76,7 @@ class Base():
         self.dir.save_json(filename, stats_list, path)
         print(f'Saved as {filename}.json in {path}')
 
+
 class PlayerStats(Base):
 
     def __init__(self, *args, **kwargs):
@@ -224,9 +225,20 @@ class FixtureStats(Base):
         if i >0:
             print(f'{i} games retreived had no stats')
         self.save_completed('fixtureinfo', stats_list, StorageConfig.STATS_DIR)
+
+
+    def fixture_player_stats_singel(self, fixture_id, player_id):
+        """Gets stats for a fixture"""
+        ds = load_match_data(f'https://footballapi.pulselive.com/football/stats/player/{player_id}?fixtures={fixture_id}')
+        return ds
+
+    def fixture_player_stats_singel_wrapper(self, params):
+        """Wrapper to pass tuple args to multiprocess"""
+        return self.fixture_player_stats_singel(*params)
     
-    def fixture_player_stats(self):
+    def load_fixture_player_stats(self):
         stats_list = []
+
         print("Getting fixture players..")
         with Pool(self.pool) as p:
             fixture_info = list(tqdm(p.imap(self.fixture_info_singel, self.fixture_ids, chunksize=1), total=len(self.fixture_ids)))
@@ -252,11 +264,44 @@ class FixtureStats(Base):
                 i += 1
             if stats:
                 stats_list.append(stats)
-        pprint(stats_list)
-        # print('Completed')
-        # if i >0:
-        #     print(f'{i} games retreived had no stats')
-        # self.save_completed('fixture_', stats_list, StorageConfig.STATS_DIR)
+        print('Completed')
+        if i >0:
+            print(f'{i} games retreived had no stats')
+        return stats_list
+
+    def fixture_player_stats(self):
+        """Create a list of tuples (fixture_id, player_id) to pass to the
+        multiprocess for speed. Only create tuple of games that has been played.
+
+        """
+        stats_list = []
+        fixture_tuples = []
+        fixture_player_ids = self.load_fixture_player_stats()
+        i = 0
+        for fixture in fixture_player_ids:
+            for fixture_id, value in fixture.items():
+                if value:
+                    for player_id in value:
+                        fixture_tuples.append((fixture_id, player_id))
+        print("Getting player info for all fixtures..")
+        with Pool(self.pool) as p:
+            fixture_stats = list(tqdm(p.imap(self.fixture_player_stats_singel_wrapper, fixture_tuples, chunksize=1), total=len(fixture_tuples)))
+        print('Getting data from workers..')
+        i = 0
+        for fixture in fixture_stats:
+            stats = {}
+            stats['info'] = fixture['entity']
+            if 'stats' in fixture:
+                stats['stats'] = fixture['stats']
+            else:
+                i += 1
+            if stats:
+                stats_list.append(stats)
+            print('Completed')
+        if i >0:
+            print(f'{i} games retreived had no stats')
+        self.save_completed('player_fixture', stats_list, StorageConfig.STATS_DIR)
+        
 
 
 class TeamStats(Base):
