@@ -23,15 +23,6 @@ class DBCleaning:
 					'position': 'G'
 				}
 			},
-			# {
-			# 	'$project': {
-			# 		'total_aerial': {'$add': ['$aerial_lost', '$aerial_won']},
-			# 		'total_attempts_conceded': {'$add': ['$attempts_conceded_ibox', '$attempts_conceded_obox']},
-			# 		'total_goal_kicks': 'goal_kicks',
-			# 		'total_keeper_throws': 'keeper_throws',
-			# 		'total_goals_conceded': 'goals_conceded',
-			# 	},
-			# },
 		    {
 		        '$project': {
 		        	'name': 1,
