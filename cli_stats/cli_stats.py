@@ -174,7 +174,7 @@ class StatShell(cmd.Cmd):
             -t,  --team           Team standings
             -f,  --fixture        Fixturestats
             -l,  --league         League Standings
-            """  
+            """
         file_name = arg['<LEAGUE>'].upper() + '_' + arg['<SEASON>'] + '_'
         league = arg['<LEAGUE>'].upper()
         season = str(arg['<SEASON>'])
@@ -218,8 +218,7 @@ class StatShell(cmd.Cmd):
             -f,  --fixture        Push Fixturestats
             -l,  --league         Push League Standings
             -e,  --player_fixture Push Player Fixture Stats
-            """  
-        print(arg)
+            """
         data = db.DB(arg['<LEAGUE>'].upper(), arg['<SEASON>'])
         for key, value in arg.items():
             if value == True:
@@ -244,6 +243,7 @@ class StatShell(cmd.Cmd):
             file_season = str(arg['SEASON'])
             file_name = arg['LEAGUE'].upper() + '_' + arg['SEASON'] + '_'
             for i in download_params:
+                print("Doing: ", i)
                 self.downloads_choices(i, arg['LEAGUE'].upper(), season)  
             for i in clean_params:
                 if i == '-p':

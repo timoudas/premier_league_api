@@ -66,7 +66,7 @@ def load_file(file):
         loaded_file = import_json(file)
         return loaded_file
     except FileNotFoundError:
-        print("Please check that", loaded_file, "exists")
+        print("Please check that", file, "exists")
 
 def check_record(collection, index_dict):
     """Check if record exists in collection
