@@ -258,6 +258,9 @@ class StatShell(cmd.Cmd):
                 elif i == '-l':
                     dir.save_json(file_name + 'league_standings', self.loading_choices(i, league, file_season), StorageConfig.DB_DIR)
                     print('-l File was saved')
+                else:
+                    dir.save_json(file_name + 'league_standings', self.loading_choices(i, league, file_season), StorageConfig.DB_DIR)
+                    print('-e File was saved')
             for i in db_params:
                 self.push_choices(i, data)
 
