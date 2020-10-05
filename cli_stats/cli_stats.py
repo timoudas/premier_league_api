@@ -11,7 +11,7 @@ Options:
     -p,  --player         Playerstats
     -t,  --team           Team standings
     -f,  --fixture        Fixturestats
-    -s,  --squad          Squad
+    -u,  --update         Update
 """
 """
 Interactive Command Line for the following tasks:
@@ -151,13 +151,13 @@ class StatShell(cmd.Cmd):
         """Usage: CLIStats$ [options] <LEAGUE> <SEASON> ...
 
         Options:
-                -p,  --player         Playerstats
-                -t,  --team           TeamStandings
-                -f,  --fixture        FixtureStats
-                -s,  --squad          Squads
-                -l,  --league         LeagueStandings
-                -i,  --league         FixtureInfo
-                -e,   --fixtureplayer   PlayerStats for Fixture
+                -p,  --player          Playerstats
+                -t,  --team            TeamStandings
+                -f,  --fixture         FixtureStats
+                -s,  --squad           Squads
+                -l,  --league          LeagueStandings
+                -i,  --fixtureinfo     FixtureInfo
+                -e,  --fixtureplayer   PlayerStats for Fixture
                 """
 
         league = arg['<LEAGUE>'].upper()
@@ -281,18 +281,24 @@ class StatShell(cmd.Cmd):
         print('working')
         for key, value in arg.items():
             if value == True:
-                self.downloads_choices(key, league, season)
-                file_prefix = f"{league}_{season}_"
-                file_suffix = self.FILE_NAMES.get(key)
-                file_name = f'{file_prefix}{file_suffix}'
-                dir.save_json(file_name, self.loading_choices(key, league, season), StorageConfig.DB_DIR)
-                self.push_choices(key, database)
+                if value == '-f':
+                    self.downloads_choices(key, league, season)
+                    self.downloads_choices('-i', league, season)
+                    file_prefix = f"{league}_{season}_"
+                    file_suffix_stats = self.FILE_NAMES.get(key)
+                    file_suffix_info = self.FILE_NAMES.get('-i')
+                    file_name_fix = f'{file_prefix}{file_suffix_stats}'
+                    file_name_info = f'{file_prefix}{file_suffix_info}'
+                    dir.save_json(file_name_fix, self.loading_choices(key, league, season), StorageConfig.DB_DIR)
+                    dir.save_json(file_name_info, self.loading_choices('-i', league, season), StorageConfig.DB_DIR)
+                else:
+                    self.downloads_choices(key, league, season)
+                    file_prefix = f"{league}_{season}_"
+                    file_suffix = self.FILE_NAMES.get(key)
+                    file_name = f'{file_prefix}{file_suffix}'
+                    dir.save_json(file_name, self.loading_choices(key, league, season), StorageConfig.DB_DIR)
+                    self.push_choices(key, database)
 
-        # for key, value in arg.items():
-        #     if value == True:
-        #         print("Pushing: ", arg['<LEAGUE>'].upper(), arg['<SEASON>'])
-        #         self.push_choices(key, database)
-        # print("Push completed")
 
     def do_clear(self, arg):
         """Clear the screen"""
@@ -309,6 +315,9 @@ def main():
 
     if opt['--interactive']:
         StatShell().cmdloop()
+    elif opt['--update']:
+        print(opt)
+        StatShell().do_update()
 
 if __name__ == '__main__':
     main()
