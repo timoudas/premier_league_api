@@ -14,10 +14,10 @@ from datetime import date
 
 
 from .api_scraper.api_scraper import Football
+from .static_types import *
 from directory import Directory
 from multiprocessing import Pool
 from pprint import pprint
-from .static_types import *
 from storage_config import StorageConfig
 from tqdm import tqdm
 
@@ -51,9 +51,14 @@ class Base():
                 league(str): A league in the form of it's abbreviation. Ex. 'EN_PR'
                 season(str): A season that exists for that specific league EX. '2019/2020'
         """
+        if season:
+            if re.match(r"(^\d{4})([/]\d{4}$)", season): #YYYYMMDDTHHMMSS
+                self.season = season
+            else: #YYYY
+                self.season = f'{season}/{str(int(season)+1)}'
         self.pool = multiprocessing.cpu_count()
         self.league = league
-        self.season = season
+        #self.season = season
         self.fb.load_leagues()
         self.fb.leagues[self.league].load_seasons()
         self.season_id = self.fb.leagues[self.league].seasons[self.season]['id']

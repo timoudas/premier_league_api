@@ -35,18 +35,18 @@ class DB():
         self.db_user = os.environ.get('DB_user')
         self.db_pass = os.environ.get('DB_pass')
         self.MONGODB_URL = f'mongodb+srv://{self.db_user}:{self.db_pass}@cluster0-mbqxj.mongodb.net/<dbname>?retryWrites=true&w=majority'
-        self.client = MongoClient(self.MONGODB_URL)
-        self.DATABASE = self.client[league + season]
-
         self.league = league
-        self.season = season
+        self.season = str(season)
+        self.client = MongoClient(self.MONGODB_URL)
+        self.DATABASE = self.client[self.league + self.season]
+
 
         self.pool = multiprocessing.cpu_count()
-        self.playerfile = self.league + '_' + self.season + '_playerstats.json'
-        self.teamfile = self.league + '_' + self.season + '_team_standings.json'
-        self.fixturefile = self.league + '_' + self.season + '_fixturestats.json'
-        self.leaguefile = self.league + '_' + self.season + '_league_standings.json'
-        self.player_fixture = self.league + '_' + self.season + '_player_fixture.json'
+        self.playerfile = f'{self.league}_{self.season}_playerstats.json'
+        self.teamfile = f'{self.league}_{self.season}_team_standings.json'
+        self.fixturefile = f'{self.league}_{self.season}_fixturestats.json'
+        self.leaguefile = f'{self.league}_{self.season}_league_standings.json'
+        self.player_fixture = f'{self.league}_{self.season}_player_fixture.json'
         self.func = func
 
     def execute(self):

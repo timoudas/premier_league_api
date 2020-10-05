@@ -21,8 +21,8 @@ Interactive Command Line for the following tasks:
     * Insert data in database
 """
 import cmd
+import datetime
 import os
-import pickle
 import sys
 
 from docopt import DocoptExit
@@ -263,6 +263,36 @@ class StatShell(cmd.Cmd):
                 print(f'{file_name} was saved')
             for arg_key in self.db_clean_params:
                 self.push_choices(arg_key, database)
+
+    @docopt_cmd
+    def do_update(self, arg):
+        """Usage: CLIStats$ [options] <LEAGUE>
+        
+        Options:
+            -p,  --player         Push Playerstats
+            -t,  --team           Push Team standings
+            -f,  --fixture        Push Fixturestats
+            -l,  --league         Push League Standings
+            -e,  --player_fixture Push Player Fixture Stats
+            """
+        season = str(datetime.date.today().year)
+        league = arg['<LEAGUE>'].upper()
+        database = db.DB(league, season)
+        print('working')
+        for key, value in arg.items():
+            if value == True:
+                self.downloads_choices(key, league, season)
+                file_prefix = f"{league}_{season}_"
+                file_suffix = self.FILE_NAMES.get(key)
+                file_name = f'{file_prefix}{file_suffix}'
+                dir.save_json(file_name, self.loading_choices(key, league, season), StorageConfig.DB_DIR)
+                self.push_choices(key, database)
+
+        # for key, value in arg.items():
+        #     if value == True:
+        #         print("Pushing: ", arg['<LEAGUE>'].upper(), arg['<SEASON>'])
+        #         self.push_choices(key, database)
+        # print("Push completed")
 
     def do_clear(self, arg):
         """Clear the screen"""
