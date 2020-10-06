@@ -10,3 +10,5 @@
 raw_data/
 *.png
 rest-server/
+ __pycache__/
+ *.pyc
