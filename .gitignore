@@ -9,3 +9,4 @@
 /model/.bash_profile
 raw_data/
 *.png
+/rest-server/
