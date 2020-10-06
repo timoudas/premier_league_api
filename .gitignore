@@ -1,13 +1,7 @@
-**/json/*
-/model/__pycache__/
-*.ipynb
-/model/Extra
-*.sqlite
-*.csv
-/model/.bash_profile
-raw_data/
 *.png
- __pycache__/
- *.pyc
-rest-server/
-/rest-server
+cli_stats/raw_data/
+__pycache__/
+*.pyc
+*.pyo
+*.ipynb
+rest_server/
