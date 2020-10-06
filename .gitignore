@@ -1,5 +1,3 @@
-#GITIGNORE
-
 **/json/*
 /model/__pycache__/
 *.ipynb
@@ -9,6 +7,7 @@
 /model/.bash_profile
 raw_data/
 *.png
-rest-server/
  __pycache__/
  *.pyc
+rest-server/
+/rest-server
