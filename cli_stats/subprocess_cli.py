@@ -5,11 +5,11 @@ Usage:
   subprocess_cli.py -u [options] <LEAGUE>
 
 Options:
-  -p  --player 				Update PlayerStats.
-  -t  --team 				Update TeamStandings.
-  -f  --fixture 			Update FixtureStats.
-  -l  --leauge				Update LeagueStandings.
-  -e  --playerfixture		Update PlayerFixture.
+  -p  --player              Update PlayerStats.
+  -t  --team                Update TeamStandings.
+  -f  --fixture             Update FixtureStats.
+  -l  --leauge              Update LeagueStandings.
+  -e  --playerfixture       Update PlayerFixture.
 """
 
 
@@ -28,6 +28,10 @@ from database import mongo_db as db
 
 from directory import Directory
 from get_data.get_stats import SeasonStats
+from storage_config import StorageConfig
+
+SEASON = str(datetime.date.today().year)
+dir = Directory()
 
 LOADING_CHOICES = {
     '-p': clean.playerstats,
@@ -45,7 +49,7 @@ FILE_NAMES = {
     '-e': 'player_fixture'
 }
 
-def downloads_choices(self, type_stats, league, season):
+def downloads_choices(type_stats, league, season):
     """Returns an instance of a class that runs a download function
         Args:
             type_stats (str): One of below keys in the dict
@@ -63,7 +67,7 @@ def downloads_choices(self, type_stats, league, season):
     params = choices.get(type_stats)
     return stats(*params)
 
-def loading_choices(self, type_stats, league, season):
+def loading_choices(type_stats, league, season):
     choices = {'-p': clean.playerstats,
                '-t': clean.team_standings,
                '-f': clean.fixturestats,
@@ -72,7 +76,7 @@ def loading_choices(self, type_stats, league, season):
     if type_stats in choices.keys():
         return choices.get(type_stats)(league, season)
 
-def push_choices(self, type_stats, database):
+def push_choices(type_stats, database):
     choices = {'-p': db.executePushPlayer,
                '-t': db.executePushTeam,
                '-f': db.executePushFixture,
@@ -81,9 +85,44 @@ def push_choices(self, type_stats, database):
     if type_stats in choices.keys():
         return choices.get(type_stats)(database)
 
+def create_file_name(league, key):
+    file_prefix = f"{league}_{SEASON}_"
+    file_suffix = FILE_NAMES.get(key)
+    file_name = f'{file_prefix}{file_suffix}'
+    return file_name
+
+def update_league_standings(league, key):
+    database = db.DB(league, SEASON)
+    file_name = create_file_name(league, ket)
+    downloads_choices(key, league, SEASON)
+    dir.save_json(file_name, loading_choices(key, league, SEASON), StorageConfig.DB_DIR)
+    push_choices(key, database)
+
+def update_player_stats(league):
+    pass
+
+def update_fixture_stats(league):
+    pass
+
+def update_team_standings(league):
+    pass
+
+def update_fixture_player_stats(league):
+    pass
+
+
+def dispatch(type_stats, league):
+    choices = {'-p': update_player_stats,
+               '-t': update_team_standings,
+               '-f': update_fixture_stats,
+               '-l': update_league_standings,
+               '-e': update_fixture_player_stats}
+    if type_stats in choices.keys():
+        return choices.get(type_stats)(league, type_stats)
+
 def update(self):
 
-    season = str(datetime.date.today().year)
+    
     league = arg['<LEAGUE>'].upper()
     database = db.DB(league, season)
     print('working')
@@ -109,5 +148,7 @@ def update(self):
 
 
 if __name__ == '__main__':
-    arguments = docopt(__doc__, version='Naval Fate 2.0')
-    print(arguments)
+    args = docopt(__doc__, version='Naval Fate 2.0')
+    for key, value in args.items():
+        if value == True:
+            dispatch(key, args['<LEAGUE>'].upper())
