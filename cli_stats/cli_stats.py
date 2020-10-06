@@ -264,40 +264,6 @@ class StatShell(cmd.Cmd):
             for arg_key in self.db_clean_params:
                 self.push_choices(arg_key, database)
 
-    @docopt_cmd
-    def do_update(self, arg):
-        """Usage: CLIStats$ [options] <LEAGUE>
-        
-        Options:
-            -p,  --player         Push Playerstats
-            -t,  --team           Push Team standings
-            -f,  --fixture        Push Fixturestats
-            -l,  --league         Push League Standings
-            -e,  --player_fixture Push Player Fixture Stats
-            """
-        season = str(datetime.date.today().year)
-        league = arg['<LEAGUE>'].upper()
-        database = db.DB(league, season)
-        print('working')
-        for key, value in arg.items():
-            if value == True:
-                if value == '-f':
-                    self.downloads_choices(key, league, season)
-                    self.downloads_choices('-i', league, season)
-                    file_prefix = f"{league}_{season}_"
-                    file_suffix_stats = self.FILE_NAMES.get(key)
-                    file_suffix_info = self.FILE_NAMES.get('-i')
-                    file_name_fix = f'{file_prefix}{file_suffix_stats}'
-                    file_name_info = f'{file_prefix}{file_suffix_info}'
-                    dir.save_json(file_name_fix, self.loading_choices(key, league, season), StorageConfig.DB_DIR)
-                    dir.save_json(file_name_info, self.loading_choices('-i', league, season), StorageConfig.DB_DIR)
-                else:
-                    self.downloads_choices(key, league, season)
-                    file_prefix = f"{league}_{season}_"
-                    file_suffix = self.FILE_NAMES.get(key)
-                    file_name = f'{file_prefix}{file_suffix}'
-                    dir.save_json(file_name, self.loading_choices(key, league, season), StorageConfig.DB_DIR)
-                    self.push_choices(key, database)
 
 
     def do_clear(self, arg):
@@ -315,9 +281,7 @@ def main():
 
     if opt['--interactive']:
         StatShell().cmdloop()
-    elif opt['--update']:
-        print(opt)
-        StatShell().do_update()
+
 
 if __name__ == '__main__':
     main()

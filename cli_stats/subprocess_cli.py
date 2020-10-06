@@ -91,60 +91,33 @@ def create_file_name(league, key):
     file_name = f'{file_prefix}{file_suffix}'
     return file_name
 
-def update_league_standings(league, key):
+def update(league, key):
     database = db.DB(league, SEASON)
-    file_name = create_file_name(league, ket)
-    downloads_choices(key, league, SEASON)
-    dir.save_json(file_name, loading_choices(key, league, SEASON), StorageConfig.DB_DIR)
-    push_choices(key, database)
+    if key == '-f':
+        file_name_fix = create_file_name(league, key)
+        file_name_info = create_file_name(league, '-i')
+        downloads_choices(key, league, SEASON)
+        downloads_choices('-i', league, SEASON)
+        dir.save_json(file_name_fix, loading_choices(key, league, SEASON), StorageConfig.DB_DIR)
+        dir.save_json(file_name_info, loading_choices('-i', league, SEASON), StorageConfig.DB_DIR)
+        push_choices(key, database)
+        push_choices('-i', database)
+    else:
+        file_name = create_file_name(league, key)
+        downloads_choices(key, league, SEASON)
+        dir.save_json(file_name, loading_choices(key, league, SEASON), StorageConfig.DB_DIR)
+        push_choices(key, database)
 
-def update_player_stats(league):
-    pass
-
-def update_fixture_stats(league):
-    pass
-
-def update_team_standings(league):
-    pass
-
-def update_fixture_player_stats(league):
-    pass
 
 
 def dispatch(type_stats, league):
-    choices = {'-p': update_player_stats,
-               '-t': update_team_standings,
-               '-f': update_fixture_stats,
-               '-l': update_league_standings,
-               '-e': update_fixture_player_stats}
+    choices = {'-p': update,
+               '-t': update,
+               '-f': update,
+               '-l': update,
+               '-e': update}
     if type_stats in choices.keys():
         return choices.get(type_stats)(league, type_stats)
-
-def update(self):
-
-    
-    league = arg['<LEAGUE>'].upper()
-    database = db.DB(league, season)
-    print('working')
-    for key, value in arg.items():
-        if value == True:
-            if value == '-f':
-                self.downloads_choices(key, league, season)
-                self.downloads_choices('-i', league, season)
-                file_prefix = f"{league}_{season}_"
-                file_suffix_stats = self.FILE_NAMES.get(key)
-                file_suffix_info = self.FILE_NAMES.get('-i')
-                file_name_fix = f'{file_prefix}{file_suffix_stats}'
-                file_name_info = f'{file_prefix}{file_suffix_info}'
-                dir.save_json(file_name_fix, self.loading_choices(key, league, season), StorageConfig.DB_DIR)
-                dir.save_json(file_name_info, self.loading_choices('-i', league, season), StorageConfig.DB_DIR)
-            else:
-                self.downloads_choices(key, league, season)
-                file_prefix = f"{league}_{season}_"
-                file_suffix = self.FILE_NAMES.get(key)
-                file_name = f'{file_prefix}{file_suffix}'
-                dir.save_json(file_name, self.loading_choices(key, league, season), StorageConfig.DB_DIR)
-                self.push_choices(key, database)
 
 
 if __name__ == '__main__':

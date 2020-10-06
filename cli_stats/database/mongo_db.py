@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import multiprocessing
 import os
@@ -9,8 +10,11 @@ import uuid
 
 
 from bson.objectid import ObjectId
+from deco import concurrent
+from deco import synchronized
 from directory import Directory
 from multiprocessing import Pool
+from pprint import pprint
 from pymongo import ASCENDING
 from pymongo import DESCENDING
 from pymongo import MongoClient
@@ -120,6 +124,9 @@ def executePushPlayer(db):
             push_upstream(collection, player)
 
 
+
+
+
 def executePushFixture(db):
 
     fixturestats = load_file(db.fixturefile)
@@ -132,6 +139,10 @@ def executePushFixture(db):
             update_upstream(collection, {'f_id': fixture['f_id']}, fixture)
         else:
             push_upstream(collection, fixture)
+
+
+
+
 
 def executePushTeam(db):
 
@@ -178,30 +189,6 @@ def executePushFixturePlayerStats(db):
 
 if __name__ == '__main__':
     db = DB('EN_PR', '2019')
-    player_fixture = load_file(db.player_fixture)
-    for i in player_fixture:
-        print(i['f_id'])
-    # print(os.environ.get('DB_user'))
-    # en_pr2019 = DB('EN_PR', '2019')
-    # executePushPlayer(en_pr2019)
-    # executePushFixture(en_pr2019)
-    # executePushTeam(en_pr2019)
-    # en_pr2018 = DB('EN_PR', '2018')
-    # executePushPlayer(en_pr2018)
-    # executePushFixture(en_pr2018)
-    # executePushTeam(en_pr2018)
+    executePushFixture(db)
 
-
-# #EXAMPLE db mycol = mydb["playerstats"]
-# def push_playerstats(self):
-#     try:
-#         stats = clean.playerstats('EN_PR', '2019')
-#     except FileNotFoundError as e:
-#         print("Please check that the file exists.")
-#     print("Getting fixture stats..")
-#     with Pool(self.pool) as p:
-#         fixture_stats = list(tqdm(p.imap(self.fixture_stats_singel, self.fixture_ids, chunksize=1), total=len(self.fixture_ids)))
-
-#     for d in stats:
-#         mycol.insert_one(d)
 
