@@ -99,9 +99,7 @@ def update(league, key):
         downloads_choices(key, league, SEASON)
         downloads_choices('-i', league, SEASON)
         dir.save_json(file_name_fix, loading_choices(key, league, SEASON), StorageConfig.DB_DIR)
-        dir.save_json(file_name_info, loading_choices('-i', league, SEASON), StorageConfig.DB_DIR)
         push_choices(key, database)
-        push_choices('-i', database)
     else:
         file_name = create_file_name(league, key)
         downloads_choices(key, league, SEASON)
