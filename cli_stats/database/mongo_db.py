@@ -1,23 +1,13 @@
-import asyncio
-import datetime
 import multiprocessing
 import os
 import pymongo
-import sys
-import time
-import types
-import uuid
 
 
-from bson.objectid import ObjectId
-from deco import concurrent
-from deco import synchronized
 from directory import Directory
-from multiprocessing import Pool
-from pprint import pprint
 from pymongo import ASCENDING
 from pymongo import DESCENDING
 from pymongo import MongoClient
+from pymongo import UpdateOne
 from storage_config import StorageConfig
 from tqdm import tqdm
 
@@ -124,6 +114,33 @@ def executePushPlayer(db):
             push_upstream(collection, player)
 
 
+"""
+SPEED INCREASE IN PUSHING DATA TO DB. WORKING EXAMPLE.
+NEEDS TESTING TO ASSERT.
+"""
+##########################################
+# def update_upstream(index_dict, record):
+#     """Update record in collection
+#         Args:
+#             collection (str): Name of collection in database
+#             index_dict (dict): key, value
+#             record (dict): Data to be updated in collection
+#     """
+#     return UpdateOne(index_dict, {"$set": record}, upsert=True)
+
+# def executePushPlayer(db):
+#     updates = []
+#     playerstats = load_file(db.playerfile)
+#     collection_name = DB_collections('p')
+#     collection = db.DATABASE[collection_name]
+#     collection_index(collection, 'p_id')
+#     for player in tqdm(playerstats):
+#         updates.append(update_upstream({'p_id': player['p_id']}, player))
+
+#     collection.bulk_write(updates)
+#########################################
+
+
 
 
 
@@ -189,6 +206,6 @@ def executePushFixturePlayerStats(db):
 
 if __name__ == '__main__':
     db = DB('EN_PR', '2019')
-    executePushFixture(db)
+    executePushPlayer(db)
 
 
