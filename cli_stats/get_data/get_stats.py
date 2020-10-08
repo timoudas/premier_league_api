@@ -13,11 +13,11 @@ from datetime import date
 
 
 
-from api_scraper.api_scraper import Football #
+from .api_scraper.api_scraper import Football #
+from .static_types import * #
 from directory import Directory
 from multiprocessing import Pool
 from pprint import pprint
-from static_types import * #
 from storage_config import StorageConfig
 from tqdm import tqdm
 session = requests.Session()
