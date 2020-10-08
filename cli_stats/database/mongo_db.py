@@ -2,12 +2,14 @@ import multiprocessing
 import os
 import pymongo
 
+from pprint import pprint
 
 from directory import Directory
 from pymongo import ASCENDING
 from pymongo import DESCENDING
 from pymongo import MongoClient
 from pymongo import UpdateOne
+from pymongo.errors import BulkWriteError
 from storage_config import StorageConfig
 from tqdm import tqdm
 
@@ -62,12 +64,6 @@ def load_file(file):
     except FileNotFoundError:
         print("Please check that", file, "exists")
 
-def check_record(collection, index_dict):
-    """Check if record exists in collection
-        Args:
-            index_dict (dict): key, value
-    """
-    return collection.find_one(index_dict)
 
 def collection_index(collection, index, *args):
     """Checks if index exists for collection, 
@@ -82,130 +78,151 @@ def collection_index(collection, index, *args):
     if index not in collection.index_information():
         return collection.create_index([(index, DESCENDING), *compound_index], unique=True)
 
-def push_upstream(collection, record):
+def update_upstream(index_dict, record):
     """Update record in collection
         Args:
-            collection (str): Name of collection in database
-            record_id (str): record _id to be put for record in collection
-            record (dict): Data to be pushed in collection
-    """
-    return collection.insert_one(record)
-
-def update_upstream(collection, index_dict, record):
-    """Update record in collection
-        Args:
-            collection (str): Name of collection in database
             index_dict (dict): key, value
             record (dict): Data to be updated in collection
     """
-    return collection.update_one(index_dict, {"$set": record}, upsert=True)
+    return UpdateOne(index_dict, {"$set": record}, upsert=True)
 
 def executePushPlayer(db):
-
+    updates = []
     playerstats = load_file(db.playerfile)
     collection_name = DB_collections('p')
     collection = db.DATABASE[collection_name]
     collection_index(collection, 'p_id')
-    for player in tqdm(playerstats):
-        existingPost = check_record(collection, {'p_id': player['p_id']})
-        if existingPost:
-            update_upstream(collection, {'p_id': player['p_id']}, player)
-        else:
-            push_upstream(collection, player)
-
-
-"""
-SPEED INCREASE IN PUSHING DATA TO DB. WORKING EXAMPLE.
-NEEDS TESTING TO ASSERT.
-"""
-##########################################
-# def update_upstream(index_dict, record):
-#     """Update record in collection
-#         Args:
-#             collection (str): Name of collection in database
-#             index_dict (dict): key, value
-#             record (dict): Data to be updated in collection
-#     """
-#     return UpdateOne(index_dict, {"$set": record}, upsert=True)
-
-# def executePushPlayer(db):
-#     updates = []
-#     playerstats = load_file(db.playerfile)
-#     collection_name = DB_collections('p')
-#     collection = db.DATABASE[collection_name]
-#     collection_index(collection, 'p_id')
-#     for player in tqdm(playerstats):
-#         updates.append(update_upstream({'p_id': player['p_id']}, player))
-
-#     collection.bulk_write(updates)
-#########################################
-
-
-
+    print(f'Pushing updates to:  {collection_name}')
+    for player in playerstats:
+        updates.append(update_upstream({'p_id': player['p_id']}, player))
+    try:
+        collection.bulk_write(updates)
+    except BulkWriteError as bwe:
+        pprint(bwe.details)
+    print('Done')
 
 
 def executePushFixture(db):
-
+    updates = []
     fixturestats = load_file(db.fixturefile)
     collection_name = DB_collections('f')
     collection = db.DATABASE[collection_name]
     collection_index(collection, 'f_id')
-    for fixture in tqdm(fixturestats):
-        existingPost = check_record(collection, {'f_id': fixture['f_id']})
-        if existingPost:
-            update_upstream(collection, {'f_id': fixture['f_id']}, fixture)
-        else:
-            push_upstream(collection, fixture)
+    print(f'Pushing updates to:  {collection_name}')
+    for fixture in fixturestats:
+        updates.append(update_upstream({'f_id': fixture['f_id']}, fixture))
+    try:
+        collection.bulk_write(updates)
+    except BulkWriteError as bwe:
+        pprint(bwe.details)
+    print('Done')
+
 
 
 
 
 
 def executePushTeam(db):
-
+    updates = []
     team_standings = load_file(db.teamfile)
     collection_name = DB_collections('t')
     collection = db.DATABASE[collection_name]
     collection_index(collection, 'team_shortName', 'played')
-    for team in tqdm(team_standings):
-        existingPost = check_record(collection, {'team_shortName': team['team_shortName'],
-                                                 'played': team['played']})
-        if existingPost:
-            update_upstream(collection, {'team_shortName': team['team_shortName'],
-                                        'played': team['played']}, team)
-        else:
-            push_upstream(collection, team)
+    print(f'Pushing updates to:  {collection_name}')
+    for team in team_standings:
+        updates.append(update_upstream({'team_shortName': team['team_shortName'],
+                                        'played': team['played']}, team))
+    try:
+        collection.bulk_write(updates)
+    except BulkWriteError as bwe:
+        pprint(bwe.details)
+    print('Done')
+
 
 def executePushLeagueStandings(db):
-
+    updates = []
     league_standings = load_file(db.leaguefile)
     collection_name = DB_collections('l')
     collection = db.DATABASE[collection_name]
     collection_index(collection, 'team_shortName')
-    for team in tqdm(league_standings):
-        existingPost = check_record(collection, {'team_shortName': team['team_shortName']})
-        if existingPost:
-            update_upstream(collection, {'team_shortName': team['team_shortName']}, team)
-        else:
-            push_upstream(collection, team)
+    print(f'Pushing updates to:  {collection_name}')
+    for team in league_standings:
+        updates.append(update_upstream({'team_shortName': team['team_shortName']}, team))
+    try:
+        collection.bulk_write(updates)
+    except BulkWriteError as bwe:
+        pprint(bwe.details)
+    print('Done')
+
 
 def executePushFixturePlayerStats(db):
-
+    updates = []
     player_fixture = load_file(db.player_fixture)
     collection_name = DB_collections('pf')
     collection = db.DATABASE[collection_name]
     collection_index(collection, 'f_id', 'id')
-    for player in tqdm(player_fixture):
-        existingPost = check_record(collection, {'f_id': player['f_id'],
-                                                 'id': player['id']})
-        if existingPost:
-            update_upstream(collection, {'f_id': player['f_id'],
-                                        'id': player['id']}, player)
-        else:
-            push_upstream(collection, player)     
+    print(f'Pushing updates to:  {collection_name}')
+    for player in player_fixture:
+        updates.append(update_upstream({'f_id': player['f_id'],
+                                        'id': player['id']}, player))
+    try:
+        collection.bulk_write(updates)
+    except BulkWriteError as bwe:
+        pprint(bwe.details)
+    print('Done')
+
+def test():
+    db = DB('EN_PR', 2019)
+    executePushPlayer(db)
+    executePushTeam(db)
+    executePushFixture(db)
+    executePushTeam(db)
+    executePushLeagueStandings(db)
+    executePushFixturePlayerStats(db)
+
+
+############### LEGACY ###################
+
+# def update_upstream(collection, index_dict, record):
+#     """Update record in collection
+#         Args:
+#             collection (str): Name of collection in database
+#             index_dict (dict): key, value
+#             record (dict): Data to be updated in collection
+#     """
+#     return collection.update_one(index_dict, {"$set": record}, upsert=True)
+
+# def check_record(collection, index_dict):
+#     """Check if record exists in collection
+#         Args:
+#             index_dict (dict): key, value
+#     """
+#     return collection.find_one(index_dict)
+
+# def push_upstream(collection, record):
+#     """Update record in collection
+#         Args:
+#             collection (str): Name of collection in database
+#             record_id (str): record _id to be put for record in collection
+#             record (dict): Data to be pushed in collection
+#     """
+#     return collection.insert_one(record)
+
+
+# def executePushPlayer(db):
+
+#     playerstats = load_file(db.playerfile)
+#     collection_name = DB_collections('p')
+#     collection = db.DATABASE[collection_name]
+#     collection_index(collection, 'p_id')
+#     for player in tqdm(playerstats):
+#         existingPost = check_record(collection, {'p_id': player['p_id']})
+#         if existingPost:
+#             update_upstream(collection, {'p_id': player['p_id']}, player)
+#         else:
+#             push_upstream(collection, player)
 
 if __name__ == '__main__':
-    db = DB('EN_PR', '2019')
-    executePushPlayer(db)
+    test()
 
 
