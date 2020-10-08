@@ -13,14 +13,14 @@ from datetime import date
 
 
 
-from .api_scraper.api_scraper import Football
-from .static_types import *
+from api_scraper.api_scraper import Football #
 from directory import Directory
 from multiprocessing import Pool
 from pprint import pprint
+from static_types import * #
 from storage_config import StorageConfig
 from tqdm import tqdm
-
+session = requests.Session()
 
 def load_match_data(url):
     """Retreives Ids for different pages on the API"""
@@ -31,8 +31,7 @@ def load_match_data(url):
     params = (('pageSize', '100'),)
     # request to obtain the team info
     try:
-        with requests.Session() as s:
-            response = s.get(url, headers=headers, params=params).json()
+        response = session.get(url, headers=headers, params=params).json()
         data = response
         return data
     except Exception as e:
@@ -558,7 +557,7 @@ if __name__ == '__main__':
     # f = FixtureStats('EN_PR', '2019/2020')
     # print(dir(f.fixture_dispatch_map))
     stats = SeasonStats()
-    stats('fixture_player_stats', 'EN_PR', '2019/2020')
+    stats('player_stats', 'EN_PR', '2019/2020')
     # f = FixtureStats('EN_PR', '2019/2020')
     # pprint(f.fixture_player_stats_singel('38313', '4287'))
 
