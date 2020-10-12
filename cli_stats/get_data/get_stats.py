@@ -242,7 +242,7 @@ class FixtureStats(Base):
                                     'seasonId':self.season_id,
                                     'seasonLabel': self.season_label})
         else:
-            print(fixture_id, player_id)
+            print(f'Could not get info on: f_id:{fixture_id}, p_id{player_id}')
         if 'stats' in fixture:
             stats['stats'] = fixture['stats']
             stats['stats'].append({'id':fixture['entity']['id']})
