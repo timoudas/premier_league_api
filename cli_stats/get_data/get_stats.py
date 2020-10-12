@@ -56,13 +56,13 @@ class Base():
                 self.season = f'{season}/{str(int(season)+1)}'
         self.pool = multiprocessing.cpu_count()
         self.league = league
-        #self.season = season
+        self.season_label = f'{self.season[:5]}/{str(int(self.season[5:7])+1)}'
         self.fb.load_leagues()
         self.fb.leagues[self.league].load_seasons()
         self.season_id = self.fb.leagues[self.league].seasons[self.season]['id']
         self.teams = self.fb.leagues[self.league].seasons[self.season].load_teams()
         self.year = re.search( r'(\d{4})', self.season).group()
-        self.league_season = self.league + '_' + self.year + '_'
+        self.league_season = f'{self.league}_{self.year}'
 
 
 
@@ -75,7 +75,7 @@ class Base():
             path(str): The path to were the content is to be saved
 
         """
-        filename = self.league + '_' + self.year + '_' + filename
+        filename = f'{self.league_season}_{filename}'
         self.dir.save_json(filename, stats_list, path)
         print(f'Saved as {filename}.json in {path}')
 
@@ -88,7 +88,7 @@ class PlayerStats(Base):
         save time."""
         Base.__init__(self, *args, **kwargs)
         self.player_ids = self.load_season_players()
-        self.player_dispatch_map = { 'player_stats' : self.player_stats}
+        self.player_dispatch_map = {'player_stats' : self.player_stats}
 
 
     def load_season_players(self):
@@ -133,7 +133,7 @@ class PlayerStats(Base):
         for player in all_players:
             stats = {"info": {}}
             stats["info"] = player['entity']
-            stats['info'].update({'season_id': self.season_id})
+            stats['info'].update({'seasonId': self.season_id})
             if player['stats']:
                 stats['stats'] = player['stats']
                 stats['stats'].append({'id':player['entity']['id']})
@@ -238,7 +238,9 @@ class FixtureStats(Base):
         stats = {}
         if 'entity' in fixture:
             stats['info'] = fixture['entity']
-            stats['info'].update({'f_id': fixture_id})
+            stats['info'].update({'f_id': fixture_id, 
+                                    'seasonId':self.season_id,
+                                    'seasonLabel': self.season_label})
         else:
             print(fixture_id, player_id)
         if 'stats' in fixture:
@@ -314,8 +316,6 @@ class FixtureStats(Base):
             print(f'{i} games retreived had no stats')
         self.save_completed('player_fixture', stats_list, StorageConfig.STATS_DIR)
         
-
-
 class TeamStats(Base):
 
     def __init__(self, *args, **kwargs):
@@ -537,52 +537,7 @@ class SeasonStatsUpdateFixture(FixtureStats):
             return team_squads
         else:
             print('No diffs')
-                
-        
-            
-
-        
-
-
-class Stats:
-    dir = Directory()
-    def __init__(self):
-        """Creates a pickle object where the __init__() attributes from
-        SeasonStats is saved. This is to enable the download of stats
-        without having to initiate SeasonStats everytime to download
-        stats. Drawback is that the pickled object can get outdated as
-        players switch teams or teams move up and down the leagues at
-        the ens of the season.
-        """
-
-        data = self.dir.load_json('season_params.json', StorageConfig.PARAMS_DIR)
-        holder = {str(league)+'_'+ str(season_label):
-                    SeasonStats(league=league, season=season_label) 
-                        for league, seasons in data.items() for season_label in seasons}
-        with open('league_seasons_init', 'wb') as f:
-            pickle.dump(holder, f)
 
 
 if __name__ == '__main__': 
-    # f = FixtureStats('EN_PR', '2019/2020')
-    # print(dir(f.fixture_dispatch_map))
-    stats = SeasonStats()
-    stats('player_stats', 'EN_PR', '2019/2020')
-    # f = FixtureStats('EN_PR', '2019/2020')
-    # pprint(f.fixture_player_stats_singel('38313', '4287'))
-
-
-
-
-    # season_params = {'EN_PR':['2019/2020', '2018/2019']}
-    # gen = ((str(league)+'_'+ str(season_label), SeasonStats(league=league, season=season_label)) for league, seasons in season_params.items() for season_label in seasons)
-    # d = dict(gen)
-    # with open('test_pickle', 'wb') as f:
-    #     pickle.dump(d, f)
-    # start = time.time()
-    #season_19_20 = SeasonStats('EN_PR', '2018/2019')
-    #season_19_20.team_squad()
-    # season_19_20.player_stats()
-    # season_19_20.fixture_stats()
-    # # end = time.time()
-    # print(end - start)
+    pass

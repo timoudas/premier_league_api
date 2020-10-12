@@ -159,6 +159,8 @@ def read_player_fixture_all(data):
                     {'age' : stats.get('age'),
                     'f_id': stats.get('f_id'),
                     'id' : stats.get('id'),
+                    'seasonId' : stats.get('seasonId'),
+                    'seasonLabel' : stats.get('seasonLabel'),
                     'birth' : deep_get(stats, 'birth.date.label'),
                     'birth_exact' : deep_get(stats, 'birth.date.millis'),
                     'country' : deep_get(stats, 'birth.country.country'),

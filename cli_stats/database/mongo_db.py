@@ -118,10 +118,6 @@ def executePushFixture(db):
     print('Done')
 
 
-
-
-
-
 def executePushTeam(db):
     updates = []
     team_standings = load_file(db.teamfile)
