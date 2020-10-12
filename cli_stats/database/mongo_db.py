@@ -49,6 +49,31 @@ class DB():
         if self.func is not None:
             return self.func(self)
 
+class DBLeague():
+
+    def __init__(self, league, season, func=None, DB_NAME='PremierLeague'):
+        self.db_user = os.environ.get('DB_user')
+        self.db_pass = os.environ.get('DB_pass')
+        self.MONGODB_URL = f'mongodb+srv://{self.db_user}:{self.db_pass}@cluster0-mbqxj.mongodb.net/<dbname>?retryWrites=true&w=majority'
+        self.league = league
+        self.season = str(season)
+        self.client = MongoClient(self.MONGODB_URL)
+        self.DATABASE = self.client[DB_NAME]
+
+
+        self.pool = multiprocessing.cpu_count()
+        self.playerfile = f'{self.league}_{self.season}_playerstats.json'
+        self.teamfile = f'{self.league}_{self.season}_team_standings.json'
+        self.fixturefile = f'{self.league}_{self.season}_fixturestats.json'
+        self.leaguefile = f'{self.league}_{self.season}_league_standings.json'
+        self.player_fixture = f'{self.league}_{self.season}_player_fixture.json'
+        self.func = func
+
+    def execute(self):
+        if self.func is not None:
+            return self.func(self)
+
+
 
 def import_json(file):
     """Imports a json file in read mode
@@ -85,6 +110,23 @@ def update_upstream(index_dict, record):
             record (dict): Data to be updated in collection
     """
     return UpdateOne(index_dict, {"$set": record}, upsert=True)
+
+def executePushPlayerPL(db):
+    updates = []
+    playerstats = load_file(db.playerfile)
+    print(len(playerstats), db.season)
+    # collection_name = DB_collections('p')
+    # collection = db.DATABASE[collection_name]
+    # collection_index(collection, 'p_id', 'seasonId')
+    # print(f'Pushing updates to:  {collection_name}')
+    # for player in playerstats:
+    #     updates.append(update_upstream({'p_id': player['p_id'],
+    #                                     'seasonId': player['seasonId']}, player))
+    # try:
+    #     collection.bulk_write(updates)
+    # except BulkWriteError as bwe:
+    #     pprint(bwe.details)
+    # print('Done')
 
 def executePushPlayer(db):
     updates = []
@@ -168,13 +210,24 @@ def executePushFixturePlayerStats(db):
     print('Done')
 
 def test():
-    db = DB('EN_PR', 2019)
-    executePushPlayer(db)
-    executePushTeam(db)
-    executePushFixture(db)
-    executePushTeam(db)
-    executePushLeagueStandings(db)
-    executePushFixturePlayerStats(db)
+    db = DBLeague('EN_PR', 2017)
+    executePushPlayerPL(db)
+    db = DBLeague('EN_PR', 2018)
+    executePushPlayerPL(db)
+    db = DBLeague('EN_PR', 2019)
+    executePushPlayerPL(db)
+    db = DBLeague('EN_PR', 2020)
+    executePushPlayerPL(db)
+
+class DBConn():
+
+    def __init__(self, DB_NAME='PremierLeague'):
+        self.db_user = os.environ.get('DB_user')
+        self.db_pass = os.environ.get('DB_pass')
+        self.MONGODB_URL = f'mongodb+srv://{self.db_user}:{self.db_pass}@cluster0-mbqxj.mongodb.net/<dbname>?retryWrites=true&w=majority'
+        self.client = MongoClient(self.MONGODB_URL)
+        self.DATABASE = self.client[DB_NAME]
+
 
 
 ############### LEGACY ###################
@@ -219,6 +272,28 @@ def test():
 #             push_upstream(collection, player)
 
 if __name__ == '__main__':
-    test()
-
-
+    # test()
+    # t = DBConn().DATABASE['player_stats']
+    # var = list(t.find({'seasonId': 79}))
+    # print(len(var), 2017)
+    # t = DBConn().DATABASE['player_stats']
+    # var = list(t.find({'seasonId': 210}))
+    # print(len(var), 2018)
+    # t = DBConn().DATABASE['player_stats']
+    # var = list(t.find({'seasonId': 274}))
+    # print(len(var), 2019)
+    # t = DBConn().DATABASE['player_stats']
+    # var = list(t.find({'seasonId': 363}))
+    # print(len(var), 2020)
+    def validate(year):
+        file = f'EN_PR_{year}_playerstats.json'
+        data = load_file(file)
+        ids = []
+        for i in data:
+            p = i['id']
+            if p not in ids:
+                ids.append(p)
+            else:
+                print(p)
+        print(len(ids))
+    validate(2019)

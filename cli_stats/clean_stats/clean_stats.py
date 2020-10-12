@@ -175,10 +175,6 @@ def read_player_fixture_all(data):
                     'nationalTeam' : deep_get(stats, 'nationalTeam.country'),
                     'playerId' : stats.get('playerId'),
                     'p_id' : stats.get('id'),})
-            try:
-                stats_temp = {'season' : data[-1]['season']}
-            except KeyError as e:
-                pass
             stats_all.append(stats_temp)
         return stats_all
     except TypeError as e:
@@ -197,7 +193,8 @@ def read_playerinfo(data):
             stats_temp = \
                 {'age' : stats.get('age'),
                 'id' : stats.get('id'),
-                'seasonId' : stats.get('season_id'),
+                'seasonId' : stats.get('seasonId'),
+                'seasonLabelcle' : stats.get('seasonLabel'),
                 'birth' : deep_get(stats, 'birth.date.label'),
                 'birthExact' : deep_get(stats, 'birth.date.millis'),
                 'country' : deep_get(stats, 'birth.country.country'),
@@ -205,17 +202,12 @@ def read_playerinfo(data):
                 'loan' : deep_get(stats, 'info.loan'),
                 'position' : deep_get(stats, 'info.position'),
                 'positionInfo' : deep_get(stats, 'info.positionInfo'),
-                'shirtNum' : deep_get(stats, 'info.shirtNum'),
                 'name' : deep_get(stats, 'name.display'),
                 'first' : deep_get(stats, 'name.first'),
                 'last' : deep_get(stats, 'name.last'),
                 'nationalTeam' : deep_get(stats, 'nationalTeam.country'),
                 'playerId' : stats.get('playerId'),
                 'p_id' : stats.get('id'),}
-            try:
-            	stats_temp = {'season' : data[-1]['season']}
-            except KeyError as e:
-            	pass
             info_all.append(stats_temp)
     # except TypeError as e:
     #     print("Check that data exists and is loaded correctly")
@@ -304,10 +296,12 @@ def fixture_player_stats(league, year):
 def playerstats(league, year):
     players_info = read_playerinfo(load_player_stats(league, year))
     player_stats = read_playerstats(load_player_stats(league, year))
+    player_team = read_player_team(load_team_squads(league, year))
 
 
     #Mergers the two list of dicts if `id-key` is the same
     merge_info_stats = [{**x, **y} for y in players_info for x in player_stats if x['id'] == y['id']]
+    #merge_events = [{**x, **y} for y in merge_info_stats for x in player_team if x['id'] == y['id']]
     d = [dict(sorted(d.items())) for d in merge_info_stats]
     return d
 

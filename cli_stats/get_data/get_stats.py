@@ -133,7 +133,8 @@ class PlayerStats(Base):
         for player in all_players:
             stats = {"info": {}}
             stats["info"] = player['entity']
-            stats['info'].update({'seasonId': self.season_id})
+            stats['info'].update({'seasonId': self.season_id,
+                                    'seasonLabel': self.season_label})
             if player['stats']:
                 stats['stats'] = player['stats']
                 stats['stats'].append({'id':player['entity']['id']})
