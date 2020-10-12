@@ -32,8 +32,7 @@ def load_match_data(url):
     # request to obtain the team info
     try:
         response = session.get(url, headers=headers, params=params).json()
-        data = response
-        return data
+        return response
     except Exception as e:
         print(e, 'Something went wrong with the request')
         return {}
@@ -93,8 +92,8 @@ class PlayerStats(Base):
 
 
     def load_season_players(self):
-        """Loads the players for a league-season,
-        calls api_scraper.py methods
+        """
+        Loads the playerIds into a list for a given league-season.        calls api_scraper.py methods
         """
         print(f'Initializing \t {self.league} \t {self.season} players')
         player_id = []
@@ -113,7 +112,7 @@ class PlayerStats(Base):
 
 
     def player_stats_singel(self, player):
-        """Gets stats for a player"""
+        """Returns a a json-response for player stats"""
         
         ds = load_match_data(
             f'https://footballapi.pulselive.com/football/stats/player/{player}?compSeasons={self.season_id}')
@@ -134,6 +133,7 @@ class PlayerStats(Base):
         for player in all_players:
             stats = {"info": {}}
             stats["info"] = player['entity']
+            stats['info'].update({'season_id': self.season_id})
             if player['stats']:
                 stats['stats'] = player['stats']
                 stats['stats'].append({'id':player['entity']['id']})
@@ -230,17 +230,17 @@ class FixtureStats(Base):
             print(f'{i} games retreived had no stats')
         self.save_completed('fixtureinfo', stats_list, StorageConfig.STATS_DIR)
 
-    def fixture_player_stats_singel_wrapper(self, params):
-        """Wrapper to pass tuple args to multiprocess"""
-        return self.fixture_player_stats_singel(*params)
 
     def fixture_player_stats_singel(self, fixture_id, player_id):
-        """Gets stats for a fixture"""
+        """Gets stats a player for a fixture"""
         fixture = load_match_data(f'https://footballapi.pulselive.com/football/stats/player/{player_id}?fixtures={fixture_id}')
         i = 0
         stats = {}
-        stats['info'] = fixture['entity']
-        stats['info'].update({'f_id': fixture_id})
+        if 'entity' in fixture:
+            stats['info'] = fixture['entity']
+            stats['info'].update({'f_id': fixture_id})
+        else:
+            print(fixture_id, player_id)
         if 'stats' in fixture:
             stats['stats'] = fixture['stats']
             stats['stats'].append({'id':fixture['entity']['id']})
@@ -248,6 +248,10 @@ class FixtureStats(Base):
             i += 1
         if stats:
             return stats
+
+    def fixture_player_stats_singel_wrapper(self, params):
+        """Wrapper to pass tuple args to multiprocess"""
+        return self.fixture_player_stats_singel(*params)
 
     
     def load_fixture_player_stats(self):
@@ -415,10 +419,16 @@ class LeagueStats(Base):
 
         def league_standings(self):
             """Gets standing for a league"""
+            stats_list = []
             print("Getting league standings..")
             response = load_match_data(
                 f'https://footballapi.pulselive.com/football/standings?compSeasons={self.season_id}')
-            stats_list = response['tables'][0]['entries']
+            season_info = response['compSeason']
+            stats = response['tables'][0]['entries']
+            for standing in stats:
+                standing['seasonLabel'] = season_info['label']
+                standing['seasonId'] = season_info['id']
+                stats_list.append(standing)
             print('Completed')
             self.save_completed('league_standings', stats_list, StorageConfig.STATS_DIR)
 

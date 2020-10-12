@@ -15,7 +15,6 @@ Looks if fixtureID exists in .json, if it doesn't exist it gets append
 
 import collections
 import sys
-import uuid 
 
 from directory import Directory
 from functools import reduce
@@ -196,8 +195,9 @@ def read_playerinfo(data):
             stats_temp = \
                 {'age' : stats.get('age'),
                 'id' : stats.get('id'),
+                'seasonId' : stats.get('season_id'),
                 'birth' : deep_get(stats, 'birth.date.label'),
-                'birth_exact' : deep_get(stats, 'birth.date.millis'),
+                'birthExact' : deep_get(stats, 'birth.date.millis'),
                 'country' : deep_get(stats, 'birth.country.country'),
                 'isoCode' : deep_get(stats, 'birth.country.isoCode'),
                 'loan' : deep_get(stats, 'info.loan'),
@@ -320,7 +320,8 @@ def read_fixtureinfo(data):
                 away_team = stats['teams'][1]
                 stats_temp = \
                     {'gameweek_id' : deep_get(stats, 'gameweek.id'),
-                    'season_label' : deep_get(stats, 'gameweek.compSeason.label'),
+                    'seasonLabel' : deep_get(stats, 'gameweek.compSeason.label'),
+                    'seasonId' : deep_get(stats, 'gameweek.compSeason.id'),
                     'id' : stats['id'],
 
                     'competition' : deep_get(stats, 'gameweek.compSeason.competition.description'),
@@ -527,8 +528,8 @@ def read_team_standings_stats(data):
                              'competition' : deep_get(comp, 'competition.description'),
                              'competition_abbr' : deep_get(comp, 'competition.abbreviation'),
                              'competition_id' : deep_get(comp, 'competition.id'),
-                             'season_label': deep_get(d, 'season.label'),
-                             'season_id': deep_get(d, 'season.id'),
+                             'seasonLabel': deep_get(d, 'season.label'),
+                             'seasonId': deep_get(d, 'season.id'),
                              'fixtures' : [],
                              'played' : fixtures['played'],
                              'points' : fixtures['points'],
@@ -584,7 +585,6 @@ def read_leagueinfo(data):
     info_all = []
     try:
         for d in data:
-            league_stand_id = str(uuid.uuid4())[:8]
             stats_temp = {}
             overall = d['overall']
             home = d['home']
@@ -595,7 +595,9 @@ def read_leagueinfo(data):
             stats_temp = \
                 {'team_name' : deep_get(team, 'name'),
                 'team_shortName' : deep_get(team, 'club.shortName'),
-                'team_id' : deep_get(team, 'club.id'),
+                'team_id' : deep_get(team, 'club.id'), 
+                'seasonId' : d['seasonId'],
+                'seasonLabel' : d['seasonLabel'],
 
                 'position' : d['position'],
                 'overall_played' : deep_get(overall, 'played'),
