@@ -9,6 +9,7 @@ from directory import Directory
 from pprint import pprint
 from storage_config import StorageConfig
 from tqdm import tqdm
+session = requests.Session()
 
 
 #TODO
@@ -62,8 +63,7 @@ def load_raw_data(url):
 
     # request to obtain the team info
         try:
-            with requests.Session() as s:
-                response = s.get(url, headers=headers, params=params).json()
+            response = session.get(url, headers=headers, params=params).json()
             if url.endswith('staff'):
                 data = response['players']
                 return data

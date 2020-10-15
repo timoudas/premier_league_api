@@ -279,21 +279,21 @@ if __name__ == '__main__':
     # t = DBConn().DATABASE['player_stats']
     # var = list(t.find({'seasonId': 210}))
     # print(len(var), 2018)
-    # t = DBConn().DATABASE['player_stats']
-    # var = list(t.find({'seasonId': 274}))
-    # print(len(var), 2019)
+    t = DBConn().DATABASE['player_stats']
+    var = list(t.find({'seasonId': 274}))
+    print(len(var), 2019)
     # t = DBConn().DATABASE['player_stats']
     # var = list(t.find({'seasonId': 363}))
     # print(len(var), 2020)
-    def validate(year):
-        file = f'EN_PR_{year}_playerstats.json'
-        data = load_file(file)
-        ids = []
-        for i in data:
-            p = i['id']
-            if p not in ids:
-                ids.append(p)
-            else:
-                print(p)
-        print(len(ids))
-    validate(2019)
+    # def validate(year):
+    #     file = f'EN_PR_{year}_playerstats.json'
+    #     data = load_file(file)
+    #     ids = []
+    #     for i in data:
+    #         p = i['id']
+    #         if p not in ids:
+    #             ids.append(p)
+    #         else:
+    #             print(p)
+    #     print(len(ids))
+    # validate(2019)

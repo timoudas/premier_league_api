@@ -87,7 +87,6 @@ class PlayerStats(Base):
         That is so that they don't have to be created everytime that they are needed, and 
         save time."""
         Base.__init__(self, *args, **kwargs)
-        self.player_ids = self.load_season_players()
         self.player_dispatch_map = {'player_stats' : self.player_stats}
 
 
@@ -96,17 +95,19 @@ class PlayerStats(Base):
         Loads the playerIds into a list for a given league-season.        calls api_scraper.py methods
         """
         print(f'Initializing \t {self.league} \t {self.season} players')
-        player_id = []
+        player_id_temp = []
         for team in tqdm(self.teams.values()):
             try:
                 players = self.fb.leagues[self.league].seasons[self.season].teams[team['shortName']].load_players()
             except:
-                print(f"Found no players for {self.league} {self.season} {team}")
+                print(f"Something weong with connection to {self.league} {self.season} {team}")
             if players:
                 for player in players.keys():
-                    player_id.append(player)
+                    player_id_temp.append(player)
             else:
-                ('No players found..')          
+                print(f"Found no players for {self.league} {self.season} {team}")
+        player_id_tup = set(player_id_temp)
+        player_id = list(player_id_tup)          
         print('Initialization completed')
         return player_id
 
@@ -118,15 +119,15 @@ class PlayerStats(Base):
             f'https://footballapi.pulselive.com/football/stats/player/{player}?compSeasons={self.season_id}')
         return ds
 
-
     def player_stats(self):
         """Gets stats for all players in a league-season using multithreading
         saves output in a json file.
          """
+        player_ids = self.load_season_players()
         stats_list = []
         print("Getting player stats..")
         with Pool(self.pool) as p:
-            player_stats = list(tqdm(p.imap(self.player_stats_singel, self.player_ids), total=len(self.player_ids)))
+            player_stats = list(tqdm(p.imap(self.player_stats_singel, player_ids), total=len(player_ids)))
         print('Getting data from workers..')
         all_players = player_stats
         i = 0
@@ -541,4 +542,4 @@ class SeasonStatsUpdateFixture(FixtureStats):
 
 
 if __name__ == '__main__': 
-    pass
+    players = PlayerStats('EN_PR', '2019').load_season_players()
