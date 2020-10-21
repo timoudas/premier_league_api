@@ -80,6 +80,7 @@ class StatShell(cmd.Cmd):
         '-f': clean.fixturestats,
         '-l': clean.league_standings,
         '-e': clean.fixture_player_stats,
+        '-s': clean.team_squads,
     }
 
     FILE_NAMES = {
@@ -87,7 +88,8 @@ class StatShell(cmd.Cmd):
         '-t': 'team_standings',
         '-f': 'fixturestats',
         '-l': 'league_standings',
-        '-e': 'player_fixture'
+        '-e': 'player_fixture',
+        '-s': 'team_squads',
     }
 
     def __init__(self):
@@ -182,7 +184,8 @@ class StatShell(cmd.Cmd):
                    '-t': clean.team_standings,
                    '-f': clean.fixturestats,
                    '-l': clean.league_standings,
-                   '-e': clean.fixture_player_stats}
+                   '-e': clean.fixture_player_stats,
+                   '-s': clean.team_squads,}
         if type_stats in choices.keys():
             return choices.get(type_stats)(league, season)
 
@@ -196,6 +199,7 @@ class StatShell(cmd.Cmd):
             -f,  --fixture        Fixturestats
             -l,  --league         League Standings
             -e   --player_fixture Player Fixture Stats
+            -s   --team_squads    Team Squads
             """
         file_prefix = f"{arg['<LEAGUE>'].upper()}_{arg['<SEASON>']}_"
         league = arg['<LEAGUE>'].upper()
@@ -211,11 +215,12 @@ class StatShell(cmd.Cmd):
                 print("Please check that", file_prefix, " exists")
 
     def push_choices(self, type_stats, database):
-        choices = {'-p': db.executePushPlayer,
-                   '-t': db.executePushTeam,
-                   '-f': db.executePushFixture,
-                   '-l': db.executePushLeagueStandings,
-                   '-e': db.executePushFixturePlayerStats}
+        choices = {'-p': db.executePushPlayerLeague,
+                   '-t': db.executePushTeamLeague,
+                   '-f': db.executePushFixtureLeague,
+                   '-l': db.executePushLeagueStandingsLeague,
+                   '-e': db.executePushFixturePlayerStatsLeague,
+                   '-s': db.executePushTeamSquadsLeague}
         if type_stats in choices.keys():
             return choices.get(type_stats)(database)
 
@@ -229,8 +234,9 @@ class StatShell(cmd.Cmd):
             -f,  --fixture        Push Fixturestats
             -l,  --league         Push League Standings
             -e,  --player_fixture Push Player Fixture Stats
+            -s   --team_squads    Team Squads
             """
-        database = db.DB(arg['<LEAGUE>'].upper(), arg['<SEASON>'])
+        database = db.DBLeague(arg['<LEAGUE>'].upper(), arg['<SEASON>'])
         for key, value in arg.items():
             if value == True:
                 print("Pushing: ", arg['<LEAGUE>'].upper(), arg['<SEASON>'])
@@ -245,11 +251,11 @@ class StatShell(cmd.Cmd):
         if not len(arg['SEASON']) == 4:
             print('Season should be YYYY')
         else:
-            database = db.DB(arg['LEAGUE'].upper(), arg['SEASON'])
+            database = db.DBLeague(arg['LEAGUE'].upper(), arg['SEASON'])
             league = arg['LEAGUE'].upper()
-            season_end = str(int(arg['SEASON'])+1)
-            season = f"{arg['SEASON']}/{season_end}"
-            file_season = str(arg['SEASON'])
+            # season_end = str(int(arg['SEASON'])+1)
+            # season = f"{arg['SEASON']}/{season_end}"
+            season = str(arg['SEASON'])
             file_prefix = f"{arg['LEAGUE'].upper()}_{arg['SEASON']}_"
 
             for i in download_params:
@@ -259,7 +265,8 @@ class StatShell(cmd.Cmd):
             for arg_key in self.db_clean_params:
                 file_suffix = self.FILE_NAMES.get(arg_key)
                 file_name = f'{file_prefix}{file_suffix}'
-                dir.save_json(file_name, self.loading_choices(key, league, season), StorageConfig.DB_DIR)
+                print(file_name)
+                dir.save_json(file_name, self.loading_choices(arg_key, league, season), StorageConfig.DB_DIR)
                 print(f'{file_name} was saved')
             for arg_key in self.db_clean_params:
                 self.push_choices(arg_key, database)

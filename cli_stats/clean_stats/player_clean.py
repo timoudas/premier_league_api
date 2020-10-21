@@ -1,5 +1,5 @@
-from load_files import deep_get
-from load_files import load_player_stats
+from .load_files import deep_get
+from .load_files import load_player_stats
 
 def read_playerstats(data):
     """Read stats from ...playerstats.json into flattened
@@ -60,4 +60,4 @@ def playerstats(league, year):
     #Mergers the two list of dicts if `id-key` is the same
     merge_info_stats = [{**x, **y} for y in players_info for x in player_stats if x['id'] == y['id']]
     d = [dict(sorted(d.items())) for d in merge_info_stats]
-    return 
+    return d

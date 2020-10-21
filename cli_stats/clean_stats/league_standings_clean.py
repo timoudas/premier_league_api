@@ -1,5 +1,5 @@
-from load_files import deep_get
-from load_files import load_league_standings
+from .load_files import deep_get
+from .load_files import load_league_standings
 
 def read_leagueinfo(data):
     info_all = []

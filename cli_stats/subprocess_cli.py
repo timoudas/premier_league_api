@@ -39,6 +39,7 @@ LOADING_CHOICES = {
     '-f': clean.fixturestats,
     '-l': clean.league_standings,
     '-e': clean.fixture_player_stats,
+    '-s': clean.team_squads,
 }
 
 FILE_NAMES = {
@@ -46,7 +47,8 @@ FILE_NAMES = {
     '-t': 'team_standings',
     '-f': 'fixturestats',
     '-l': 'league_standings',
-    '-e': 'player_fixture'
+    '-e': 'player_fixture',
+    '-s': 'team_squads',
 }
 
 def downloads_choices(type_stats, league, season):
@@ -72,16 +74,18 @@ def loading_choices(type_stats, league, season):
                '-t': clean.team_standings,
                '-f': clean.fixturestats,
                '-l': clean.league_standings,
-               '-e': clean.fixture_player_stats}
+               '-e': clean.fixture_player_stats,
+               '-s': clean.team_squads,}
     if type_stats in choices.keys():
         return choices.get(type_stats)(league, season)
 
 def push_choices(type_stats, database):
-    choices = {'-p': db.executePushPlayer,
-               '-t': db.executePushTeam,
-               '-f': db.executePushFixture,
-               '-l': db.executePushLeagueStandings,
-               '-e': db.executePushFixturePlayerStats}
+    choices = {'-p': db.executePushPlayerLeague,
+               '-t': db.executePushTeamLeague,
+               '-f': db.executePushFixtureLeague,
+               '-l': db.executePushLeagueStandingsLeague,
+               '-e': db.executePushFixturePlayerStatsLeague,
+               '-s': db.executePushTeamSquadsLeague}
     if type_stats in choices.keys():
         return choices.get(type_stats)(database)
 
@@ -92,7 +96,7 @@ def create_file_name(league, key):
     return file_name
 
 def update(league, key):
-    database = db.DB(league, SEASON)
+    database = db.DBLeague(league, SEASON)
     if key == '-f':
         file_name_fix = create_file_name(league, key)
         file_name_info = create_file_name(league, '-i')
@@ -113,7 +117,8 @@ def dispatch(type_stats, league):
                '-t': update,
                '-f': update,
                '-l': update,
-               '-e': update}
+               '-e': update
+               '-s': update}
     if type_stats in choices.keys():
         return choices.get(type_stats)(league, type_stats)
 

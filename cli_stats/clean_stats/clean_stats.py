@@ -14,14 +14,14 @@ Looks if fixtureID exists in .json, if it doesn't exist it gets append
 import collections
 import sys
 
-
-from fixture_clean import fixture_player_stats
-from fixture_clean import fixturestats
-from league_standings_clean import league_standings
-from player_clean import playerstats
 from pprint import pprint
-from team_squads_clean import team_squads
-from team_standings_clean import team_standings
+
+from .fixture_clean import fixture_player_stats
+from .fixture_clean import fixturestats
+from .league_standings_clean import league_standings
+from .player_clean import playerstats
+from .team_squads_clean import team_squads
+from .team_standings_clean import team_standings
 
 
 def validate_id(league, year):

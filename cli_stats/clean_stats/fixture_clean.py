@@ -1,7 +1,7 @@
-from load_files import deep_get
-from load_files import load_fixture_info
-from load_files import load_fixture_player_stats
-from load_files import load_fixture_stats
+from .load_files import deep_get
+from .load_files import load_fixture_info
+from .load_files import load_fixture_player_stats
+from .load_files import load_fixture_stats
 
 
 
