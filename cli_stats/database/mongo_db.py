@@ -12,7 +12,7 @@ from .mongo_db_year import executePushTeam
 from .mongo_db_year import executePushLeagueStandings
 from .mongo_db_year import executePushFixturePlayerStats
 from .mongo_db_year import executePushTeamSquads
-from .mongo_db_year import DB
+from .mongo_db_year import DBdb
 
 if __name__ == '__main__':
     pass
