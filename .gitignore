@@ -3,6 +3,6 @@ cli_stats/raw_data/
 __pycache__/
 *.pyc
 *.pyo
-*.ipynb
+
 rest_server/
 profile/
