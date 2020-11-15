@@ -9,7 +9,7 @@ from requests_html import HTMLSession
 
 
 
-IMG_SAVE_PATH = '../../../dashboard/assets/'
+IMG_SAVE_PATH = '../../../../node-projects/public/badges/'
 
 fb = Football()
 
@@ -109,9 +109,36 @@ def download_images():
                     f.write(chunk)
     # print('saved', IMG_SAVE_PATH)
 
+def get_league_imgs():
+    seasons = ['274', '79']
+    img = []
+    for i in seasons:
+        print(i)
+        url = f'https://www.premierleague.com/tables?co=1&se={i}&ha=-1'
+        response = requests.get(url, timeout=(3.05, 5))
+        soup = BeautifulSoup(response.content, 'lxml')
+        tags_name = soup.find_all('span', {'class': 'short'})
+        tags_raw = soup.find_all('img', {'class': 'badge-image badge-image--25 js-badge-image'})
+        tup = zip(tags_name, tags_raw)
+        for i, v in tup:
+            response = requests.get(v['src'])
+            if response.status_code == 200:
+                with open('{}{}.png'.format(IMG_SAVE_PATH, i.text), 'wb') as f:
+                    for chunk in response.iter_content(1024):
+                        f.write(chunk)
+
+
+def download_img(url, text):
+    response = requests.get(url)
+    if response.status_code == 200:
+        with open('{}{}.png'.format(IMG_SAVE_PATH, text), 'wb') as f:
+            for chunk in response.iter_content(1024):
+                f.write(chunk)
 
 if __name__ == '__main__':
-    download_images()
+    url = 'https://resources.premierleague.com/premierleague/badges/25/t110.png'
+    text = 'Stoke'
+    download_img(url, text)
 
 
 

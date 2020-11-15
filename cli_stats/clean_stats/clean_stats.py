@@ -1,15 +1,7 @@
 #!/usr/bin/python
 """
-Cleanstats json json files with stats. Since most files come in a nested
-format CleanStats flattens the file into list of dict where the dicts
-are flattend with the relevant info. 
-
-"""
-#!/usr/bin/python
-"""
-Updates .json files with new data from the api if the json exists
-
-Looks if fixtureID exists in .json, if it doesn't exist it gets append
+Imports all cleaningstages for all the different cleaning
+processes.
 """
 import collections
 import sys

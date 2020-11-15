@@ -1,8 +1,8 @@
 from directory import Directory
-from storage_config import StorageConfig
 from pymongo import ASCENDING
 from pymongo import DESCENDING
 from pymongo import UpdateOne
+from storage_config import StorageConfig
 
 dirs = Directory()
 
@@ -12,7 +12,8 @@ def DB_collections(collection_type):
              'f': 'fixture_stats',
              'l': 'league_standings',
              'pf': 'fixture_players_stats',
-             's': 'team_squads'}
+             's': 'team_squads',
+             'sc': 'schedule'}
     return types.get(collection_type)
 
 def import_json(file):

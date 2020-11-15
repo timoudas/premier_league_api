@@ -3,10 +3,15 @@ import os
 import pymongo
 
 from pprint import pprint
+from pymongo import ReplaceOne
 
+from .get_schedule import get_schedule
+from .static import DB_collections
+from .static import collection_index
+from .static import load_file
+from .static import update_upstream
 from pymongo import MongoClient
 from pymongo.errors import BulkWriteError
-from .static import DB_collections, load_file, collection_index, update_upstream
 
 
 class DBLeague():
@@ -133,4 +138,20 @@ def executePushTeamSquadsLeague(db):
         collection.bulk_write(updates)
     except BulkWriteError as bwe:
         pprint(bwe.details)
+    print('Done')
+
+def executePushSchedule(db):
+    updates = []
+    data = get_schedule()
+    collection_name = DB_collections('sc')
+    collection = db.DATABASE[collection_name]
+    collection.remove({})
+    print(f'Pushing updates to:  {collection_name}')
+    collection.bulk_write([
+        ReplaceOne(
+            { "id": d['id'] }, d,
+            upsert=True
+        )
+        for d in data
+    ])
     print('Done')

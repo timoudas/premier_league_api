@@ -220,7 +220,8 @@ class StatShell(cmd.Cmd):
                    '-f': db.executePushFixtureLeague,
                    '-l': db.executePushLeagueStandingsLeague,
                    '-e': db.executePushFixturePlayerStatsLeague,
-                   '-s': db.executePushTeamSquadsLeague}
+                   '-s': db.executePushTeamSquadsLeague,
+                   '-d': db.executePushSchedule,}
         if type_stats in choices.keys():
             return choices.get(type_stats)(database)
 
@@ -235,6 +236,7 @@ class StatShell(cmd.Cmd):
             -l,  --league         Push League Standings
             -e,  --player_fixture Push Player Fixture Stats
             -s   --team_squads    Team Squads
+            -d   --Schedule       Schedule
             """
         database = db.DBLeague(arg['<LEAGUE>'].upper(), arg['<SEASON>'])
         for key, value in arg.items():
@@ -253,8 +255,6 @@ class StatShell(cmd.Cmd):
         else:
             database = db.DBLeague(arg['LEAGUE'].upper(), arg['SEASON'])
             league = arg['LEAGUE'].upper()
-            # season_end = str(int(arg['SEASON'])+1)
-            # season = f"{arg['SEASON']}/{season_end}"
             season = str(arg['SEASON'])
             file_prefix = f"{arg['LEAGUE'].upper()}_{arg['SEASON']}_"
 

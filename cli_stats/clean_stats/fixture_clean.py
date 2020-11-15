@@ -2,6 +2,7 @@ from .load_files import deep_get
 from .load_files import load_fixture_info
 from .load_files import load_fixture_player_stats
 from .load_files import load_fixture_stats
+from pprint import pprint
 
 
 
@@ -131,11 +132,11 @@ def read_fixture_events(data):
                 team_id = lineups['teamId']
                 linup = lineups['lineup']
                 substitutes = lineups['substitutes']
-                formation = lineups['formation']
+                formation = deep_get(lineups, 'formation')
                 formation_temp = \
                 {'teamId': team_id,
-                'label': formation['label'],
-                'players': formation['players']
+                'label': deep_get(formation, 'label'),
+                'players': deep_get(formation, 'players')
                 }
                 stats_temp['formation'].append(formation_temp)
                 for l in linup:

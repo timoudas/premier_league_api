@@ -117,7 +117,7 @@ def dispatch(type_stats, league):
                '-t': update,
                '-f': update,
                '-l': update,
-               '-e': update
+               '-e': update,
                '-s': update}
     if type_stats in choices.keys():
         return choices.get(type_stats)(league, type_stats)
