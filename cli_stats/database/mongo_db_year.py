@@ -131,32 +131,6 @@ def executePushTeamSquads(db):
         pprint(bwe.details)
     print('Done')
 
-############### LEGACY ###################
-
-# def update_upstream(collection, index_dict, record):
-#     """Update record in collection
-#         Args:
-#             collection (str): Name of collection in database
-#             index_dict (dict): key, value
-#             record (dict): Data to be updated in collection
-#     """
-#     return collection.update_one(index_dict, {"$set": record}, upsert=True)
-
-# def check_record(collection, index_dict):
-#     """Check if record exists in collection
-#         Args:
-#             index_dict (dict): key, value
-#     """
-#     return collection.find_one(index_dict)
-
-# def push_upstream(collection, record):
-#     """Update record in collection
-#         Args:
-#             collection (str): Name of collection in database
-#             record_id (str): record _id to be put for record in collection
-#             record (dict): Data to be pushed in collection
-#     """
-#     return collection.insert_one(record)
 
 if __name__ == '__main__':
 	pass
