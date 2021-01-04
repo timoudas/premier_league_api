@@ -30,7 +30,7 @@ from directory import Directory
 from get_data.get_stats import SeasonStats
 from storage_config import StorageConfig
 
-SEASON = str(datetime.date.today().year)
+SEASON = str(datetime.date.today().year-1)
 dir = Directory()
 
 LOADING_CHOICES = {
@@ -124,7 +124,10 @@ def dispatch(type_stats, league):
 
 
 if __name__ == '__main__':
-    args = docopt(__doc__, version='sub-proccesses v1.0')
-    for key, value in args.items():
-        if value == True:
-            dispatch(key, args['<LEAGUE>'].upper())
+  try:
+      args = docopt(__doc__, version='sub-proccesses v1.0')
+      for key, value in args.items():
+          if value == True:
+              dispatch(key, args['<LEAGUE>'].upper())
+  except Exception as e:
+    print(e)
