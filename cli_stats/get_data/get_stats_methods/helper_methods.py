@@ -1,6 +1,6 @@
 import multiprocessing
-import requests
 import re
+import requests
 
 from ..api_scraper.api_scraper import Football #
 from .static_types import * #
@@ -25,6 +25,9 @@ def load_match_data(url):
         response = session.get(url, headers=headers, params=params).json()
         return response
     except Exception as e:
+        response = session.get(url, headers=headers, params=params).json()
+        return response
+    else:
         print(e, 'Something went wrong with the request')
         return {}
 

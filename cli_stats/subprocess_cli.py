@@ -10,6 +10,7 @@ Options:
   -f  --fixture             Update FixtureStats.
   -l  --leauge              Update LeagueStandings.
   -e  --playerfixture       Update PlayerFixture.
+  -s  --squads              Update TeamSquads
 """
 
 
