@@ -70,6 +70,8 @@ class Base():
 
         """
         filename = f'{self.league_season}_{filename}'
+        if not self.dir.check_if_file_exist(path):
+            self.dir.mkdir(path)
         self.dir.save_json(filename, stats_list, path)
         print(f'Saved as {filename}.json in {path}')
 
